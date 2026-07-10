@@ -1,8 +1,8 @@
 {
   "name": "G3 AI",
   "short_name": "G3",
-  "start_url": "/G3AI/",
-  "scope": "/G3AI/",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#0f0f12",
   "theme_color": "#6366f1",
