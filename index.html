@@ -746,6 +746,8 @@
             width: 100%;
             box-shadow: var(--shadow-lg);
             position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
         }
         .profile-header {
             display: flex;
@@ -809,6 +811,14 @@
             justify-content: center;
             color: var(--text-secondary);
         }
+
+        /* Toggle Switch for Settings */
+        .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--bg-hover); transition: .4s; border-radius: 24px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: var(--text-muted); transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--accent); }
+        input:checked + .slider:before { transform: translateX(20px); background-color: white; }
 
         .storage-indicator {
             position: fixed;
@@ -1223,6 +1233,43 @@
             </div>
             <div class="profile-actions">
                 <button class="profile-btn" id="editNameBtn"><i class="fas fa-pen"></i> İsmi Düzenle</button>
+                
+                <!-- Arayüz Özelleştirme -->
+                <div style="margin: 16px 0; padding: 16px; background: var(--bg-tertiary); border-radius: var(--radius-md); border: 1px solid var(--border);">
+                    <h4 style="margin-bottom: 12px; font-size: 0.9rem; color: var(--text-primary);"><i class="fas fa-palette"></i> Arayüz Özelleştirme</h4>
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                        <span style="font-size: 0.85rem; color: var(--text-secondary);">Vurgu Rengi</span>
+                        <input type="color" id="accentColorPicker" value="#6366f1" style="width: 36px; height: 36px; border: none; background: none; cursor: pointer; border-radius: 50%;">
+                    </div>
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                        <span style="font-size: 0.85rem; color: var(--text-secondary);">Yazı Boyutu</span>
+                        <input type="range" id="fontSizeSlider" min="12" max="20" value="16" style="width: 100px; accent-color: var(--accent);">
+                    </div>
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <span style="font-size: 0.85rem; color: var(--text-secondary);">Arka Plan Animasyonu</span>
+                        <label class="switch">
+                            <input type="checkbox" id="bgAnimToggle" checked>
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- GitHub Senkronizasyonu -->
+                <div style="margin: 16px 0; padding: 16px; background: var(--bg-tertiary); border-radius: var(--radius-md); border: 1px solid var(--border);">
+                    <h4 style="margin-bottom: 8px; font-size: 0.9rem; color: var(--text-primary);"><i class="fab fa-github"></i> GitHub Senkronizasyonu</h4>
+                    <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 12px;">Verilerinizi kendi GitHub hesabınızda güvenli bir Gist olarak saklayın. Cihaz değiştirseniz bile verileriniz kaybolmaz.</p>
+                    <div class="input-group" style="margin-bottom: 10px;">
+                        <input type="password" id="githubToken" placeholder="GitHub Personal Access Token (gist yetkisi)" style="width: 100%; padding: 8px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.85rem;">
+                    </div>
+                    <div class="input-group" style="margin-bottom: 12px;">
+                        <input type="text" id="githubGistId" placeholder="Gist ID (Otomatik doldurulur)" readonly style="width: 100%; padding: 8px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-muted); font-size: 0.85rem;">
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="profile-btn" id="githubSaveBtn" style="flex: 1; font-size: 0.85rem; padding: 8px;"><i class="fas fa-cloud-upload-alt"></i> Yedekle</button>
+                        <button class="profile-btn" id="githubLoadBtn" style="flex: 1; font-size: 0.85rem; padding: 8px;"><i class="fas fa-cloud-download-alt"></i> Geri Yükle</button>
+                    </div>
+                </div>
+
                 <button class="profile-btn" id="exportAllBtn"><i class="fas fa-download"></i> Markdown Olarak Dışa Aktar</button>
                 <button class="profile-btn" id="exportPdfBtn"><i class="fas fa-file-pdf"></i> PDF Olarak Dışa Aktar</button>
                 <button class="profile-btn" id="exportJsonBtn"><i class="fas fa-file-code"></i> JSON Olarak Yedekle</button>
@@ -1294,7 +1341,10 @@ KURALLAR:
             theme: 'dark',
             attachments: [],
             isRecording: false,
-            joinDate: null
+            joinDate: null,
+            accentColor: '#6366f1',
+            fontSize: 16,
+            bgAnimation: true
         };
 
         // ============================================
@@ -1525,7 +1575,142 @@ KURALLAR:
                 container.appendChild(square);
             }
         }
-        createBackgroundSquares();
+
+        // ============================================
+        // ARAYÜZ ÖZELLEŞTİRME
+        // ============================================
+        function applyCustomization() {
+            if (state.accentColor) {
+                document.documentElement.style.setProperty('--accent', state.accentColor);
+                document.documentElement.style.setProperty('--accent-hover', state.accentColor);
+            }
+            if (state.fontSize) {
+                document.body.style.fontSize = state.fontSize + 'px';
+            }
+            const bgAnim = $('bgAnimation');
+            if (bgAnim) {
+                if (state.bgAnimation === false) {
+                    bgAnim.style.display = 'none';
+                } else {
+                    bgAnim.style.display = 'block';
+                    if (bgAnim.children.length === 0) createBackgroundSquares();
+                }
+            }
+            
+            if ($('accentColorPicker')) $('accentColorPicker').value = state.accentColor;
+            if ($('fontSizeSlider')) $('fontSizeSlider').value = state.fontSize;
+            if ($('bgAnimToggle')) $('bgAnimToggle').checked = state.bgAnimation;
+
+            localStorage.setItem('g3_settings', JSON.stringify({
+                accentColor: state.accentColor,
+                fontSize: state.fontSize,
+                bgAnimation: state.bgAnimation
+            }));
+        }
+
+        // ============================================
+        // GITHUB SENKRONİZASYONU
+        // ============================================
+        async function saveToGitHub() {
+            const token = $('githubToken').value.trim();
+            if (!token) { showToast('Lütfen GitHub Token girin', true); return; }
+            
+            const gistId = $('githubGistId').value.trim();
+            const data = {
+                version: "4.8",
+                timestamp: new Date().toISOString(),
+                user: state.user,
+                chats: state.chats,
+                settings: {
+                    theme: state.theme,
+                    accentColor: state.accentColor,
+                    fontSize: state.fontSize,
+                    bgAnimation: state.bgAnimation
+                }
+            };
+
+            const url = gistId ? `https://api.github.com/gists/${gistId}` : 'https://api.github.com/gists';
+            const method = gistId ? 'PATCH' : 'POST';
+
+            try {
+                showToast('GitHub\'a gönderiliyor...');
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/vnd.github.v3+json'
+                    },
+                    body: JSON.stringify({
+                        description: "G3 AI Chat Backup",
+                        public: false,
+                        files: {
+                            "g3_backup.json": { content: JSON.stringify(data, null, 2) }
+                        }
+                    })
+                });
+
+                if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(err.message || 'GitHub API hatası');
+                }
+
+                const result = await response.json();
+                localStorage.setItem('g3_github_token', token);
+                localStorage.setItem('g3_github_gist_id', result.id);
+                $('githubGistId').value = result.id;
+                showToast('GitHub\'a başarıyla yedeklendi!');
+            } catch (error) {
+                console.error(error);
+                showToast('Yedekleme hatası: ' + error.message, true);
+            }
+        }
+
+        async function loadFromGitHub() {
+            const token = $('githubToken').value.trim() || localStorage.getItem('g3_github_token');
+            const gistId = $('githubGistId').value.trim() || localStorage.getItem('g3_github_gist_id');
+            
+            if (!token || !gistId) {
+                showToast('Token ve Gist ID gerekli', true);
+                return;
+            }
+
+            try {
+                showToast('GitHub\'dan yükleniyor...');
+                const response = await fetch(`https://api.github.com/gists/${gistId}`, {
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+
+                if (!response.ok) throw new Error('Gist bulunamadı veya yetki hatası');
+                const data = await response.json();
+                const backup = JSON.parse(data.files['g3_backup.json'].content);
+
+                if (confirm('Mevcut veriler silinip GitHub\'daki verilerle değiştirilecek. Emin misiniz?')) {
+                    state.user = backup.user;
+                    state.chats = backup.chats;
+                    if (backup.settings) {
+                        state.theme = backup.settings.theme || 'dark';
+                        state.accentColor = backup.settings.accentColor || '#6366f1';
+                        state.fontSize = backup.settings.fontSize || 16;
+                        state.bgAnimation = backup.settings.bgAnimation !== undefined ? backup.settings.bgAnimation : true;
+                    }
+                    await saveChats();
+                    saveUserState();
+                    applyCustomization();
+                    renderChatList();
+                    if (state.chats.length > 0) loadChat(state.chats[0].id);
+                    else createNewChat();
+                    updateUserUI();
+                    showToast('GitHub\'dan başarıyla yüklendi!');
+                }
+            } catch (error) {
+                console.error(error);
+                showToast('Yükleme hatası: ' + error.message, true);
+            }
+        }
 
         // ============================================
         // GOOGLE GİRİŞ DÜZELTMESİ
@@ -1857,8 +2042,7 @@ KURALLAR:
         const savedTheme = localStorage.getItem('g3_theme') || 'dark';
         document.documentElement.setAttribute('data-theme', savedTheme);
         state.theme = savedTheme;
-        updateThemeIcon();
-
+        
         themeToggle.addEventListener('click', () => {
             state.theme = state.theme === 'dark' ? 'light' : 'dark';
             document.documentElement.setAttribute('data-theme', state.theme);
@@ -1976,6 +2160,21 @@ KURALLAR:
         }
 
         async function initApp() {
+            const savedSettings = localStorage.getItem('g3_settings');
+            if (savedSettings) {
+                const settings = JSON.parse(savedSettings);
+                state.accentColor = settings.accentColor || '#6366f1';
+                state.fontSize = settings.fontSize || 16;
+                state.bgAnimation = settings.bgAnimation !== undefined ? settings.bgAnimation : true;
+            }
+            
+            const savedToken = localStorage.getItem('g3_github_token');
+            const savedGist = localStorage.getItem('g3_github_gist_id');
+            if (savedToken && $('githubToken')) $('githubToken').value = savedToken;
+            if (savedGist && $('githubGistId')) $('githubGistId').value = savedGist;
+
+            applyCustomization();
+
             const savedChats = await loadChats();
             if (savedChats) {
                 state.chats = savedChats;
@@ -2262,17 +2461,12 @@ KURALLAR:
         // ============================================
         async function generateImage(prompt) {
             return new Promise((resolve) => {
-                // Rastgele seed ile her seferinde taze ve benzersiz görsel oluşturulmasını sağla
                 const seed = Math.floor(Math.random() * 999999);
-                // Prompt'a kalite artırıcı anahtar kelimeler ekle (İngilizce terimler AI modellerinde daha iyi çalışır)
-                const enhancedPrompt = encodeURIComponent(prompt + ", masterpiece, best quality, highly detailed, 8k resolution, cinematic lighting, professional photography");
-                
-                // Pollinations AI (Flux modeli en yüksek kaliteyi verir)
+                const enhancedPrompt = encodeURIComponent(prompt + ", masterpiece, best quality, highly detailed, 8k resolution, cinematic lighting, professional photography, stunning visuals");
                 const imageUrl = `https://image.pollinations.ai/prompt/${enhancedPrompt}?width=1024&height=1024&nologo=true&seed=${seed}&model=flux`;
                 
                 const img = new Image();
                 img.crossOrigin = "anonymous";
-                
                 let isResolved = false;
                 
                 img.onload = () => {
@@ -2285,7 +2479,6 @@ KURALLAR:
                 img.onerror = () => {
                     if (!isResolved) {
                         isResolved = true;
-                        // Eğer flux modeli geçici bir hata verirse, varsayılan modelle tekrar dene (fallback)
                         const fallbackUrl = `https://image.pollinations.ai/prompt/${enhancedPrompt}?width=1024&height=1024&nologo=true&seed=${seed}`;
                         resolve(fallbackUrl);
                     }
@@ -2293,11 +2486,10 @@ KURALLAR:
                 
                 img.src = imageUrl;
                 
-                // 60 saniye zaman aşımı (görsel oluşturma bazen yoğunlukta geç sürebilir)
                 setTimeout(() => {
                     if (!isResolved) {
                         isResolved = true;
-                        resolve(`https://image.pollinations.ai/prompt/${encodeURIComponent("abstract beautiful high quality art, 8k")}?width=1024&height=1024&nologo=true&seed=${seed}`);
+                        resolve(`https://image.pollinations.ai/prompt/${encodeURIComponent("abstract beautiful high quality art, 8k, masterpiece")}?width=1024&height=1024&nologo=true&seed=${seed}`);
                     }
                 }, 60000);
             });
@@ -2518,6 +2710,26 @@ KURALLAR:
             URL.revokeObjectURL(url);
             showToast('Sohbet dışa aktarıldı');
             userDropdown.classList.remove('active');
+        });
+
+        // GitHub Event Listeners
+        $('githubSaveBtn').addEventListener('click', saveToGitHub);
+        $('githubLoadBtn').addEventListener('click', loadFromGitHub);
+        
+        // UI Customization Event Listeners
+        $('accentColorPicker').addEventListener('input', (e) => {
+            state.accentColor = e.target.value;
+            applyCustomization();
+        });
+
+        $('fontSizeSlider').addEventListener('input', (e) => {
+            state.fontSize = e.target.value;
+            applyCustomization();
+        });
+
+        $('bgAnimToggle').addEventListener('change', (e) => {
+            state.bgAnimation = e.target.checked;
+            applyCustomization();
         });
 
         let toastTimeout;
