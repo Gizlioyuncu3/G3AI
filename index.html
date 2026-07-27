@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>G3 AI - Profesyonel Asistan</title>
     
+    <!-- Site İkonu (Favicon) -->
+    <link rel="icon" href="./g3.png" type="image/png">
+    
     <!-- PWA Manifest -->
     <link rel="manifest" href="./manifest.json">
     <meta name="theme-color" content="#6366f1">
@@ -134,7 +137,7 @@
         .auth-logo { text-align: center; margin-bottom: 24px; }
         .auth-logo-icon {
             width: 60px; height: 60px;
-            background: linear-gradient(135deg, var(--accent), #8b5cf6);
+            background: linear-gradient(135deg, #ef4444, #6366f1);
             border-radius: var(--radius-md);
             display: inline-flex; align-items: center; justify-content: center;
             font-size: 28px; font-weight: 700; color: white; margin-bottom: 12px;
@@ -1084,7 +1087,7 @@
                 <div class="storage-bar">
                     <div class="storage-fill" id="storageFill"></div>
                 </div>
-                <div class="storage-text" id="storageTextDetail">0 KB / 5 MB</div>
+                <div class="storage-text" id="storageTextDetail">0 KB / 50 MB</div>
             </div>
             <div class="user-profile" id="userProfileBtn">
                 <div class="user-avatar" id="userAvatar">K</div>
@@ -1345,13 +1348,11 @@ KURALLAR:
         function initDB() {
             return new Promise((resolve, reject) => {
                 const request = indexedDB.open(DB_NAME, DB_VERSION);
-                
                 request.onerror = () => reject(request.error);
                 request.onsuccess = () => {
                     db = request.result;
                     resolve(db);
                 };
-                
                 request.onupgradeneeded = (event) => {
                     const database = event.target.result;
                     if (!database.objectStoreNames.contains(STORE_NAME)) {
@@ -1367,7 +1368,6 @@ KURALLAR:
                 const transaction = db.transaction([STORE_NAME], 'readwrite');
                 const store = transaction.objectStore(STORE_NAME);
                 const request = store.put({ id: 'chats', data: data, timestamp: Date.now() });
-                
                 request.onsuccess = () => resolve(true);
                 request.onerror = () => reject(request.error);
             });
@@ -1379,7 +1379,6 @@ KURALLAR:
                 const transaction = db.transaction([STORE_NAME], 'readonly');
                 const store = transaction.objectStore(STORE_NAME);
                 const request = store.get('chats');
-                
                 request.onsuccess = () => resolve(request.result?.data || null);
                 request.onerror = () => reject(request.error);
             });
@@ -1397,25 +1396,19 @@ KURALLAR:
         async function updateStorageUsage() {
             try {
                 let totalSize = 0;
-                
-                // IndexedDB boyutu
                 if (db) {
                     const data = await loadFromIndexedDB();
                     if (data) {
                         totalSize += new Blob([JSON.stringify(data)]).size;
                     }
                 }
-                
-                // LocalStorage boyutu
                 for (let key in localStorage) {
                     if (localStorage.hasOwnProperty(key)) {
                         totalSize += (localStorage[key].length * 2);
                     }
                 }
-                
-                const sizeKB = (totalSize / 1024).toFixed(2);
                 const sizeMB = (totalSize / (1024 * 1024)).toFixed(2);
-                const limitMB = 50; // 50MB limit (IndexedDB için daha yüksek)
+                const limitMB = 50;
                 const percent = Math.min((totalSize / (limitMB * 1024 * 1024)) * 100, 100).toFixed(1);
                 
                 const storageFill = $('storageFill');
@@ -1438,9 +1431,7 @@ KURALLAR:
         async function saveChats() {
             if (!state.chats || state.chats.length === 0) return;
             try {
-                // IndexedDB'ye kaydet
                 await saveToIndexedDB(state.chats);
-                // LocalStorage'a yedekle (hızlı erişim için)
                 localStorage.setItem('g3_chats', JSON.stringify(state.chats));
                 updateStorageIndicator('success', 'Sohbetler kaydedildi');
                 await updateStorageUsage();
@@ -1454,18 +1445,14 @@ KURALLAR:
 
         async function loadChats() {
             try {
-                // Önce IndexedDB'den yükle
                 const indexedData = await loadFromIndexedDB();
                 if (indexedData && Array.isArray(indexedData) && indexedData.length > 0) {
                     return indexedData;
                 }
-                
-                // Yoksa LocalStorage'dan yükle
                 const localData = localStorage.getItem('g3_chats');
                 if (localData) {
                     const parsed = JSON.parse(localData);
                     if (Array.isArray(parsed) && parsed.length > 0) {
-                        // IndexedDB'ye geri yükle
                         await saveToIndexedDB(parsed);
                         return parsed;
                     }
@@ -1571,10 +1558,7 @@ KURALLAR:
                 setTimeout(initializeGoogleSignIn, 500);
                 return;
             }
-            
-            // Google Client ID kontrolü - Demo için geçici ID
             const clientId = GOOGLE_CLIENT_ID || "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com";
-            
             try {
                 google.accounts.id.initialize({
                     client_id: clientId,
@@ -1582,18 +1566,11 @@ KURALLAR:
                     auto_select: false,
                     cancel_on_tap_outside: true
                 });
-
-                // Butonları hazırla
                 document.querySelectorAll('.google-btn').forEach(btn => {
                     btn.addEventListener('click', (e) => {
                         e.preventDefault();
                         google.accounts.id.prompt((notification) => {
                             if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-                                // Popup aç
-                                google.accounts.id.renderButton(
-                                    document.createElement('div'),
-                                    { theme: 'outline', size: 'large', click_listener: () => {} }
-                                );
                                 showToast('Google giriş penceresi açılıyor...');
                             }
                         });
@@ -1686,18 +1663,14 @@ KURALLAR:
             } else {
                 avatarLg.textContent = state.user.avatar || 'K';
             }
-            
             const totalMessages = state.chats.reduce((sum, chat) => sum + chat.messages.filter(m => m.role !== 'system').length, 0);
             $('statChats').textContent = state.chats.length;
             $('statMessages').textContent = totalMessages;
-            
             const joinDate = state.joinDate || Date.now();
             const daysSince = Math.max(1, Math.ceil((Date.now() - joinDate) / (1000 * 60 * 60 * 24)));
             $('statDays').textContent = daysSince;
-            
             const dateStr = new Date(joinDate).toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' });
             $('profileJoinDate').textContent = `Katılım: ${dateStr}`;
-            
             profileModal.classList.add('active');
             userDropdown.classList.remove('active');
         }
@@ -1724,7 +1697,7 @@ KURALLAR:
                 exportText += `\n## ${chat.title}\n\n`;
                 chat.messages.forEach(msg => {
                     if (msg.role === 'system') return;
-                    const role = msg.role === 'user' ? ' Kullanıcı' : '🤖 G3';
+                    const role = msg.role === 'user' ? '👤 Kullanıcı' : '🤖 G3';
                     exportText += `### ${role}\n${msg.content}\n\n---\n\n`;
                 });
             });
@@ -1741,15 +1714,12 @@ KURALLAR:
         $('exportPdfBtn').addEventListener('click', () => {
             const activeChat = state.chats.find(c => c.id === state.currentChatId);
             if (!activeChat) return;
-            
             showToast('PDF hazırlanıyor...');
-            
             const element = document.createElement('div');
             element.style.padding = '20px';
             element.style.fontFamily = 'Arial, sans-serif';
             element.style.color = '#333';
             element.style.backgroundColor = '#ffffff';
-            
             let htmlContent = `
                 <div style="text-align: center; margin-bottom: 30px;">
                     <h1 style="color: #6366f1; margin: 0;">G3 AI Sohbet</h1>
@@ -1758,7 +1728,6 @@ KURALLAR:
                 </div>
                 <hr style="border: 1px solid #e2e8f0; margin-bottom: 20px;">
             `;
-            
             activeChat.messages.forEach(msg => {
                 if (msg.role === 'system') return;
                 const isUser = msg.role === 'user';
@@ -1766,14 +1735,12 @@ KURALLAR:
                 const bgColor = isUser ? '#f7fafc' : '#ffffff';
                 const borderColor = isUser ? '#6366f1' : '#cbd5e0';
                 const roleColor = isUser ? '#6366f1' : '#2d3748';
-                
                 let content = msg.content
                     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
                     .replace(/\n/g, '<br>')
                     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                     .replace(/\*(.*?)\*/g, '<em>$1</em>')
                     .replace(/`([^`]+)`/g, '<code style="background:#edf2f7;padding:2px 4px;border-radius:3px;font-family:monospace;">$1</code>');
-                    
                 htmlContent += `
                     <div style="margin-bottom: 20px; padding: 15px; background: ${bgColor}; border-left: 4px solid ${borderColor}; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
                         <h3 style="margin: 0 0 10px 0; color: ${roleColor}; font-size: 16px;">${role}</h3>
@@ -1781,9 +1748,7 @@ KURALLAR:
                     </div>
                 `;
             });
-            
             element.innerHTML = htmlContent;
-            
             const opt = {
                 margin: 10,
                 filename: `G3_${activeChat.title.replace(/[^a-z0-9]/gi, '_').substring(0, 20)}.pdf`,
@@ -1791,7 +1756,6 @@ KURALLAR:
                 html2canvas: { scale: 2, useCORS: true, logging: false },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
-            
             html2pdf().set(opt).from(element).save().then(() => {
                 showToast('PDF başarıyla indirildi');
             }).catch(err => {
@@ -2011,18 +1975,21 @@ KURALLAR:
             if (window.innerWidth <= 768) overlay.click();
         }
 
-        const savedChats = await loadChats();
-        if (savedChats) {
-            state.chats = savedChats;
-            if (state.chats.length > 0) {
-                state.currentChatId = state.chats[0].id;
-                renderChatList();
-                loadChat(state.currentChatId);
+        // Top-level await hatasını önlemek için async fonksiyon içinde çağırma
+        async function initApp() {
+            const savedChats = await loadChats();
+            if (savedChats) {
+                state.chats = savedChats;
+                if (state.chats.length > 0) {
+                    state.currentChatId = state.chats[0].id;
+                    renderChatList();
+                    loadChat(state.currentChatId);
+                } else { createNewChat(); }
             } else { createNewChat(); }
-        } else { createNewChat(); }
-
-        updateChatFooter();
-        setInterval(updateChatFooter, 60000); // Her dakika güncelle
+            updateChatFooter();
+            setInterval(updateChatFooter, 60000);
+        }
+        initApp();
 
         function appendMessageUI(text, sender, animate = true, attachments = []) {
             welcomeScreen.style.display = 'none';
@@ -2251,18 +2218,13 @@ KURALLAR:
             }
         });
 
-        // ============================================
-        // KOMUT MENÜSÜ MANTIĞI
-        // ============================================
         userInput.addEventListener('input', (e) => {
             const val = e.target.value;
             const lastSlashIndex = val.lastIndexOf('/');
-            
             if (lastSlashIndex !== -1 && (lastSlashIndex === val.length - 1 || !val.slice(lastSlashIndex).includes(' '))) {
                 const query = val.slice(lastSlashIndex + 1).toLowerCase();
                 const items = commandMenu.querySelectorAll('.command-item');
                 let hasVisible = false;
-                
                 items.forEach(item => {
                     const cmd = item.dataset.cmd.replace('/', '').toLowerCase();
                     if (cmd.includes(query)) {
@@ -2272,7 +2234,6 @@ KURALLAR:
                         item.style.display = 'none';
                     }
                 });
-                
                 if (hasVisible) commandMenu.classList.add('active');
                 else commandMenu.classList.remove('active');
             } else {
@@ -2297,34 +2258,19 @@ KURALLAR:
             setTimeout(() => commandMenu.classList.remove('active'), 150);
         });
 
-        // ============================================
-        // GÖRSEL OLUŞTURMA SİSTEMİ (YENİDEN YAZILDI)
-        // ============================================
         async function generateImage(prompt) {
             return new Promise((resolve, reject) => {
-                // Pollinations AI API kullan
                 const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&nologo=true&seed=${Date.now()}&model=flux`;
-                
                 const img = new Image();
                 img.crossOrigin = "anonymous";
-                
-                img.onload = () => {
-                    resolve(imageUrl);
-                };
-                
+                img.onload = () => resolve(imageUrl);
                 img.onerror = () => {
-                    // Alternatif: Placehold.co kullan (daha güvenilir)
                     const fallbackUrl = `https://placehold.co/1024x1024/6366f1/ffffff?text=${encodeURIComponent(prompt.substring(0, 50))}`;
                     resolve(fallbackUrl);
                 };
-                
                 img.src = imageUrl;
-                
-                // Timeout ekle
                 setTimeout(() => {
-                    if (img.complete === false) {
-                        reject(new Error('Görsel oluşturma zaman aşımı'));
-                    }
+                    if (img.complete === false) reject(new Error('Görsel oluşturma zaman aşımı'));
                 }, 30000);
             });
         }
@@ -2336,14 +2282,12 @@ KURALLAR:
             const activeChat = state.chats.find(c => c.id === state.currentChatId);
             if (!activeChat) return;
 
-            // /imagine komutu kontrolü
             if (text.startsWith('/imagine')) {
                 if (!checkLimit('image')) {
                     userInput.disabled = false;
                     sendBtn.disabled = false;
                     return;
                 }
-
                 const prompt = text.replace(/^\/imagine\s*/, '').trim();
                 if (!prompt) {
                     appendMessageUI("Lütfen /imagine komutundan sonra bir görsel açıklaması yazın. Örnek: /imagine uzayda süzülen bir kedi", 'ai');
@@ -2351,12 +2295,10 @@ KURALLAR:
                     sendBtn.disabled = false;
                     return;
                 }
-
                 if (activeChat.messages.length === 1 && text) {
                     activeChat.title = "Görsel: " + prompt.substring(0, 20) + "...";
                     renderChatList();
                 }
-
                 appendMessageUI(text, 'user');
                 activeChat.messages.push({ role: "user", content: text });
 
@@ -2380,7 +2322,6 @@ KURALLAR:
 
                 try {
                     const imageUrl = await generateImage(prompt);
-                    
                     const loader = document.getElementById(loadingId);
                     if (loader) {
                         loader.innerHTML = `
@@ -2418,7 +2359,6 @@ KURALLAR:
                 return;
             }
 
-            // Normal sohbet limiti kontrolü
             if (!checkLimit('chat')) {
                 userInput.disabled = false;
                 sendBtn.disabled = false;
@@ -2460,17 +2400,11 @@ KURALLAR:
                         let imageParts = [];
                         m.attachments.forEach(att => {
                             if (att.type.startsWith('image/')) {
-                                imageParts.push({
-                                    type: "image_url",
-                                    image_url: { url: att.data }
-                                });
+                                imageParts.push({ type: "image_url", image_url: { url: att.data } });
                             }
                         });
                         if (imageParts.length > 0) {
-                            return {
-                                role: 'user',
-                                content: [{ type: "text", text: textPart || "Görseli analiz et." }].concat(imageParts)
-                            };
+                            return { role: 'user', content: [{ type: "text", text: textPart || "Görseli analiz et." }].concat(imageParts) };
                         }
                     }
                     return { role: m.role, content: m.content };
@@ -2511,7 +2445,6 @@ KURALLAR:
                 else if (error.message.includes('401') || error.message.toLowerCase().includes('api key')) userFriendlyMessage = 'API anahtarı geçersiz.';
                 else if (error.message.includes('429')) userFriendlyMessage = 'Çok fazla istek gönderildi. Lütfen bekleyin.';
                 else userFriendlyMessage += error.message;
-                
                 appendMessageUI(userFriendlyMessage, 'ai');
             } finally {
                 userInput.disabled = false;
@@ -2623,9 +2556,7 @@ KURALLAR:
 
         setInterval(async () => {
             if (state.chats && state.chats.length > 0) {
-                try { 
-                    await saveChats();
-                } catch (e) {}
+                try { await saveChats(); } catch (e) {}
             }
         }, 15000);
 
