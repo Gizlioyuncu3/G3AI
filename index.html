@@ -77,7 +77,15 @@
             --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.12);
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        html, body { height: 100%; overflow: hidden; }
+        
+        /* MOBİL YENİLEME SORUNUNU ÇÖZEN KRİTİK CSS */
+        html, body { 
+            height: 100%; 
+            overflow: hidden; 
+            overscroll-behavior-y: none; /* Mobilde aşağı çekip yenilemeyi engeller */
+            -webkit-overflow-scrolling: touch;
+        }
+        
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
             background-color: var(--bg-primary);
@@ -406,11 +414,15 @@
         }
         .header-profile-btn:hover { border-color: var(--accent); transform: scale(1.05); }
         .header-profile-btn img { width: 100%; height: 100%; object-fit: cover; }
+        
+        /* Sohbet alanı için kaydırma ve yenileme koruması */
         #chat-container {
             flex: 1; overflow-y: auto; padding: 24px;
             display: flex; flex-direction: column; gap: 20px;
             scroll-behavior: smooth;
+            overscroll-behavior-y: contain; /* İçerik içindeyken sayfa yenilemesini engeller */
         }
+        
         .welcome-screen {
             display: flex; flex-direction: column;
             align-items: center; justify-content: center;
@@ -1388,7 +1400,7 @@ KURALLAR:
         }
 
         // ============================================
-        // GELİŞMİŞ DEPOLAMA SİSTEMİ (IndexedDB + LocalStorage)
+        // ÇÖKMEZ DEPOLAMA SİSTEMİ (Fail-Safe IndexedDB + LocalStorage)
         // ============================================
         let db = null;
         const DB_NAME = 'G3_AI_Database';
@@ -1397,6 +1409,7 @@ KURALLAR:
 
         function initDB() {
             return new Promise((resolve, reject) => {
+                if (db) return resolve(db); // Zaten açıksa tekrar açma
                 const request = indexedDB.open(DB_NAME, DB_VERSION);
                 request.onerror = () => reject(request.error);
                 request.onsuccess = () => {
@@ -1413,7 +1426,7 @@ KURALLAR:
         }
 
         async function saveToIndexedDB(data) {
-            if (!db) await initDB();
+            await initDB();
             return new Promise((resolve, reject) => {
                 const transaction = db.transaction([STORE_NAME], 'readwrite');
                 const store = transaction.objectStore(STORE_NAME);
@@ -1424,7 +1437,7 @@ KURALLAR:
         }
 
         async function loadFromIndexedDB() {
-            if (!db) await initDB();
+            await initDB();
             return new Promise((resolve, reject) => {
                 const transaction = db.transaction([STORE_NAME], 'readonly');
                 const store = transaction.objectStore(STORE_NAME);
@@ -1448,14 +1461,10 @@ KURALLAR:
                 let totalSize = 0;
                 if (db) {
                     const data = await loadFromIndexedDB();
-                    if (data) {
-                        totalSize += new Blob([JSON.stringify(data)]).size;
-                    }
+                    if (data) totalSize += new Blob([JSON.stringify(data)]).size;
                 }
                 for (let key in localStorage) {
-                    if (localStorage.hasOwnProperty(key)) {
-                        totalSize += (localStorage[key].length * 2);
-                    }
+                    if (localStorage.hasOwnProperty(key)) totalSize += (localStorage[key].length * 2);
                 }
                 const sizeMB = (totalSize / (1024 * 1024)).toFixed(2);
                 const limitMB = 50;
@@ -1473,42 +1482,64 @@ KURALLAR:
                 }
                 if (storagePercent) storagePercent.textContent = percent + '%';
                 if (storageTextDetail) storageTextDetail.textContent = `${sizeMB} MB / 50 MB`;
-            } catch (e) {
-                console.error('Depolama hesaplama hatası:', e);
-            }
+            } catch (e) { console.error('Depolama hesaplama hatası:', e); }
         }
 
+        // KRİTİK DÜZELTME: Hiyerarşik ve çökmez kaydetme
         async function saveChats() {
             if (!state.chats || state.chats.length === 0) return;
+            let saved = false;
+            
+            // 1. Önce sınırsız kapasiteli IndexedDB'ye dene
             try {
                 await saveToIndexedDB(state.chats);
-                localStorage.setItem('g3_chats', JSON.stringify(state.chats));
-                updateStorageIndicator('success', 'Sohbetler kaydedildi');
-                await updateStorageUsage();
-                return true;
+                saved = true;
             } catch (e) {
-                console.error('Sohbet kaydetme hatası:', e);
-                updateStorageIndicator('error', 'Kaydetme hatası!');
-                return false;
+                console.warn('IndexedDB kaydetme hatası, LocalStorage deneniyor:', e);
             }
+
+            // 2. IndexedDB başarısız olursa LocalStorage'a dene
+            if (!saved) {
+                try {
+                    localStorage.setItem('g3_chats', JSON.stringify(state.chats));
+                    saved = true;
+                } catch (e) {
+                    console.error('LocalStorage kota hatası (muhtemelen görsel nedeniyle):', e);
+                    showToast('Depolama alanı doldu! Lütfen eski sohbetleri silin.', true);
+                    return false;
+                }
+            }
+
+            updateStorageIndicator('success', 'Sohbetler kaydedildi');
+            updateStorageUsage();
+            return true;
         }
 
+        // KRİTİK DÜZELTME: Hiyerarşik ve çökmez yükleme
         async function loadChats() {
             try {
+                // 1. Önce IndexedDB'den yükle
                 const indexedData = await loadFromIndexedDB();
                 if (indexedData && Array.isArray(indexedData) && indexedData.length > 0) {
                     return indexedData;
                 }
+            } catch (e) {
+                console.warn('IndexedDB yükleme hatası, LocalStorage deneniyor:', e);
+            }
+
+            // 2. IndexedDB boşsa veya hata verdiyse LocalStorage'dan yükle
+            try {
                 const localData = localStorage.getItem('g3_chats');
                 if (localData) {
                     const parsed = JSON.parse(localData);
                     if (Array.isArray(parsed) && parsed.length > 0) {
-                        await saveToIndexedDB(parsed);
+                        // Gelecekte IndexedDB kullanımı için arka planda taşı
+                        try { await saveToIndexedDB(parsed); } catch (migrateErr) {}
                         return parsed;
                     }
                 }
             } catch (e) {
-                console.error('Sohbet yükleme hatası:', e);
+                console.error('LocalStorage yükleme hatası:', e);
             }
             return null;
         }
@@ -1518,9 +1549,7 @@ KURALLAR:
                 if (state.user) localStorage.setItem('g3_user', JSON.stringify(state.user));
                 if (state.joinDate) localStorage.setItem('g3_joinDate', String(state.joinDate));
                 updateStorageUsage();
-            } catch (e) {
-                console.error('Kullanıcı kaydetme hatası:', e);
-            }
+            } catch (e) { console.error('Kullanıcı kaydetme hatası:', e); }
         }
 
         // ============================================
@@ -1644,9 +1673,7 @@ KURALLAR:
                     body: JSON.stringify({
                         description: "G3 AI Chat Backup",
                         public: false,
-                        files: {
-                            "g3_backup.json": { content: JSON.stringify(data, null, 2) }
-                        }
+                        files: { "g3_backup.json": { content: JSON.stringify(data, null, 2) } }
                     })
                 });
 
@@ -2175,7 +2202,10 @@ KURALLAR:
 
             applyCustomization();
 
+            // KRİTİK DÜZELTME: initDB tam olarak bitene kadar bekle, sonra yükle
+            await initDB();
             const savedChats = await loadChats();
+            
             if (savedChats) {
                 state.chats = savedChats;
                 if (state.chats.length > 0) {
@@ -2184,6 +2214,7 @@ KURALLAR:
                     loadChat(state.currentChatId);
                 } else { createNewChat(); }
             } else { createNewChat(); }
+            
             updateChatFooter();
             setInterval(updateChatFooter, 60000);
         }
