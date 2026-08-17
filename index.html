@@ -1265,30 +1265,44 @@ Google ile devam et
 </div>
 <script>
 // ============================================
-// 3 KATMANLI API SİSTEMİ (ANAHTAR DERDİ YOK)
-// 1) Pollinations: ANAHTARSIZ, anında çalışır (görsel inceleme dahil)
-// 2) Gemini: Eski AQ anahtarın (yedek)
-// 3) Hugging Face: hf_ anahtarın (onaylanırsa devreye girer, yoksa sessizce atlanır)
+// API ANAHTARLARI - BURAYA KENDİ ANAHTARLARINI YAZ
 // ============================================
 const HF_API_KEY = "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";
 const GEMINI_API_KEY = "AQ.Ab8RN6ICmyYKnOyhaVnjaOpAd330yEBYFAHRXKBWZ89WeIvK5w";
-const GEMINI_MODELS = ["gemini-2.0-flash", "gemini-1.5-flash"];
-const HF_MODELS = [
-  { id: "meta-llama/Llama-3.2-11B-Vision-Instruct", vision: true },
-  { id: "Qwen/Qwen2.5-VL-72B-Instruct", vision: true },
-  { id: "microsoft/Phi-3.5-vision-instruct", vision: true },
-  { id: "HuggingFaceM4/Idefics3-8B-Llama3", vision: true },
-  { id: "meta-llama/Llama-3.3-70B-Instruct", vision: false },
-  { id: "HuggingFaceH4/zephyr-7b-beta", vision: false }
+
+// ============================================
+// MODELLER - MOD BAZLI
+// ============================================
+const HF_MODELS_FAST = [
+  "Qwen/Qwen2.5-7B-Instruct",
+  "meta-llama/Llama-3.1-8B-Instruct",
+  "mistralai/Mistral-7B-Instruct-v0.3"
 ];
+
+const HF_MODELS_THINKING = [
+  "deepseek-ai/DeepSeek-R1",
+  "Qwen/QwQ-32B",
+  "Qwen/Qwen3-32B"
+];
+
+const HF_MODELS_VISION = [
+  "meta-llama/Llama-3.2-11B-Vision-Instruct",
+  "Qwen/Qwen2.5-VL-72B-Instruct",
+  "microsoft/Phi-3.5-vision-instruct",
+  "HuggingFaceM4/Idefics3-8B-Llama3"
+];
+
+const GEMINI_MODELS = ["gemini-2.0-flash", "gemini-1.5-flash"];
 const AI_AVATAR_URL = "./g3.png";
 const GOOGLE_CLIENT_ID = "";
+
 const SYSTEM_PROMPT_BASE = `Adın G3. Net, yardımcı ve direkt yanıtlar ver. Yanıtlarında Markdown kullanabilirsin.
 KURALLAR:
 1- "Seni kim yaptı?", "Yapımcın kim?", "Yaratıcın kim?" gibi sorulara KESİNLİKLE SADECE "Muhammed Eren Bayram" diye cevap ver.
 2- Kullanıcının dilini OTOMATİK ALGILA ve aynı dilde cevap ver.
 3- Kod bloklarını \`\`\`dil_kodu şeklinde formatla.
 4- Sana bir görsel gönderilirse görseli detaylı, dikkatli ve eksiksiz bir şekilde incele ve analiz et.`;
+
 const $ = (id) => document.getElementById(id);
 const chatContainer = $('chat-container');
 const userInput = $('userInput');
@@ -1316,1524 +1330,1648 @@ const storageIndicator = $('storageIndicator');
 const storageText = $('storageText');
 const chatFooterText = $('chatFooterText');
 const commandMenu = $('commandMenu');
+
 let state = {
-chats: [],
-currentChatId: null,
-currentMode: 'fast',
-user: null,
-theme: 'dark',
-attachments: [],
-isRecording: false,
-joinDate: null,
-accentColor: '#6366f1',
-fontSize: 16,
-bgAnimation: true
+  chats: [],
+  currentChatId: null,
+  currentMode: 'fast',
+  user: null,
+  theme: 'dark',
+  attachments: [],
+  isRecording: false,
+  joinDate: null,
+  accentColor: '#6366f1',
+  fontSize: 16,
+  bgAnimation: true
 };
+
 function getDailyLimits() {
-const today = new Date().toISOString().split('T')[0];
-const stored = localStorage.getItem('g3_daily_limits');
-if (stored) {
-const data = JSON.parse(stored);
-if (data.date === today) return data;
+  const today = new Date().toISOString().split('T')[0];
+  const stored = localStorage.getItem('g3_daily_limits');
+  if (stored) {
+    const data = JSON.parse(stored);
+    if (data.date === today) return data;
+  }
+  return { date: today, fast: 0, smart: 0, extra: 0 };
 }
-return { date: today, fast: 0, smart: 0, extra: 0 };
-}
+
 function saveDailyLimits(data) {
-localStorage.setItem('g3_daily_limits', JSON.stringify(data));
+  localStorage.setItem('g3_daily_limits', JSON.stringify(data));
 }
+
 function checkLimit(mode) {
-const limits = getDailyLimits();
-const limitsMap = { 'fast': 25, 'smart': 10, 'extra': 5 };
-const namesMap = { 'fast': 'Firethron (Hızlı)', 'smart': 'Hawkweed (Zeki)', 'extra': 'Nightplox (Extra)' };
-if (limits[mode] >= limitsMap[mode]) {
-showToast(`${namesMap[mode]} modu günlük sınırına (${limitsMap[mode]}) ulaştı. Yarın tekrar deneyin.`, true);
-return false;
+  const limits = getDailyLimits();
+  const limitsMap = { 'fast': 25, 'smart': 10, 'extra': 5 };
+  const namesMap = { 'fast': 'Firethron (Hızlı)', 'smart': 'Hawkweed (Zeki)', 'extra': 'Nightplox (Extra)' };
+  if (limits[mode] >= limitsMap[mode]) {
+    showToast(`${namesMap[mode]} modu günlük sınırına (${limitsMap[mode]}) ulaştı. Yarın tekrar deneyin.`, true);
+    return false;
+  }
+  limits[mode]++;
+  saveDailyLimits(limits);
+  return true;
 }
-limits[mode]++;
-saveDailyLimits(limits);
-return true;
-}
+
 let db = null;
 const DB_NAME = 'G3_AI_Database';
 const DB_VERSION = 1;
 const STORE_NAME = 'chats';
+
 function initDB() {
-return new Promise((resolve, reject) => {
-if (db) return resolve(db);
-const request = indexedDB.open(DB_NAME, DB_VERSION);
-request.onerror = () => reject(request.error);
-request.onsuccess = () => {
-db = request.result;
-resolve(db);
-};
-request.onupgradeneeded = (event) => {
-const database = event.target.result;
-if (!database.objectStoreNames.contains(STORE_NAME)) {
-database.createObjectStore(STORE_NAME, { keyPath: 'id' });
+  return new Promise((resolve, reject) => {
+    if (db) return resolve(db);
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => {
+      db = request.result;
+      resolve(db);
+    };
+    request.onupgradeneeded = (event) => {
+      const database = event.target.result;
+      if (!database.objectStoreNames.contains(STORE_NAME)) {
+        database.createObjectStore(STORE_NAME, { keyPath: 'id' });
+      }
+    };
+  });
 }
-};
-});
-}
+
 async function saveToIndexedDB(data) {
-await initDB();
-return new Promise((resolve, reject) => {
-const transaction = db.transaction([STORE_NAME], 'readwrite');
-const store = transaction.objectStore(STORE_NAME);
-const request = store.put({ id: 'chats', data: data, timestamp: Date.now() });
-request.onsuccess = () => resolve(true);
-request.onerror = () => reject(request.error);
-});
+  await initDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([STORE_NAME], 'readwrite');
+    const store = transaction.objectStore(STORE_NAME);
+    const request = store.put({ id: 'chats', data: data, timestamp: Date.now() });
+    request.onsuccess = () => resolve(true);
+    request.onerror = () => reject(request.error);
+  });
 }
+
 async function loadFromIndexedDB() {
-await initDB();
-return new Promise((resolve, reject) => {
-const transaction = db.transaction([STORE_NAME], 'readonly');
-const store = transaction.objectStore(STORE_NAME);
-const request = store.get('chats');
-request.onsuccess = () => resolve(request.result?.data || null);
-request.onerror = () => reject(request.error);
-});
+  await initDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([STORE_NAME], 'readonly');
+    const store = transaction.objectStore(STORE_NAME);
+    const request = store.get('chats');
+    request.onsuccess = () => resolve(request.result?.data || null);
+    request.onerror = () => reject(request.error);
+  });
 }
+
 function updateStorageIndicator(type, text) {
-if (!storageIndicator) return;
-storageIndicator.className = 'storage-indicator show';
-if (type === 'warn') storageIndicator.classList.add('warn');
-if (type === 'error') storageIndicator.classList.add('error');
-storageText.textContent = text;
-setTimeout(() => storageIndicator.classList.remove('show'), 2500);
+  if (!storageIndicator) return;
+  storageIndicator.className = 'storage-indicator show';
+  if (type === 'warn') storageIndicator.classList.add('warn');
+  if (type === 'error') storageIndicator.classList.add('error');
+  storageText.textContent = text;
+  setTimeout(() => storageIndicator.classList.remove('show'), 2500);
 }
+
 async function updateStorageUsage() {
-try {
-let totalSize = 0;
-if (db) {
-const data = await loadFromIndexedDB();
-if (data) totalSize += new Blob([JSON.stringify(data)]).size;
+  try {
+    let totalSize = 0;
+    if (db) {
+      const data = await loadFromIndexedDB();
+      if (data) totalSize += new Blob([JSON.stringify(data)]).size;
+    }
+    for (let key in localStorage) {
+      if (localStorage.hasOwnProperty(key)) totalSize += (localStorage[key].length * 2);
+    }
+    const sizeMB = (totalSize / (1024 * 1024)).toFixed(2);
+    const limitMB = 50;
+    const percent = Math.min((totalSize / (limitMB * 1024 * 1024)) * 100, 100).toFixed(1);
+    const storageFill = $('storageFill');
+    const storagePercent = $('storagePercent');
+    const storageTextDetail = $('storageTextDetail');
+    if (storageFill) {
+      storageFill.style.width = percent + '%';
+      storageFill.className = 'storage-fill';
+      if (percent > 80) storageFill.classList.add('danger');
+      else if (percent > 60) storageFill.classList.add('warning');
+    }
+    if (storagePercent) storagePercent.textContent = percent + '%';
+    if (storageTextDetail) storageTextDetail.textContent = `${sizeMB} MB / 50 MB`;
+  } catch (e) {
+    console.error('Depolama hesaplama hatası:', e);
+  }
 }
-for (let key in localStorage) {
-if (localStorage.hasOwnProperty(key)) totalSize += (localStorage[key].length * 2);
-}
-const sizeMB = (totalSize / (1024 * 1024)).toFixed(2);
-const limitMB = 50;
-const percent = Math.min((totalSize / (limitMB * 1024 * 1024)) * 100, 100).toFixed(1);
-const storageFill = $('storageFill');
-const storagePercent = $('storagePercent');
-const storageTextDetail = $('storageTextDetail');
-if (storageFill) {
-storageFill.style.width = percent + '%';
-storageFill.className = 'storage-fill';
-if (percent > 80) storageFill.classList.add('danger');
-else if (percent > 60) storageFill.classList.add('warning');
-}
-if (storagePercent) storagePercent.textContent = percent + '%';
-if (storageTextDetail) storageTextDetail.textContent = `${sizeMB} MB / 50 MB`;
-} catch (e) {
-console.error('Depolama hesaplama hatası:', e);
-}
-}
+
 async function saveChats() {
-if (!state.chats || state.chats.length === 0) return;
-try {
-await saveToIndexedDB(state.chats);
-try {
-localStorage.setItem('g3_chats', JSON.stringify(state.chats));
-} catch (e) {
-console.warn('LocalStorage kota sınırı aşıldı, sadece IndexedDB kullanılıyor.');
+  if (!state.chats || state.chats.length === 0) return;
+  try {
+    await saveToIndexedDB(state.chats);
+    try {
+      localStorage.setItem('g3_chats', JSON.stringify(state.chats));
+    } catch (e) {
+      console.warn('LocalStorage kota sınırı aşıldı, sadece IndexedDB kullanılıyor.');
+    }
+    updateStorageIndicator('success', 'Cihaza güvenle kaydedildi');
+    updateStorageUsage();
+    return true;
+  } catch (e) {
+    console.error('Depolama hatası:', e);
+    updateStorageIndicator('error', 'Kaydetme hatası!');
+    return false;
+  }
 }
-updateStorageIndicator('success', 'Cihaza güvenle kaydedildi');
-updateStorageUsage();
-return true;
-} catch (e) {
-console.error('Depolama hatası:', e);
-updateStorageIndicator('error', 'Kaydetme hatası!');
-return false;
-}
-}
+
 async function loadChats() {
-try {
-const indexedData = await loadFromIndexedDB();
-if (indexedData && Array.isArray(indexedData) && indexedData.length > 0) {
-return indexedData;
+  try {
+    const indexedData = await loadFromIndexedDB();
+    if (indexedData && Array.isArray(indexedData) && indexedData.length > 0) {
+      return indexedData;
+    }
+  } catch (e) {
+    console.warn('IndexedDB yükleme hatası, LocalStorage deneniyor:', e);
+  }
+  try {
+    const localData = localStorage.getItem('g3_chats');
+    if (localData) {
+      const parsed = JSON.parse(localData);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        try { await saveToIndexedDB(parsed); } catch (migrateErr) {}
+        return parsed;
+      }
+    }
+  } catch (e) {
+    console.error('LocalStorage yükleme hatası:', e);
+  }
+  return null;
 }
-} catch (e) {
-console.warn('IndexedDB yükleme hatası, LocalStorage deneniyor:', e);
-}
-try {
-const localData = localStorage.getItem('g3_chats');
-if (localData) {
-const parsed = JSON.parse(localData);
-if (Array.isArray(parsed) && parsed.length > 0) {
-try { await saveToIndexedDB(parsed); } catch (migrateErr) {}
-return parsed;
-}
-}
-} catch (e) {
-console.error('LocalStorage yükleme hatası:', e);
-}
-return null;
-}
+
 function saveUserState() {
-try {
-if (state.user) localStorage.setItem('g3_user', JSON.stringify(state.user));
-if (state.joinDate) localStorage.setItem('g3_joinDate', String(state.joinDate));
-updateStorageUsage();
-} catch (e) { console.error('Kullanıcı kaydetme hatası:', e); }
+  try {
+    if (state.user) localStorage.setItem('g3_user', JSON.stringify(state.user));
+    if (state.joinDate) localStorage.setItem('g3_joinDate', String(state.joinDate));
+    updateStorageUsage();
+  } catch (e) { console.error('Kullanıcı kaydetme hatası:', e); }
 }
+
 function incrementUserCount() {
-try {
-const current = parseInt(localStorage.getItem('g3_total_users') || '0');
-localStorage.setItem('g3_total_users', String(current + 1));
-updateStorageUsage();
-} catch (e) { console.error('Kullanıcı sayacı hatası:', e); }
+  try {
+    const current = parseInt(localStorage.getItem('g3_total_users') || '0');
+    localStorage.setItem('g3_total_users', String(current + 1));
+    updateStorageUsage();
+  } catch (e) { console.error('Kullanıcı sayacı hatası:', e); }
 }
+
 function incrementConversationCount() {
-try {
-const current = parseInt(localStorage.getItem('g3_total_conversations') || '0');
-localStorage.setItem('g3_total_conversations', String(current + 1));
-updateStorageUsage();
-} catch (e) { console.error('Konuşma sayacı hatası:', e); }
+  try {
+    const current = parseInt(localStorage.getItem('g3_total_conversations') || '0');
+    localStorage.setItem('g3_total_conversations', String(current + 1));
+    updateStorageUsage();
+  } catch (e) { console.error('Konuşma sayacı hatası:', e); }
 }
+
 function updateChatFooter() {
-if (!chatFooterText) return;
-const launchDate = new Date('2026-06-01T00:00:00');
-const now = new Date();
-const diff = now - launchDate;
-const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-chatFooterText.innerHTML = `<i class="fas fa-clock"></i> G3 AI <strong>${days} gün, ${hours} saat, ${minutes} dakika</strong> süredir aktif`;
+  if (!chatFooterText) return;
+  const launchDate = new Date('2026-06-01T00:00:00');
+  const now = new Date();
+  const diff = now - launchDate;
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  chatFooterText.innerHTML = `<i class="fas fa-clock"></i> G3 AI <strong>${days} gün, ${hours} saat, ${minutes} dakika</strong> süredir aktif`;
 }
+
 function createBackgroundSquares() {
-const container = $('bgAnimation');
-const squareCount = 15;
-for (let i = 0; i < squareCount; i++) {
-const square = document.createElement('div');
-square.className = 'bg-square';
-const size = Math.random() * 60 + 20;
-square.style.width = size + 'px';
-square.style.height = size + 'px';
-square.style.left = Math.random() * 100 + '%';
-square.style.top = -(Math.random() * 100 + 50) + 'px';
-const fallDuration = Math.random() * 15 + 10;
-const blinkDuration = Math.random() * 3 + 2;
-const delay = Math.random() * 10;
-square.style.animationDuration = `${fallDuration}s, ${blinkDuration}s`;
-square.style.animationDelay = `${delay}s, ${delay}s`;
-container.appendChild(square);
+  const container = $('bgAnimation');
+  const squareCount = 15;
+  for (let i = 0; i < squareCount; i++) {
+    const square = document.createElement('div');
+    square.className = 'bg-square';
+    const size = Math.random() * 60 + 20;
+    square.style.width = size + 'px';
+    square.style.height = size + 'px';
+    square.style.left = Math.random() * 100 + '%';
+    square.style.top = -(Math.random() * 100 + 50) + 'px';
+    const fallDuration = Math.random() * 15 + 10;
+    const blinkDuration = Math.random() * 3 + 2;
+    const delay = Math.random() * 10;
+    square.style.animationDuration = `${fallDuration}s, ${blinkDuration}s`;
+    square.style.animationDelay = `${delay}s, ${delay}s`;
+    container.appendChild(square);
+  }
 }
-}
+
 function applyCustomization() {
-if (state.accentColor) {
-document.documentElement.style.setProperty('--accent', state.accentColor);
-document.documentElement.style.setProperty('--accent-hover', state.accentColor);
+  if (state.accentColor) {
+    document.documentElement.style.setProperty('--accent', state.accentColor);
+    document.documentElement.style.setProperty('--accent-hover', state.accentColor);
+  }
+  if (state.fontSize) {
+    document.body.style.fontSize = state.fontSize + 'px';
+  }
+  const bgAnim = $('bgAnimation');
+  if (bgAnim) {
+    if (state.bgAnimation === false) {
+      bgAnim.style.display = 'none';
+    } else {
+      bgAnim.style.display = 'block';
+      if (bgAnim.children.length === 0) createBackgroundSquares();
+    }
+  }
+  if ($('accentColorPicker')) $('accentColorPicker').value = state.accentColor;
+  if ($('fontSizeSlider')) $('fontSizeSlider').value = state.fontSize;
+  if ($('bgAnimToggle')) $('bgAnimToggle').checked = state.bgAnimation;
+  localStorage.setItem('g3_settings', JSON.stringify({
+    accentColor: state.accentColor,
+    fontSize: state.fontSize,
+    bgAnimation: state.bgAnimation
+  }));
 }
-if (state.fontSize) {
-document.body.style.fontSize = state.fontSize + 'px';
-}
-const bgAnim = $('bgAnimation');
-if (bgAnim) {
-if (state.bgAnimation === false) {
-bgAnim.style.display = 'none';
-} else {
-bgAnim.style.display = 'block';
-if (bgAnim.children.length === 0) createBackgroundSquares();
-}
-}
-if ($('accentColorPicker')) $('accentColorPicker').value = state.accentColor;
-if ($('fontSizeSlider')) $('fontSizeSlider').value = state.fontSize;
-if ($('bgAnimToggle')) $('bgAnimToggle').checked = state.bgAnimation;
-localStorage.setItem('g3_settings', JSON.stringify({
-accentColor: state.accentColor,
-fontSize: state.fontSize,
-bgAnimation: state.bgAnimation
-}));
-}
+
 async function saveToGitHub() {
-const token = $('githubToken').value.trim();
-if (!token) { showToast('Lütfen GitHub Token girin', true); return; }
-const gistId = $('githubGistId').value.trim();
-const data = {
-version: "4.8",
-timestamp: new Date().toISOString(),
-user: state.user,
-chats: state.chats,
-settings: {
-theme: state.theme,
-accentColor: state.accentColor,
-fontSize: state.fontSize,
-bgAnimation: state.bgAnimation
+  const token = $('githubToken').value.trim();
+  if (!token) { showToast('Lütfen GitHub Token girin', true); return; }
+  const gistId = $('githubGistId').value.trim();
+  const data = {
+    version: "4.8",
+    timestamp: new Date().toISOString(),
+    user: state.user,
+    chats: state.chats,
+    settings: {
+      theme: state.theme,
+      accentColor: state.accentColor,
+      fontSize: state.fontSize,
+      bgAnimation: state.bgAnimation
+    }
+  };
+  const url = gistId ? `https://api.github.com/gists/${gistId}` : 'https://api.github.com/gists';
+  const method = gistId ? 'PATCH' : 'POST';
+  try {
+    showToast('GitHub\'a gönderiliyor...');
+    const response = await fetch(url, {
+      method: method,
+      headers: {
+        'Authorization': `token ${token}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/vnd.github.v3+json'
+      },
+      body: JSON.stringify({
+        description: "G3 AI Chat Backup",
+        public: false,
+        files: { "g3_backup.json": { content: JSON.stringify(data, null, 2) } }
+      })
+    });
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.message || 'GitHub API hatası');
+    }
+    const result = await response.json();
+    localStorage.setItem('g3_github_token', token);
+    localStorage.setItem('g3_github_gist_id', result.id);
+    $('githubGistId').value = result.id;
+    showToast('GitHub\'a başarıyla yedeklendi!');
+  } catch (error) {
+    console.error(error);
+    showToast('Yedekleme hatası: ' + error.message, true);
+  }
 }
-};
-const url = gistId ? `https://api.github.com/gists/${gistId}` : 'https://api.github.com/gists';
-const method = gistId ? 'PATCH' : 'POST';
-try {
-showToast('GitHub\'a gönderiliyor...');
-const response = await fetch(url, {
-method: method,
-headers: {
-'Authorization': `token ${token}`,
-'Content-Type': 'application/json',
-'Accept': 'application/vnd.github.v3+json'
-},
-body: JSON.stringify({
-description: "G3 AI Chat Backup",
-public: false,
-files: { "g3_backup.json": { content: JSON.stringify(data, null, 2) } }
-})
-});
-if (!response.ok) {
-const err = await response.json();
-throw new Error(err.message || 'GitHub API hatası');
-}
-const result = await response.json();
-localStorage.setItem('g3_github_token', token);
-localStorage.setItem('g3_github_gist_id', result.id);
-$('githubGistId').value = result.id;
-showToast('GitHub\'a başarıyla yedeklendi!');
-} catch (error) {
-console.error(error);
-showToast('Yedekleme hatası: ' + error.message, true);
-}
-}
+
 async function loadFromGitHub() {
-const token = $('githubToken').value.trim() || localStorage.getItem('g3_github_token');
-const gistId = $('githubGistId').value.trim() || localStorage.getItem('g3_github_gist_id');
-if (!token || !gistId) {
-showToast('Token ve Gist ID gerekli', true);
-return;
+  const token = $('githubToken').value.trim() || localStorage.getItem('g3_github_token');
+  const gistId = $('githubGistId').value.trim() || localStorage.getItem('g3_github_gist_id');
+  if (!token || !gistId) {
+    showToast('Token ve Gist ID gerekli', true);
+    return;
+  }
+  try {
+    showToast('GitHub\'dan yükleniyor...');
+    const response = await fetch(`https://api.github.com/gists/${gistId}`, {
+      headers: {
+        'Authorization': `token ${token}`,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+    if (!response.ok) throw new Error('Gist bulunamadı veya yetki hatası');
+    const data = await response.json();
+    const backup = JSON.parse(data.files['g3_backup.json'].content);
+    if (confirm('Mevcut veriler silinip GitHub\'daki verilerle değiştirilecek. Emin misiniz?')) {
+      state.user = backup.user;
+      state.chats = backup.chats;
+      if (backup.settings) {
+        state.theme = backup.settings.theme || 'dark';
+        state.accentColor = backup.settings.accentColor || '#6366f1';
+        state.fontSize = backup.settings.fontSize || 16;
+        state.bgAnimation = backup.settings.bgAnimation !== undefined ? backup.settings.bgAnimation : true;
+      }
+      await saveChats();
+      saveUserState();
+      applyCustomization();
+      renderChatList();
+      if (state.chats.length > 0) loadChat(state.chats[0].id);
+      else createNewChat();
+      updateUserUI();
+      showToast('GitHub\'dan başarıyla yüklendi!');
+    }
+  } catch (error) {
+    console.error(error);
+    showToast('Yükleme hatası: ' + error.message, true);
+  }
 }
-try {
-showToast('GitHub\'dan yükleniyor...');
-const response = await fetch(`https://api.github.com/gists/${gistId}`, {
-headers: {
-'Authorization': `token ${token}`,
-'Accept': 'application/vnd.github.v3+json'
-}
-});
-if (!response.ok) throw new Error('Gist bulunamadı veya yetki hatası');
-const data = await response.json();
-const backup = JSON.parse(data.files['g3_backup.json'].content);
-if (confirm('Mevcut veriler silinip GitHub\'daki verilerle değiştirilecek. Emin misiniz?')) {
-state.user = backup.user;
-state.chats = backup.chats;
-if (backup.settings) {
-state.theme = backup.settings.theme || 'dark';
-state.accentColor = backup.settings.accentColor || '#6366f1';
-state.fontSize = backup.settings.fontSize || 16;
-state.bgAnimation = backup.settings.bgAnimation !== undefined ? backup.settings.bgAnimation : true;
-}
-await saveChats();
-saveUserState();
-applyCustomization();
-renderChatList();
-if (state.chats.length > 0) loadChat(state.chats[0].id);
-else createNewChat();
-updateUserUI();
-showToast('GitHub\'dan başarıyla yüklendi!');
-}
-} catch (error) {
-console.error(error);
-showToast('Yükleme hatası: ' + error.message, true);
-}
-}
+
 function handleGoogleCredentialResponse(response) {
-try {
-const token = response.credential;
-const payload = JSON.parse(atob(token.split('.')[1]));
-state.user = {
-name: payload.name || 'Google Kullanıcı',
-email: payload.email,
-avatar: payload.picture || payload.name?.charAt(0).toUpperCase() || 'G',
-isGoogleUser: true
-};
-if (!state.joinDate) state.joinDate = Date.now();
-saveUserState();
-incrementUserCount();
-updateUserUI();
-updateChatFooter();
-authOverlay.classList.remove('active');
-showToast('Google ile giriş yapıldı');
-} catch (error) {
-console.error('Google giriş hatası:', error);
-showToast('Google girişi başarısız oldu', true);
+  try {
+    const token = response.credential;
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    state.user = {
+      name: payload.name || 'Google Kullanıcı',
+      email: payload.email,
+      avatar: payload.picture || payload.name?.charAt(0).toUpperCase() || 'G',
+      isGoogleUser: true
+    };
+    if (!state.joinDate) state.joinDate = Date.now();
+    saveUserState();
+    incrementUserCount();
+    updateUserUI();
+    updateChatFooter();
+    authOverlay.classList.remove('active');
+    showToast('Google ile giriş yapıldı');
+  } catch (error) {
+    console.error('Google giriş hatası:', error);
+    showToast('Google girişi başarısız oldu', true);
+  }
 }
-}
+
 function initializeGoogleSignIn() {
-if (typeof google === 'undefined' || !google.accounts || !google.accounts.id) {
-setTimeout(initializeGoogleSignIn, 500);
-return;
+  if (typeof google === 'undefined' || !google.accounts || !google.accounts.id) {
+    setTimeout(initializeGoogleSignIn, 500);
+    return;
+  }
+  const clientId = GOOGLE_CLIENT_ID || "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com";
+  try {
+    google.accounts.id.initialize({
+      client_id: clientId,
+      callback: handleGoogleCredentialResponse,
+      auto_select: false,
+      cancel_on_tap_outside: true
+    });
+    document.querySelectorAll('.google-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        google.accounts.id.prompt((notification) => {
+          if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+            showToast('Google giriş penceresi açılıyor...');
+          }
+        });
+      });
+    });
+  } catch (error) {
+    console.error('Google Sign-In başlatma hatası:', error);
+    document.querySelectorAll('.google-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        showToast('Google Client ID yapılandırılmamış', true);
+      });
+    });
+  }
 }
-const clientId = GOOGLE_CLIENT_ID || "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com";
-try {
-google.accounts.id.initialize({
-client_id: clientId,
-callback: handleGoogleCredentialResponse,
-auto_select: false,
-cancel_on_tap_outside: true
-});
-document.querySelectorAll('.google-btn').forEach(btn => {
-btn.addEventListener('click', (e) => {
-e.preventDefault();
-google.accounts.id.prompt((notification) => {
-if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-showToast('Google giriş penceresi açılıyor...');
-}
-});
-});
-});
-} catch (error) {
-console.error('Google Sign-In başlatma hatası:', error);
-document.querySelectorAll('.google-btn').forEach(btn => {
-btn.addEventListener('click', () => {
-showToast('Google Client ID yapılandırılmamış', true);
-});
-});
-}
-}
+
 window.addEventListener('load', () => {
-setTimeout(initializeGoogleSignIn, 500);
-setTimeout(updateStorageUsage, 500);
-initDB().then(() => updateStorageUsage());
+  setTimeout(initializeGoogleSignIn, 500);
+  setTimeout(updateStorageUsage, 500);
+  initDB().then(() => updateStorageUsage());
 });
+
 document.querySelectorAll('.auth-tab').forEach(tab => {
-tab.addEventListener('click', () => {
-document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
-tab.classList.add('active');
-const target = tab.dataset.tab;
-$('loginForm').classList.toggle('hidden', target !== 'login');
-$('registerForm').classList.toggle('hidden', target !== 'register');
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    const target = tab.dataset.tab;
+    $('loginForm').classList.toggle('hidden', target !== 'login');
+    $('registerForm').classList.toggle('hidden', target !== 'register');
+  });
 });
-});
+
 function handleAuth(e) {
-e.preventDefault();
-const isRegister = e.target.id === 'registerForm';
-const name = isRegister ? e.target.querySelector('input[type="text"]').value : 'Kullanıcı';
-const email = e.target.querySelector('input[type="email"]').value;
-state.user = { name: name || 'Kullanıcı', email: email, avatar: (name || email).charAt(0).toUpperCase() };
-if (!state.joinDate) state.joinDate = Date.now();
-saveUserState();
-if (isRegister) incrementUserCount();
-updateUserUI();
-updateChatFooter();
-authOverlay.classList.remove('active');
-showToast('Hoş geldin! 👋');
+  e.preventDefault();
+  const isRegister = e.target.id === 'registerForm';
+  const name = isRegister ? e.target.querySelector('input[type="text"]').value : 'Kullanıcı';
+  const email = e.target.querySelector('input[type="email"]').value;
+  state.user = { name: name || 'Kullanıcı', email: email, avatar: (name || email).charAt(0).toUpperCase() };
+  if (!state.joinDate) state.joinDate = Date.now();
+  saveUserState();
+  if (isRegister) incrementUserCount();
+  updateUserUI();
+  updateChatFooter();
+  authOverlay.classList.remove('active');
+  showToast('Hoş geldin! 👋');
 }
+
 $('loginForm').addEventListener('submit', handleAuth);
 $('registerForm').addEventListener('submit', handleAuth);
+
 $('logoutBtn').addEventListener('click', () => {
-state.user = null;
-try {
-localStorage.removeItem('g3_user');
-localStorage.removeItem('g3_joinDate');
-} catch (e) {}
-userDropdown.classList.remove('active');
-authOverlay.classList.add('active');
-updateStorageUsage();
+  state.user = null;
+  try {
+    localStorage.removeItem('g3_user');
+    localStorage.removeItem('g3_joinDate');
+  } catch (e) {}
+  userDropdown.classList.remove('active');
+  authOverlay.classList.add('active');
+  updateStorageUsage();
 });
+
 function updateUserUI() {
-if (!state.user) return;
-$('userName').textContent = state.user.name;
-$('userEmail').textContent = state.user.email;
-const avatarEl = $('userAvatar');
-if (state.user.avatar && (state.user.avatar.startsWith('http') || state.user.avatar.startsWith('data:'))) {
-avatarEl.innerHTML = `<img src="${state.user.avatar}" alt="${state.user.name}">`;
-} else {
-avatarEl.textContent = state.user.avatar || 'K';
+  if (!state.user) return;
+  $('userName').textContent = state.user.name;
+  $('userEmail').textContent = state.user.email;
+  const avatarEl = $('userAvatar');
+  if (state.user.avatar && (state.user.avatar.startsWith('http') || state.user.avatar.startsWith('data:'))) {
+    avatarEl.innerHTML = `<img src="${state.user.avatar}" alt="${state.user.name}">`;
+  } else {
+    avatarEl.textContent = state.user.avatar || 'K';
+  }
+  updateHeaderProfileBtn();
 }
-updateHeaderProfileBtn();
-}
+
 function updateHeaderProfileBtn() {
-if (!headerProfileBtn || !state.user) return;
-if (state.user.avatar && (state.user.avatar.startsWith('http') || state.user.avatar.startsWith('data:'))) {
-headerProfileBtn.innerHTML = `<img src="${state.user.avatar}" alt="${state.user.name}">`;
-} else {
-headerProfileBtn.textContent = state.user.avatar || 'K';
+  if (!headerProfileBtn || !state.user) return;
+  if (state.user.avatar && (state.user.avatar.startsWith('http') || state.user.avatar.startsWith('data:'))) {
+    headerProfileBtn.innerHTML = `<img src="${state.user.avatar}" alt="${state.user.name}">`;
+  } else {
+    headerProfileBtn.textContent = state.user.avatar || 'K';
+  }
 }
-}
+
 function openProfileModal() {
-if (!state.user) return;
-$('profileName').textContent = state.user.name;
-$('profileEmail').textContent = state.user.email;
-const avatarLg = $('profileAvatarLg');
-if (state.user.avatar && (state.user.avatar.startsWith('http') || state.user.avatar.startsWith('data:'))) {
-avatarLg.innerHTML = `<img src="${state.user.avatar}" alt="${state.user.name}">`;
-} else {
-avatarLg.textContent = state.user.avatar || 'K';
+  if (!state.user) return;
+  $('profileName').textContent = state.user.name;
+  $('profileEmail').textContent = state.user.email;
+  const avatarLg = $('profileAvatarLg');
+  if (state.user.avatar && (state.user.avatar.startsWith('http') || state.user.avatar.startsWith('data:'))) {
+    avatarLg.innerHTML = `<img src="${state.user.avatar}" alt="${state.user.name}">`;
+  } else {
+    avatarLg.textContent = state.user.avatar || 'K';
+  }
+  const totalMessages = state.chats.reduce((sum, chat) => sum + chat.messages.filter(m => m.role !== 'system').length, 0);
+  $('statChats').textContent = state.chats.length;
+  $('statMessages').textContent = totalMessages;
+  const joinDate = state.joinDate || Date.now();
+  const daysSince = Math.max(1, Math.ceil((Date.now() - joinDate) / (1000 * 60 * 60 * 24)));
+  $('statDays').textContent = daysSince;
+  const dateStr = new Date(joinDate).toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' });
+  $('profileJoinDate').textContent = `Katılım: ${dateStr}`;
+  profileModal.classList.add('active');
+  userDropdown.classList.remove('active');
 }
-const totalMessages = state.chats.reduce((sum, chat) => sum + chat.messages.filter(m => m.role !== 'system').length, 0);
-$('statChats').textContent = state.chats.length;
-$('statMessages').textContent = totalMessages;
-const joinDate = state.joinDate || Date.now();
-const daysSince = Math.max(1, Math.ceil((Date.now() - joinDate) / (1000 * 60 * 60 * 24)));
-$('statDays').textContent = daysSince;
-const dateStr = new Date(joinDate).toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' });
-$('profileJoinDate').textContent = `Katılım: ${dateStr}`;
-profileModal.classList.add('active');
-userDropdown.classList.remove('active');
-}
+
 $('profileClose').addEventListener('click', () => profileModal.classList.remove('active'));
 profileModal.addEventListener('click', (e) => { if (e.target === profileModal) profileModal.classList.remove('active'); });
 $('openProfileBtn').addEventListener('click', openProfileModal);
 headerProfileBtn.addEventListener('click', openProfileModal);
+
 $('editNameBtn').addEventListener('click', () => {
-const newName = prompt('Yeni adınız:', state.user?.name || '');
-if (newName && newName.trim()) {
-state.user.name = newName.trim();
-saveUserState();
-updateUserUI();
-$('profileName').textContent = state.user.name;
-showToast('İsim güncellendi');
-}
+  const newName = prompt('Yeni adınız:', state.user?.name || '');
+  if (newName && newName.trim()) {
+    state.user.name = newName.trim();
+    saveUserState();
+    updateUserUI();
+    $('profileName').textContent = state.user.name;
+    showToast('İsim güncellendi');
+  }
 });
+
 $('exportAllBtn').addEventListener('click', () => {
-let exportText = '# G3 AI - Tüm Sohbetler\n';
-state.chats.forEach(chat => {
-exportText += `\n## ${chat.title}\n\n`;
-chat.messages.forEach(msg => {
-if (msg.role === 'system') return;
-const role = msg.role === 'user' ? '👤 Kullanıcı' : '🤖 G3';
-exportText += `### ${role}\n${msg.content}\n\n---\n\n`;
+  let exportText = '# G3 AI - Tüm Sohbetler\n';
+  state.chats.forEach(chat => {
+    exportText += `\n## ${chat.title}\n\n`;
+    chat.messages.forEach(msg => {
+      if (msg.role === 'system') return;
+      const role = msg.role === 'user' ? '👤 Kullanıcı' : '🤖 G3';
+      exportText += `### ${role}\n${msg.content}\n\n---\n\n`;
+    });
+  });
+  const blob = new Blob([exportText], { type: 'text/markdown' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `g3_tum_sohbetler_${Date.now()}.md`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Tüm veriler dışa aktarıldı');
 });
-});
-const blob = new Blob([exportText], { type: 'text/markdown' });
-const url = URL.createObjectURL(blob);
-const a = document.createElement('a');
-a.href = url;
-a.download = `g3_tum_sohbetler_${Date.now()}.md`;
-a.click();
-URL.revokeObjectURL(url);
-showToast('Tüm veriler dışa aktarıldı');
-});
+
 $('exportPdfBtn').addEventListener('click', () => {
-const activeChat = state.chats.find(c => c.id === state.currentChatId);
-if (!activeChat) return;
-showToast('PDF hazırlanıyor...');
-const element = document.createElement('div');
-element.style.padding = '20px';
-element.style.fontFamily = 'Arial, sans-serif';
-element.style.color = '#333';
-element.style.backgroundColor = '#ffffff';
-let htmlContent = `
-<div style="text-align: center; margin-bottom: 30px;">
-<h1 style="color: #6366f1; margin: 0;">G3 AI Sohbet</h1>
-<h2 style="color: #4a5568; font-weight: normal; margin: 5px 0 0 0;">${activeChat.title}</h2>
-<p style="color: #a0aec0; font-size: 12px; margin-top: 10px;">${new Date(activeChat.createdAt).toLocaleString('tr-TR')}</p>
-</div>
-<hr style="border: 1px solid #e2e8f0; margin-bottom: 20px;">
-`;
-activeChat.messages.forEach(msg => {
-if (msg.role === 'system') return;
-const isUser = msg.role === 'user';
-const role = isUser ? 'Kullanıcı' : 'G3 Asistan';
-const bgColor = isUser ? '#f7fafc' : '#ffffff';
-const borderColor = isUser ? '#6366f1' : '#cbd5e0';
-const roleColor = isUser ? '#6366f1' : '#2d3748';
-let content = msg.content
-.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-.replace(/\n/g, '<br>')
-.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-.replace(/\*(.*?)\*/g, '<em>$1</em>')
-.replace(/`([^`]+)`/g, '<code style="background:#edf2f7;padding:2px 4px;border-radius:3px;font-family:monospace;">$1</code>');
-htmlContent += `
-<div style="margin-bottom: 20px; padding: 15px; background: ${bgColor}; border-left: 4px solid ${borderColor}; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-<h3 style="margin: 0 0 10px 0; color: ${roleColor}; font-size: 16px;">${role}</h3>
-<div style="line-height: 1.6; font-size: 14px; color: #2d3748;">${content}</div>
-</div>
-`;
+  const activeChat = state.chats.find(c => c.id === state.currentChatId);
+  if (!activeChat) return;
+  showToast('PDF hazırlanıyor...');
+  const element = document.createElement('div');
+  element.style.padding = '20px';
+  element.style.fontFamily = 'Arial, sans-serif';
+  element.style.color = '#333';
+  element.style.backgroundColor = '#ffffff';
+  let htmlContent = `
+    <div style="text-align: center; margin-bottom: 30px;">
+      <h1 style="color: #6366f1; margin: 0;">G3 AI Sohbet</h1>
+      <h2 style="color: #4a5568; font-weight: normal; margin: 5px 0 0 0;">${activeChat.title}</h2>
+      <p style="color: #a0aec0; font-size: 12px; margin-top: 10px;">${new Date(activeChat.createdAt).toLocaleString('tr-TR')}</p>
+    </div>
+    <hr style="border: 1px solid #e2e8f0; margin-bottom: 20px;">
+  `;
+  activeChat.messages.forEach(msg => {
+    if (msg.role === 'system') return;
+    const isUser = msg.role === 'user';
+    const role = isUser ? 'Kullanıcı' : 'G3 Asistan';
+    const bgColor = isUser ? '#f7fafc' : '#ffffff';
+    const borderColor = isUser ? '#6366f1' : '#cbd5e0';
+    const roleColor = isUser ? '#6366f1' : '#2d3748';
+    let content = msg.content
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/\n/g, '<br>')
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em>$1</em>')
+      .replace(/`([^`]+)`/g, '<code style="background:#edf2f7;padding:2px 4px;border-radius:3px;font-family:monospace;">$1</code>');
+    htmlContent += `
+      <div style="margin-bottom: 20px; padding: 15px; background: ${bgColor}; border-left: 4px solid ${borderColor}; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        <h3 style="margin: 0 0 10px 0; color: ${roleColor}; font-size: 16px;">${role}</h3>
+        <div style="line-height: 1.6; font-size: 14px; color: #2d3748;">${content}</div>
+      </div>
+    `;
+  });
+  element.innerHTML = htmlContent;
+  const opt = {
+    margin: 10,
+    filename: `G3_${activeChat.title.replace(/[^a-z0-9]/gi, '_').substring(0, 20)}.pdf`,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true, logging: false },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  };
+  html2pdf().set(opt).from(element).save().then(() => {
+    showToast('PDF başarıyla indirildi');
+  }).catch(err => {
+    console.error(err);
+    showToast('PDF oluşturulurken hata oluştu', true);
+  });
 });
-element.innerHTML = htmlContent;
-const opt = {
-margin: 10,
-filename: `G3_${activeChat.title.replace(/[^a-z0-9]/gi, '_').substring(0, 20)}.pdf`,
-image: { type: 'jpeg', quality: 0.98 },
-html2canvas: { scale: 2, useCORS: true, logging: false },
-jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-};
-html2pdf().set(opt).from(element).save().then(() => {
-showToast('PDF başarıyla indirildi');
-}).catch(err => {
-console.error(err);
-showToast('PDF oluşturulurken hata oluştu', true);
-});
-});
+
 $('exportJsonBtn').addEventListener('click', () => {
-const exportData = { app: "G3 AI", version: "1.0", exportDate: new Date().toISOString(), user: state.user, chats: state.chats };
-const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-const url = URL.createObjectURL(blob);
-const a = document.createElement('a');
-a.href = url;
-a.download = `g3_ai_yedek_${Date.now()}.json`;
-a.click();
-URL.revokeObjectURL(url);
-showToast('JSON yedekleme başarıyla indirildi');
+  const exportData = { app: "G3 AI", version: "1.0", exportDate: new Date().toISOString(), user: state.user, chats: state.chats };
+  const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `g3_ai_yedek_${Date.now()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('JSON yedekleme başarıyla indirildi');
 });
+
 $('importJsonBtn').addEventListener('click', () => $('importJsonInput').click());
+
 $('importJsonInput').addEventListener('change', (e) => {
-const file = e.target.files[0];
-if (!file) return;
-const reader = new FileReader();
-reader.onload = async (event) => {
-try {
-const data = JSON.parse(event.target.result);
-if (data.chats && Array.isArray(data.chats)) {
-if (confirm('Mevcut tüm sohbetler silinecek ve yedekten geri yüklenecek. Emin misiniz?')) {
-state.chats = data.chats;
-if (data.user) state.user = data.user;
-await saveChats();
-saveUserState();
-updateUserUI();
-renderChatList();
-if (state.chats.length > 0) loadChat(state.chats[0].id);
-else createNewChat();
-showToast('Yedek başarıyla geri yüklendi');
-}
-} else {
-showToast('Geçersiz yedek dosyası', true);
-}
-} catch (err) {
-showToast('Dosya okunurken hata oluştu', true);
-}
-};
-reader.readAsText(file);
-e.target.value = '';
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async (event) => {
+    try {
+      const data = JSON.parse(event.target.result);
+      if (data.chats && Array.isArray(data.chats)) {
+        if (confirm('Mevcut tüm sohbetler silinecek ve yedekten geri yüklenecek. Emin misiniz?')) {
+          state.chats = data.chats;
+          if (data.user) state.user = data.user;
+          await saveChats();
+          saveUserState();
+          updateUserUI();
+          renderChatList();
+          if (state.chats.length > 0) loadChat(state.chats[0].id);
+          else createNewChat();
+          showToast('Yedek başarıyla geri yüklendi');
+        }
+      } else {
+        showToast('Geçersiz yedek dosyası', true);
+      }
+    } catch (err) {
+      showToast('Dosya okunurken hata oluştu', true);
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
 });
+
 $('deleteAllBtn').addEventListener('click', async () => {
-if (confirm('TÜM SOHBETLER silinecek. Emin misiniz?')) {
-state.chats = [];
-state.currentChatId = null;
-try {
-localStorage.removeItem('g3_chats');
-if (db) {
-const transaction = db.transaction([STORE_NAME], 'readwrite');
-transaction.objectStore(STORE_NAME).clear();
-}
-} catch (e) {}
-createNewChat();
-profileModal.classList.remove('active');
-showToast('Tüm veriler silindi');
-await updateStorageUsage();
-}
+  if (confirm('TÜM SOHBETLER silinecek. Emin misiniz?')) {
+    state.chats = [];
+    state.currentChatId = null;
+    try {
+      localStorage.removeItem('g3_chats');
+      if (db) {
+        const transaction = db.transaction([STORE_NAME], 'readwrite');
+        transaction.objectStore(STORE_NAME).clear();
+      }
+    } catch (e) {}
+    createNewChat();
+    profileModal.classList.remove('active');
+    showToast('Tüm veriler silindi');
+    await updateStorageUsage();
+  }
 });
+
 $('clearAllBtn').addEventListener('click', async () => {
-if (confirm('Tüm sohbetler silinecek. Emin misiniz?')) {
-state.chats = [];
-try {
-localStorage.removeItem('g3_chats');
-if (db) {
-const transaction = db.transaction([STORE_NAME], 'readwrite');
-transaction.objectStore(STORE_NAME).clear();
-}
-} catch (e) {}
-createNewChat();
-userDropdown.classList.remove('active');
-showToast('Tüm sohbetler silindi');
-await updateStorageUsage();
-}
+  if (confirm('Tüm sohbetler silinecek. Emin misiniz?')) {
+    state.chats = [];
+    try {
+      localStorage.removeItem('g3_chats');
+      if (db) {
+        const transaction = db.transaction([STORE_NAME], 'readwrite');
+        transaction.objectStore(STORE_NAME).clear();
+      }
+    } catch (e) {}
+    createNewChat();
+    userDropdown.classList.remove('active');
+    showToast('Tüm sohbetler silindi');
+    await updateStorageUsage();
+  }
 });
+
 const savedUser = localStorage.getItem('g3_user');
 const savedJoinDate = localStorage.getItem('g3_joinDate');
 if (savedUser) {
-try {
-state.user = JSON.parse(savedUser);
-state.joinDate = savedJoinDate ? parseInt(savedJoinDate) : Date.now();
-updateUserUI();
-} catch (e) { console.warn('Kullanıcı verisi okunamadı:', e); }
+  try {
+    state.user = JSON.parse(savedUser);
+    state.joinDate = savedJoinDate ? parseInt(savedJoinDate) : Date.now();
+    updateUserUI();
+  } catch (e) { console.warn('Kullanıcı verisi okunamadı:', e); }
 } else {
-setTimeout(() => authOverlay.classList.add('active'), 300);
+  setTimeout(() => authOverlay.classList.add('active'), 300);
 }
+
 const savedTheme = localStorage.getItem('g3_theme') || 'dark';
 document.documentElement.setAttribute('data-theme', savedTheme);
 state.theme = savedTheme;
+
 themeToggle.addEventListener('click', () => {
-state.theme = state.theme === 'dark' ? 'light' : 'dark';
-document.documentElement.setAttribute('data-theme', state.theme);
-try { localStorage.setItem('g3_theme', state.theme); } catch (e) {}
-updateThemeIcon();
-updateStorageUsage();
+  state.theme = state.theme === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', state.theme);
+  try { localStorage.setItem('g3_theme', state.theme); } catch (e) {}
+  updateThemeIcon();
+  updateStorageUsage();
 });
+
 $('themeToggleDropdown').addEventListener('click', () => {
-state.theme = state.theme === 'dark' ? 'light' : 'dark';
-document.documentElement.setAttribute('data-theme', state.theme);
-try { localStorage.setItem('g3_theme', state.theme); } catch (e) {}
-updateThemeIcon();
-userDropdown.classList.remove('active');
-updateStorageUsage();
+  state.theme = state.theme === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', state.theme);
+  try { localStorage.setItem('g3_theme', state.theme); } catch (e) {}
+  updateThemeIcon();
+  userDropdown.classList.remove('active');
+  updateStorageUsage();
 });
+
 function updateThemeIcon() {
-const icon = themeToggle.querySelector('i');
-icon.className = state.theme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+  const icon = themeToggle.querySelector('i');
+  icon.className = state.theme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
 }
+
 menuToggle.addEventListener('click', () => { sidebar.classList.add('open'); overlay.classList.add('show'); });
+
 overlay.addEventListener('click', () => {
-sidebar.classList.remove('open');
-overlay.classList.remove('show');
-userDropdown.classList.remove('active');
+  sidebar.classList.remove('open');
+  overlay.classList.remove('show');
+  userDropdown.classList.remove('active');
 });
+
 userProfileBtn.addEventListener('click', (e) => { e.stopPropagation(); userDropdown.classList.toggle('active'); });
+
 document.addEventListener('click', (e) => {
-if (!userDropdown.contains(e.target) && !userProfileBtn.contains(e.target)) {
-userDropdown.classList.remove('active');
-}
+  if (!userDropdown.contains(e.target) && !userProfileBtn.contains(e.target)) {
+    userDropdown.classList.remove('active');
+  }
 });
+
 function getSystemPromptForMode(mode) {
-let prompt = SYSTEM_PROMPT_BASE;
-if (mode === 'fast') {
-prompt += "\nMOD: Firethron (Hızlı). KURALLAR: Son derece hızlı, kısa ve öz yanıtlar ver. Gereksiz açıklamalardan kaçın. Komut sistemi yok.";
-} else if (mode === 'smart') {
-prompt += "\nMOD: Hawkweed (Zeki). KURALLAR: Derinlemesine, bağlamsal yanıtlar ver. Eski mesajlarla yeni mesajlar arasında güçlü bağ kur. Kullanıcı /imagine, /video, /music, /analyze, /code, /translate, /summarize, /story, /math veya /roleplay gibi komutlar girerse ilgili alanda dünya çapında bir uzman gibi davran. Sana bir görsel gönderilirse görseli en ince detayına kadar analiz et.";
-try {
-const now = new Date();
-prompt += `\nCANLI VERİ BAĞLANTISI AKTİF: Şu anki tarih ve saat: ${now.toLocaleString('tr-TR')}. Kullanıcı canlı saat, piyasa, altın veya döviz gibi bilgiler isterse elindeki güncel bağlamı kullan.`;
-} catch (e) {}
-} else if (mode === 'extra') {
-prompt += "\nMOD: Nightplox (Extra). KURALLAR: Daha yaratıcı, detaylı ve zengin yanıtlar ver. Komut sistemi kapalıdır; kullanıcı komut isterse komutların sadece Zeki modda açıldığını söyle.";
+  let prompt = SYSTEM_PROMPT_BASE;
+  if (mode === 'fast') {
+    prompt += "\nMOD: Firethron (Hızlı). KURALLAR: Son derece hızlı, kısa ve öz yanıtlar ver. Gereksiz açıklamalardan kaçın. Komut sistemi yok.";
+  } else if (mode === 'smart') {
+    prompt += "\nMOD: Hawkweed (Zeki). KURALLAR: Derinlemesine, bağlamsal yanıtlar ver. Eski mesajlarla yeni mesajlar arasında güçlü bağ kur. Kullanıcı /imagine, /video, /music, /analyze, /code, /translate, /summarize, /story, /math veya /roleplay gibi komutlar girerse ilgili alanda dünya çapında bir uzman gibi davran. Sana bir görsel gönderilirse görseli en ince detayına kadar analiz et.";
+    try {
+      const now = new Date();
+      prompt += `\nCANLI VERİ BAĞLANTISI AKTİF: Şu anki tarih ve saat: ${now.toLocaleString('tr-TR')}. Kullanıcı canlı saat, piyasa, altın veya döviz gibi bilgiler isterse elindeki güncel bağlamı kullan.`;
+    } catch (e) {}
+  } else if (mode === 'extra') {
+    prompt += "\nMOD: Nightplox (Extra/Düşünen). KURALLAR: Derinlemesine düşün, adım adım analiz et, çok detaylı ve kapsamlı yanıtlar ver. Karmaşık problemleri çözmek için mantık yürüt. Komut sistemi kapalıdır; kullanıcı komut isterse komutların sadece Zeki modda açıldığını söyle.";
+  }
+  return prompt;
 }
-return prompt;
-}
+
 function updateCommandMenu(mode) {
-commandMenu.innerHTML = '';
-if (mode === 'smart') {
-const cmds = [
-{ cmd: '/imagine ', desc: 'Görsel oluştur', icon: 'fa-image' },
-{ cmd: '/video ', desc: 'Video senaryosu/prompt oluştur', icon: 'fa-video' },
-{ cmd: '/music ', desc: 'Müzik sözü ve beste önerisi', icon: 'fa-music' },
-{ cmd: '/analyze ', desc: 'Dosya/görsel derinlemesine inceleme', icon: 'fa-search' },
-{ cmd: '/code ', desc: 'Gelişmiş kod yazma ve hata ayıklama', icon: 'fa-code' },
-{ cmd: '/translate ', desc: 'Bağlamsal ve profesyonel çeviri', icon: 'fa-language' },
-{ cmd: '/summarize ', desc: 'Uzun metinleri madde madde özetle', icon: 'fa-compress-alt' },
-{ cmd: '/story ', desc: 'Etkileşimli ve dallanan hikaye anlatımı', icon: 'fa-book-open' },
-{ cmd: '/math ', desc: 'Karmaşık matematik ve mantık problemleri', icon: 'fa-calculator' },
-{ cmd: '/roleplay ', desc: 'Belirli bir karakter veya uzman gibi davran', icon: 'fa-mask' }
-];
-cmds.forEach(c => {
-const div = document.createElement('div');
-div.className = 'command-item';
-div.dataset.cmd = c.cmd;
-div.innerHTML = `<i class="fas ${c.icon}"></i><span class="cmd-name">${c.cmd.trim()}</span><span class="cmd-desc">${c.desc}</span>`;
-div.addEventListener('click', () => {
-userInput.value = c.cmd;
-commandMenu.classList.remove('active');
-userInput.focus();
-autoResizeTextarea();
-});
-commandMenu.appendChild(div);
-});
-} else {
-const div = document.createElement('div');
-div.className = 'command-item';
-div.style.color = 'var(--text-muted)';
-div.style.justifyContent = 'center';
-div.innerHTML = `<i class="fas fa-lock"></i><span class="cmd-desc">Komutlar sadece Zeki (Hawkweed) modunda kullanılabilir</span>`;
-commandMenu.appendChild(div);
+  commandMenu.innerHTML = '';
+  if (mode === 'smart') {
+    const cmds = [
+      { cmd: '/imagine ', desc: 'Görsel oluştur', icon: 'fa-image' },
+      { cmd: '/video ', desc: 'Video senaryosu/prompt oluştur', icon: 'fa-video' },
+      { cmd: '/music ', desc: 'Müzik sözü ve beste önerisi', icon: 'fa-music' },
+      { cmd: '/analyze ', desc: 'Dosya/görsel derinlemesine inceleme', icon: 'fa-search' },
+      { cmd: '/code ', desc: 'Gelişmiş kod yazma ve hata ayıklama', icon: 'fa-code' },
+      { cmd: '/translate ', desc: 'Bağlamsal ve profesyonel çeviri', icon: 'fa-language' },
+      { cmd: '/summarize ', desc: 'Uzun metinleri madde madde özetle', icon: 'fa-compress-alt' },
+      { cmd: '/story ', desc: 'Etkileşimli ve dallanan hikaye anlatımı', icon: 'fa-book-open' },
+      { cmd: '/math ', desc: 'Karmaşık matematik ve mantık problemleri', icon: 'fa-calculator' },
+      { cmd: '/roleplay ', desc: 'Belirli bir karakter veya uzman gibi davran', icon: 'fa-mask' }
+    ];
+    cmds.forEach(c => {
+      const div = document.createElement('div');
+      div.className = 'command-item';
+      div.dataset.cmd = c.cmd;
+      div.innerHTML = `<i class="fas ${c.icon}"></i><span class="cmd-name">${c.cmd.trim()}</span><span class="cmd-desc">${c.desc}</span>`;
+      div.addEventListener('click', () => {
+        userInput.value = c.cmd;
+        commandMenu.classList.remove('active');
+        userInput.focus();
+        autoResizeTextarea();
+      });
+      commandMenu.appendChild(div);
+    });
+  } else {
+    const div = document.createElement('div');
+    div.className = 'command-item';
+    div.style.color = 'var(--text-muted)';
+    div.style.justifyContent = 'center';
+    div.innerHTML = `<i class="fas fa-lock"></i><span class="cmd-desc">Komutlar sadece Zeki (Hawkweed) modunda kullanılabilir</span>`;
+    commandMenu.appendChild(div);
+  }
 }
-}
+
 document.querySelectorAll('.mode-btn').forEach(btn => {
-btn.addEventListener('click', () => {
-if (btn.classList.contains('locked')) return;
-document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-btn.classList.add('active');
-state.currentMode = btn.dataset.mode;
-updateCommandMenu(state.currentMode);
+  btn.addEventListener('click', () => {
+    if (btn.classList.contains('locked')) return;
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    state.currentMode = btn.dataset.mode;
+    updateCommandMenu(state.currentMode);
+  });
 });
-});
+
 function createNewChat() {
-const chatId = Date.now().toString();
-state.currentChatId = chatId;
-state.chats.unshift({
-id: chatId,
-title: "Yeni Sohbet",
-mode: state.currentMode || 'fast',
-createdAt: Date.now(),
-messages: [{ role: "system", content: SYSTEM_PROMPT_BASE }]
-});
-renderChatList();
-clearChatUI();
-welcomeScreen.style.display = 'flex';
-document.querySelectorAll('.mode-btn').forEach(b => {
-b.classList.remove('locked');
-b.disabled = false;
-if (b.dataset.mode === (state.currentMode || 'fast')) {
-b.classList.add('active');
-} else {
-b.classList.remove('active');
+  const chatId = Date.now().toString();
+  state.currentChatId = chatId;
+  state.chats.unshift({
+    id: chatId,
+    title: "Yeni Sohbet",
+    mode: state.currentMode || 'fast',
+    createdAt: Date.now(),
+    messages: [{ role: "system", content: SYSTEM_PROMPT_BASE }]
+  });
+  renderChatList();
+  clearChatUI();
+  welcomeScreen.style.display = 'flex';
+  document.querySelectorAll('.mode-btn').forEach(b => {
+    b.classList.remove('locked');
+    b.disabled = false;
+    if (b.dataset.mode === (state.currentMode || 'fast')) {
+      b.classList.add('active');
+    } else {
+      b.classList.remove('active');
+    }
+  });
+  updateCommandMenu(state.currentMode || 'fast');
+  saveChats();
 }
-});
-updateCommandMenu(state.currentMode || 'fast');
-saveChats();
-}
+
 newChatBtn.addEventListener('click', () => {
-createNewChat();
-if (window.innerWidth <= 768) overlay.click();
+  createNewChat();
+  if (window.innerWidth <= 768) overlay.click();
 });
+
 function clearChatUI() {
-Array.from(chatContainer.children).forEach(child => {
-if (child !== welcomeScreen && child !== typingIndicator && child.id !== 'chatFooter') child.remove();
-});
-typingIndicator.classList.remove('active');
+  Array.from(chatContainer.children).forEach(child => {
+    if (child !== welcomeScreen && child !== typingIndicator && child.id !== 'chatFooter') child.remove();
+  });
+  typingIndicator.classList.remove('active');
 }
+
 function renderChatList() {
-chatListEl.innerHTML = '';
-const now = Date.now();
-const day = 24 * 60 * 60 * 1000;
-const groups = { 'Bugün': [], 'Dün': [], 'Son 7 Gün': [], 'Daha Eski': [] };
-state.chats.forEach(chat => {
-const age = now - chat.createdAt;
-if (age < day && new Date(chat.createdAt).toDateString() === new Date().toDateString()) groups['Bugün'].push(chat);
-else if (age < 2 * day) groups['Dün'].push(chat);
-else if (age < 7 * day) groups['Son 7 Gün'].push(chat);
-else groups['Daha Eski'].push(chat);
-});
-Object.entries(groups).forEach(([label, chats]) => {
-if (chats.length === 0) return;
-const labelEl = document.createElement('div');
-labelEl.className = 'chat-group-label';
-labelEl.textContent = label;
-chatListEl.appendChild(labelEl);
-chats.forEach(chat => {
-const div = document.createElement('div');
-div.className = `chat-item ${chat.id === state.currentChatId ? 'active' : ''}`;
-const modeIcon = chat.mode === 'fast' ? 'fa-bolt' : (chat.mode === 'smart' ? 'fa-brain' : 'fa-star');
-div.innerHTML = `<i class="fas ${modeIcon}" style="font-size:0.7rem; opacity:0.7;"></i><span>${chat.title}</span><button class="chat-delete" data-id="${chat.id}" title="Sohbeti Sil"><i class="fas fa-trash"></i></button>`;
-div.querySelector('span').onclick = () => loadChat(chat.id);
-div.querySelector('.chat-delete').onclick = (e) => {
-e.stopPropagation();
-if (confirm(`"${chat.title}" sohbeti silinecek. Emin misiniz?`)) {
-state.chats = state.chats.filter(c => c.id !== chat.id);
-if (state.currentChatId === chat.id) {
-if (state.chats.length > 0) loadChat(state.chats[0].id);
-else createNewChat();
+  chatListEl.innerHTML = '';
+  const now = Date.now();
+  const day = 24 * 60 * 60 * 1000;
+  const groups = { 'Bugün': [], 'Dün': [], 'Son 7 Gün': [], 'Daha Eski': [] };
+  state.chats.forEach(chat => {
+    const age = now - chat.createdAt;
+    if (age < day && new Date(chat.createdAt).toDateString() === new Date().toDateString()) groups['Bugün'].push(chat);
+    else if (age < 2 * day) groups['Dün'].push(chat);
+    else if (age < 7 * day) groups['Son 7 Gün'].push(chat);
+    else groups['Daha Eski'].push(chat);
+  });
+  Object.entries(groups).forEach(([label, chats]) => {
+    if (chats.length === 0) return;
+    const labelEl = document.createElement('div');
+    labelEl.className = 'chat-group-label';
+    labelEl.textContent = label;
+    chatListEl.appendChild(labelEl);
+    chats.forEach(chat => {
+      const div = document.createElement('div');
+      div.className = `chat-item ${chat.id === state.currentChatId ? 'active' : ''}`;
+      const modeIcon = chat.mode === 'fast' ? 'fa-bolt' : (chat.mode === 'smart' ? 'fa-brain' : 'fa-star');
+      div.innerHTML = `<i class="fas ${modeIcon}" style="font-size:0.7rem; opacity:0.7;"></i><span>${chat.title}</span><button class="chat-delete" data-id="${chat.id}" title="Sohbeti Sil"><i class="fas fa-trash"></i></button>`;
+      div.querySelector('span').onclick = () => loadChat(chat.id);
+      div.querySelector('.chat-delete').onclick = (e) => {
+        e.stopPropagation();
+        if (confirm(`"${chat.title}" sohbeti silinecek. Emin misiniz?`)) {
+          state.chats = state.chats.filter(c => c.id !== chat.id);
+          if (state.currentChatId === chat.id) {
+            if (state.chats.length > 0) loadChat(state.chats[0].id);
+            else createNewChat();
+          }
+          renderChatList();
+          saveChats();
+          showToast('Sohbet silindi');
+        }
+      };
+      chatListEl.appendChild(div);
+    });
+  });
 }
-renderChatList();
-saveChats();
-showToast('Sohbet silindi');
-}
-};
-chatListEl.appendChild(div);
-});
-});
-}
+
 function loadChat(chatId) {
-state.currentChatId = chatId;
-const activeChat = state.chats.find(c => c.id === chatId);
-document.querySelectorAll('.mode-btn').forEach(b => {
-b.classList.add('locked');
-b.disabled = true;
-b.classList.remove('active');
-if (b.dataset.mode === activeChat.mode) {
-b.classList.add('active');
+  state.currentChatId = chatId;
+  const activeChat = state.chats.find(c => c.id === chatId);
+  document.querySelectorAll('.mode-btn').forEach(b => {
+    b.classList.add('locked');
+    b.disabled = true;
+    b.classList.remove('active');
+    if (b.dataset.mode === activeChat.mode) {
+      b.classList.add('active');
+    }
+  });
+  updateCommandMenu(activeChat.mode);
+  renderChatList();
+  clearChatUI();
+  welcomeScreen.style.display = 'none';
+  if (!activeChat) return;
+  activeChat.messages.forEach(msg => {
+    if (msg.role !== 'system') appendMessageUI(msg.content, msg.role === 'user' ? 'user' : 'ai', false, msg.attachments);
+  });
+  if (window.innerWidth <= 768) overlay.click();
 }
-});
-updateCommandMenu(activeChat.mode);
-renderChatList();
-clearChatUI();
-welcomeScreen.style.display = 'none';
-if (!activeChat) return;
-activeChat.messages.forEach(msg => {
-if (msg.role !== 'system') appendMessageUI(msg.content, msg.role === 'user' ? 'user' : 'ai', false, msg.attachments);
-});
-if (window.innerWidth <= 768) overlay.click();
-}
+
 async function initApp() {
-const savedSettings = localStorage.getItem('g3_settings');
-if (savedSettings) {
-const settings = JSON.parse(savedSettings);
-state.accentColor = settings.accentColor || '#6366f1';
-state.fontSize = settings.fontSize || 16;
-state.bgAnimation = settings.bgAnimation !== undefined ? settings.bgAnimation : true;
+  const savedSettings = localStorage.getItem('g3_settings');
+  if (savedSettings) {
+    const settings = JSON.parse(savedSettings);
+    state.accentColor = settings.accentColor || '#6366f1';
+    state.fontSize = settings.fontSize || 16;
+    state.bgAnimation = settings.bgAnimation !== undefined ? settings.bgAnimation : true;
+  }
+  const savedToken = localStorage.getItem('g3_github_token');
+  const savedGist = localStorage.getItem('g3_github_gist_id');
+  if (savedToken && $('githubToken')) $('githubToken').value = savedToken;
+  if (savedGist && $('githubGistId')) $('githubGistId').value = savedGist;
+  applyCustomization();
+  await initDB();
+  const savedChats = await loadChats();
+  if (savedChats) {
+    state.chats = savedChats;
+    if (state.chats.length > 0) {
+      state.currentChatId = state.chats[0].id;
+      renderChatList();
+      loadChat(state.currentChatId);
+    } else { createNewChat(); }
+  } else { createNewChat(); }
+  updateChatFooter();
+  setInterval(updateChatFooter, 60000);
 }
-const savedToken = localStorage.getItem('g3_github_token');
-const savedGist = localStorage.getItem('g3_github_gist_id');
-if (savedToken && $('githubToken')) $('githubToken').value = savedToken;
-if (savedGist && $('githubGistId')) $('githubGistId').value = savedGist;
-applyCustomization();
-await initDB();
-const savedChats = await loadChats();
-if (savedChats) {
-state.chats = savedChats;
-if (state.chats.length > 0) {
-state.currentChatId = state.chats[0].id;
-renderChatList();
-loadChat(state.currentChatId);
-} else { createNewChat(); }
-} else { createNewChat(); }
-updateChatFooter();
-setInterval(updateChatFooter, 60000);
-}
+
 initApp();
+
 function appendMessageUI(text, sender, animate = true, attachments = []) {
-welcomeScreen.style.display = 'none';
-const wrapper = document.createElement('div');
-wrapper.className = `message-wrapper ${sender}-wrapper`;
-if (!animate) wrapper.style.animation = 'none';
-const row = document.createElement('div');
-row.className = 'message-row';
-const avatar = document.createElement('div');
-avatar.className = 'message-avatar';
-if (sender === 'user') {
-if (state.user?.avatar && (state.user.avatar.startsWith('http') || state.user.avatar.startsWith('data:'))) {
-avatar.innerHTML = `<img src="${state.user.avatar}" alt="User">`;
-} else {
-avatar.textContent = state.user?.avatar || 'K';
+  welcomeScreen.style.display = 'none';
+  const wrapper = document.createElement('div');
+  wrapper.className = `message-wrapper ${sender}-wrapper`;
+  if (!animate) wrapper.style.animation = 'none';
+  const row = document.createElement('div');
+  row.className = 'message-row';
+  const avatar = document.createElement('div');
+  avatar.className = 'message-avatar';
+  if (sender === 'user') {
+    if (state.user?.avatar && (state.user.avatar.startsWith('http') || state.user.avatar.startsWith('data:'))) {
+      avatar.innerHTML = `<img src="${state.user.avatar}" alt="User">`;
+    } else {
+      avatar.textContent = state.user?.avatar || 'K';
+    }
+  } else {
+    avatar.innerHTML = `<img src="${AI_AVATAR_URL}" alt="G3" onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\\'fas fa-bolt\\' style=\\'color:var(--accent)\\'></i>';">`;
+  }
+  const content = document.createElement('div');
+  content.style.flex = '1';
+  content.style.minWidth = '0';
+  content.style.display = 'flex';
+  content.style.flexDirection = 'column';
+  content.style.alignItems = sender === 'user' ? 'flex-end' : 'flex-start';
+  const msgDiv = document.createElement('div');
+  msgDiv.className = 'message';
+  if (sender === 'ai') msgDiv.innerHTML = renderMarkdown(text);
+  else msgDiv.textContent = text;
+  content.appendChild(msgDiv);
+  if (attachments && attachments.length > 0) {
+    attachments.forEach(att => {
+      const attDiv = document.createElement('div');
+      attDiv.className = 'file-attachment';
+      if (att.type.startsWith('image/')) attDiv.innerHTML = `<img src="${att.data}" alt="${att.name}">`;
+      else attDiv.innerHTML = `<i class="fas fa-file"></i> ${att.name}`;
+      msgDiv.appendChild(attDiv);
+    });
+  }
+  if (sender === 'ai') {
+    const actions = document.createElement('div');
+    actions.className = 'message-actions';
+    actions.innerHTML = `
+      <button class="action-btn" data-action="copy" title="Kopyala"><i class="fas fa-copy"></i></button>
+      <button class="action-btn" data-action="regenerate" title="Yeniden Oluştur"><i class="fas fa-rotate"></i></button>
+      <button class="action-btn" data-action="like" title="Beğen"><i class="fas fa-thumbs-up"></i></button>
+      <button class="action-btn" data-action="dislike" title="Beğenme"><i class="fas fa-thumbs-down"></i></button>
+      <button class="action-btn" data-action="speak" title="Sesli Oku"><i class="fas fa-volume-high"></i></button>
+    `;
+    content.appendChild(actions);
+    actions.querySelectorAll('.action-btn').forEach(btn => {
+      btn.addEventListener('click', () => handleAction(btn, text));
+    });
+  }
+  row.appendChild(avatar);
+  row.appendChild(content);
+  wrapper.appendChild(row);
+  chatContainer.insertBefore(wrapper, typingIndicator);
+  chatContainer.scrollTop = chatContainer.scrollHeight;
 }
-} else {
-avatar.innerHTML = `<img src="${AI_AVATAR_URL}" alt="G3" onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\\'fas fa-bolt\\' style=\\'color:var(--accent)\\'></i>';">`;
-}
-const content = document.createElement('div');
-content.style.flex = '1';
-content.style.minWidth = '0';
-content.style.display = 'flex';
-content.style.flexDirection = 'column';
-content.style.alignItems = sender === 'user' ? 'flex-end' : 'flex-start';
-const msgDiv = document.createElement('div');
-msgDiv.className = 'message';
-if (sender === 'ai') msgDiv.innerHTML = renderMarkdown(text);
-else msgDiv.textContent = text;
-content.appendChild(msgDiv);
-if (attachments && attachments.length > 0) {
-attachments.forEach(att => {
-const attDiv = document.createElement('div');
-attDiv.className = 'file-attachment';
-if (att.type.startsWith('image/')) attDiv.innerHTML = `<img src="${att.data}" alt="${att.name}">`;
-else attDiv.innerHTML = `<i class="fas fa-file"></i> ${att.name}`;
-msgDiv.appendChild(attDiv);
-});
-}
-if (sender === 'ai') {
-const actions = document.createElement('div');
-actions.className = 'message-actions';
-actions.innerHTML = `
-<button class="action-btn" data-action="copy" title="Kopyala"><i class="fas fa-copy"></i></button>
-<button class="action-btn" data-action="regenerate" title="Yeniden Oluştur"><i class="fas fa-rotate"></i></button>
-<button class="action-btn" data-action="like" title="Beğen"><i class="fas fa-thumbs-up"></i></button>
-<button class="action-btn" data-action="dislike" title="Beğenme"><i class="fas fa-thumbs-down"></i></button>
-<button class="action-btn" data-action="speak" title="Sesli Oku"><i class="fas fa-volume-high"></i></button>
-`;
-content.appendChild(actions);
-actions.querySelectorAll('.action-btn').forEach(btn => {
-btn.addEventListener('click', () => handleAction(btn, text));
-});
-}
-row.appendChild(avatar);
-row.appendChild(content);
-wrapper.appendChild(row);
-chatContainer.insertBefore(wrapper, typingIndicator);
-chatContainer.scrollTop = chatContainer.scrollHeight;
-}
+
 function renderMarkdown(text) {
-marked.setOptions({
-breaks: true, gfm: true,
-highlight: function(code, lang) {
-if (lang && hljs.getLanguage(lang)) {
-try { return hljs.highlight(code, { language: lang }).value; } catch (e) {}
+  marked.setOptions({
+    breaks: true, gfm: true,
+    highlight: function(code, lang) {
+      if (lang && hljs.getLanguage(lang)) {
+        try { return hljs.highlight(code, { language: lang }).value; } catch (e) {}
+      }
+      return hljs.highlightAuto(code).value;
+    }
+  });
+  let html = marked.parse(text);
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = html;
+  tempDiv.querySelectorAll('pre').forEach(pre => {
+    const code = pre.querySelector('code');
+    const lang = code?.className?.match(/language-(\w+)/)?.[1] || 'code';
+    const wrapper = document.createElement('div');
+    wrapper.className = 'code-block';
+    const header = document.createElement('div');
+    header.className = 'code-header';
+    header.innerHTML = `<span>${lang}</span><button class="copy-code-btn"><i class="fas fa-copy"></i> Kopyala</button>`;
+    wrapper.appendChild(header);
+    pre.parentNode.insertBefore(wrapper, pre);
+    wrapper.appendChild(pre);
+    header.querySelector('.copy-code-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      navigator.clipboard.writeText(code.textContent);
+      showToast('Kod kopyalandı');
+    });
+  });
+  return tempDiv.innerHTML;
 }
-return hljs.highlightAuto(code).value;
-}
-});
-let html = marked.parse(text);
-const tempDiv = document.createElement('div');
-tempDiv.innerHTML = html;
-tempDiv.querySelectorAll('pre').forEach(pre => {
-const code = pre.querySelector('code');
-const lang = code?.className?.match(/language-(\w+)/)?.[1] || 'code';
-const wrapper = document.createElement('div');
-wrapper.className = 'code-block';
-const header = document.createElement('div');
-header.className = 'code-header';
-header.innerHTML = `<span>${lang}</span><button class="copy-code-btn"><i class="fas fa-copy"></i> Kopyala</button>`;
-wrapper.appendChild(header);
-pre.parentNode.insertBefore(wrapper, pre);
-wrapper.appendChild(pre);
-header.querySelector('.copy-code-btn').addEventListener('click', (e) => {
-e.stopPropagation();
-navigator.clipboard.writeText(code.textContent);
-showToast('Kod kopyalandı');
-});
-});
-return tempDiv.innerHTML;
-}
+
 function handleAction(btn, text) {
-const action = btn.dataset.action;
-switch (action) {
-case 'copy': navigator.clipboard.writeText(text); showToast('Mesaj kopyalandı'); break;
-case 'regenerate': regenerateResponse(); break;
-case 'like':
-btn.classList.toggle('liked');
-btn.parentElement.querySelector('[data-action="dislike"]').classList.remove('disliked');
-break;
-case 'dislike':
-btn.classList.toggle('disliked');
-btn.parentElement.querySelector('[data-action="like"]').classList.remove('liked');
-break;
-case 'speak': toggleSpeech(text, btn); break;
+  const action = btn.dataset.action;
+  switch (action) {
+    case 'copy': navigator.clipboard.writeText(text); showToast('Mesaj kopyalandı'); break;
+    case 'regenerate': regenerateResponse(); break;
+    case 'like':
+      btn.classList.toggle('liked');
+      btn.parentElement.querySelector('[data-action="dislike"]').classList.remove('disliked');
+      break;
+    case 'dislike':
+      btn.classList.toggle('disliked');
+      btn.parentElement.querySelector('[data-action="like"]').classList.remove('liked');
+      break;
+    case 'speak': toggleSpeech(text, btn); break;
+  }
 }
-}
+
 function extractBase64(dataUrl) {
-const parts = dataUrl.split(',');
-return parts.length > 1 ? parts[1] : dataUrl;
+  const parts = dataUrl.split(',');
+  return parts.length > 1 ? parts[1] : dataUrl;
 }
-// ============================================
-// MESAJLARI OPENAI FORMATINA ÇEVİR
-// (Görseller base64 data URL olarak gider -> GÖRSEL İNCELEME çalışır)
-// ============================================
+
 function buildOpenAiMessages(messages, systemPrompt) {
-const out = [{ role: "system", content: systemPrompt }];
-let hasImages = false;
-messages.forEach(m => {
-if (m.role === "system") return;
-if (m.role === "user") {
-const imgs = (m.attachments || []).filter(a => a.type && a.type.startsWith("image/") && a.data);
-if (imgs.length > 0) {
-hasImages = true;
-const content = [];
-const text = (m.content || "").replace(/\[Kullanıcı bir görsel yükledi\]/g, "").trim();
-content.push({ type: "text", text: text || "Lütfen bu görseli detaylı bir şekilde incele ve açıkla." });
-imgs.forEach(a => content.push({ type: "image_url", image_url: { url: a.data } }));
-out.push({ role: "user", content: content });
-} else {
-out.push({ role: "user", content: m.content || "Merhaba" });
+  const out = [{ role: "system", content: systemPrompt }];
+  let hasImages = false;
+  messages.forEach(m => {
+    if (m.role === "system") return;
+    if (m.role === "user") {
+      const imgs = (m.attachments || []).filter(a => a.type && a.type.startsWith("image/") && a.data);
+      if (imgs.length > 0) {
+        hasImages = true;
+        const content = [];
+        const text = (m.content || "").replace(/\[Kullanıcı bir görsel yükledi\]/g, "").trim();
+        content.push({ type: "text", text: text || "Lütfen bu görseli detaylı bir şekilde incele ve açıkla." });
+        imgs.forEach(a => content.push({ type: "image_url", image_url: { url: a.data } }));
+        out.push({ role: "user", content: content });
+      } else {
+        out.push({ role: "user", content: m.content || "Merhaba" });
+      }
+    } else if (m.role === "assistant") {
+      out.push({ role: "assistant", content: m.content });
+    }
+  });
+  return { messages: out, hasImages: hasImages };
 }
-} else if (m.role === "assistant") {
-out.push({ role: "assistant", content: m.content });
-}
-});
-return { messages: out, hasImages: hasImages };
-}
+
 // ============================================
-// 1) POLLINATIONS - ANAHTARSIZ, ANINDA ÇALIŞIR
+// 1) HUGGING FACE - ÖNCELİKLİ, MOD BAZLI
+// ============================================
+async function tryHuggingFace(openAiMessages, hasImages, mode) {
+  const endpoints = [
+    "https://router.huggingface.co/v1/chat/completions",
+    "https://api-inference.huggingface.co/v1/chat/completions"
+  ];
+  
+  let models = [];
+  let maxTokens = 800;
+  let temperature = 0.7;
+  
+  if (hasImages) {
+    models = HF_MODELS_VISION;
+    maxTokens = 1000;
+  } else if (mode === 'fast') {
+    models = HF_MODELS_FAST;
+    maxTokens = 500;
+    temperature = 0.8;
+  } else if (mode === 'extra') {
+    models = HF_MODELS_THINKING;
+    maxTokens = 2000;
+    temperature = 0.6;
+  } else {
+    models = [...HF_MODELS_FAST, ...HF_MODELS_THINKING.slice(0, 1)];
+    maxTokens = 1000;
+    temperature = 0.7;
+  }
+  
+  let lastError = null;
+  for (const endpoint of endpoints) {
+    for (const model of models) {
+      try {
+        const response = await fetch(endpoint, {
+          method: "POST",
+          headers: { "Authorization": "Bearer " + HF_API_KEY, "Content-Type": "application/json" },
+          body: JSON.stringify({ 
+            model: model, 
+            messages: openAiMessages, 
+            temperature: temperature, 
+            max_tokens: maxTokens 
+          })
+        });
+        if (response.ok) {
+          const data = await response.json();
+          const reply = (data.choices?.[0]?.message?.content || "").trim();
+          if (reply) return reply;
+        }
+        lastError = new Error("HF HTTP " + response.status);
+      } catch (e) { lastError = e; }
+    }
+  }
+  throw lastError || new Error("HF başarısız");
+}
+
+// ============================================
+// 2) POLLINATIONS - YEDEK
 // ============================================
 async function tryPollinations(openAiMessages) {
-try {
-const r = await fetch("https://text.pollinations.ai/openai", {
-method: "POST",
-headers: { "Content-Type": "application/json" },
-body: JSON.stringify({ model: "openai", messages: openAiMessages, temperature: 0.6, max_tokens: 800 })
-});
-if (r.ok) {
-const d = await r.json();
-const reply = (d.choices?.[0]?.message?.content || "").trim();
-if (reply) return reply;
+  try {
+    const r = await fetch("https://text.pollinations.ai/openai", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ model: "openai", messages: openAiMessages, temperature: 0.6, max_tokens: 800 })
+    });
+    if (r.ok) {
+      const d = await r.json();
+      const reply = (d.choices?.[0]?.message?.content || "").trim();
+      if (reply) return reply;
+    }
+  } catch (e) {}
+  const r2 = await fetch("https://text.pollinations.ai/", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ messages: openAiMessages, model: "openai" })
+  });
+  if (!r2.ok) throw new Error("Pollinations HTTP " + r2.status);
+  const reply = (await r2.text()).trim();
+  if (!reply) throw new Error("Pollinations boş yanıt");
+  return reply;
 }
-} catch (e) {}
-const r2 = await fetch("https://text.pollinations.ai/", {
-method: "POST",
-headers: { "Content-Type": "application/json" },
-body: JSON.stringify({ messages: openAiMessages, model: "openai" })
-});
-if (!r2.ok) throw new Error("Pollinations HTTP " + r2.status);
-const reply = (await r2.text()).trim();
-if (!reply) throw new Error("Pollinations boş yanıt");
-return reply;
-}
+
 // ============================================
-// 2) GEMINI - ESKİ AQ ANAHTARIN
+// 3) GEMINI - SON ÇARE
 // ============================================
 async function tryGemini(messages, systemPrompt) {
-const contents = [];
-messages.forEach(m => {
-if (m.role === 'system') return;
-if (m.role === 'user') {
-const parts = [];
-if (m.content && m.content.trim()) parts.push({ text: m.content });
-if (m.attachments && m.attachments.length > 0) {
-m.attachments.forEach(att => {
-if (att.type && att.type.startsWith('image/') && att.data) {
-parts.push({ inlineData: { mimeType: att.type, data: extractBase64(att.data) } });
+  const contents = [];
+  messages.forEach(m => {
+    if (m.role === 'system') return;
+    if (m.role === 'user') {
+      const parts = [];
+      if (m.content && m.content.trim()) parts.push({ text: m.content });
+      if (m.attachments && m.attachments.length > 0) {
+        m.attachments.forEach(att => {
+          if (att.type && att.type.startsWith('image/') && att.data) {
+            parts.push({ inlineData: { mimeType: att.type, data: extractBase64(att.data) } });
+          }
+        });
+      }
+      if (parts.length === 0) parts.push({ text: 'Merhaba' });
+      contents.push({ role: 'user', parts });
+    } else if (m.role === 'assistant') {
+      contents.push({ role: 'model', parts: [{ text: m.content }] });
+    }
+  });
+  const body = {
+    contents: contents,
+    systemInstruction: { parts: [{ text: systemPrompt }] },
+    generationConfig: { temperature: 0.6, maxOutputTokens: 800 }
+  };
+  let lastError = null;
+  for (const model of GEMINI_MODELS) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': GEMINI_API_KEY },
+      body: JSON.stringify(body)
+    });
+    if (response.ok) {
+      const data = await response.json();
+      const reply = (data.candidates?.[0]?.content?.parts || []).map(p => p.text || '').join('').trim();
+      if (reply) return reply;
+    }
+    lastError = new Error("Gemini HTTP " + response.status);
+  }
+  throw lastError || new Error('Gemini başarısız');
 }
-});
-}
-if (parts.length === 0) parts.push({ text: 'Merhaba' });
-contents.push({ role: 'user', parts });
-} else if (m.role === 'assistant') {
-contents.push({ role: 'model', parts: [{ text: m.content }] });
-}
-});
-const body = {
-contents: contents,
-systemInstruction: { parts: [{ text: systemPrompt }] },
-generationConfig: { temperature: 0.6, maxOutputTokens: 800 }
-};
-let lastError = null;
-for (const model of GEMINI_MODELS) {
-const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
-const response = await fetch(url, {
-method: 'POST',
-headers: { 'Content-Type': 'application/json', 'x-goog-api-key': GEMINI_API_KEY },
-body: JSON.stringify(body)
-});
-if (response.ok) {
-const data = await response.json();
-const reply = (data.candidates?.[0]?.content?.parts || []).map(p => p.text || '').join('').trim();
-if (reply) return reply;
-}
-lastError = new Error("Gemini HTTP " + response.status);
-}
-throw lastError || new Error('Gemini başarısız');
-}
+
 // ============================================
-// 3) HUGGING FACE - hf_ ANAHTARIN (hızlı dene, takılma)
+// ANA ÇAĞRI: HF öncelikli, sonra Pollinations, sonra Gemini
 // ============================================
-async function tryHuggingFace(openAiMessages, hasImages) {
-const endpoints = [
-"https://router.huggingface.co/v1/chat/completions",
-"https://api-inference.huggingface.co/v1/chat/completions"
-];
-let lastError = null;
-for (const endpoint of endpoints) {
-for (const model of HF_MODELS) {
-if (hasImages && !model.vision) continue;
-try {
-const response = await fetch(endpoint, {
-method: "POST",
-headers: { "Authorization": "Bearer " + HF_API_KEY, "Content-Type": "application/json" },
-body: JSON.stringify({ model: model.id, messages: openAiMessages, temperature: 0.6, max_tokens: 800 })
-});
-if (response.ok) {
-const data = await response.json();
-const reply = (data.choices?.[0]?.message?.content || "").trim();
-if (reply) return reply;
+async function callAI(messages, systemPrompt, mode) {
+  const built = buildOpenAiMessages(messages, systemPrompt);
+  
+  try {
+    return await tryHuggingFace(built.messages, built.hasImages, mode);
+  } catch (e1) {
+    console.warn('Hugging Face başarısız, Pollinations deneniyor:', e1.message);
+  }
+  
+  try {
+    return await tryPollinations(built.messages);
+  } catch (e2) {
+    console.warn('Pollinations başarısız, Gemini deneniyor:', e2.message);
+  }
+  
+  try {
+    return await tryGemini(messages, systemPrompt);
+  } catch (e3) {
+    console.warn('Gemini başarısız:', e3.message);
+  }
+  
+  throw new Error('Tüm API sağlayıcılarına ulaşılamadı. İnternet bağlantını kontrol et.');
 }
-lastError = new Error("HF HTTP " + response.status);
-} catch (e) { lastError = e; }
-}
-}
-throw lastError || new Error("HF başarısız");
-}
-// ============================================
-// ANA ÇAĞRI: Sırayla dene, ilk çalışan kazanır
-// ============================================
-async function callAI(messages, systemPrompt) {
-const built = buildOpenAiMessages(messages, systemPrompt);
-try {
-return await tryPollinations(built.messages);
-} catch (e1) {
-console.warn('Pollinations başarısız, Gemini deneniyor:', e1.message);
-}
-try {
-return await tryGemini(messages, systemPrompt);
-} catch (e2) {
-console.warn('Gemini başarısız, Hugging Face deneniyor:', e2.message);
-}
-try {
-return await tryHuggingFace(built.messages, built.hasImages);
-} catch (e3) {
-console.warn('HF başarısız:', e3.message);
-}
-throw new Error('Tüm API sağlayıcılarına ulaşılamadı. İnternet bağlantını kontrol et.');
-}
+
 async function regenerateResponse() {
-const activeChat = state.chats.find(c => c.id === state.currentChatId);
-if (!activeChat) return;
-const lastAiIndex = activeChat.messages.map(m => m.role).lastIndexOf('assistant');
-if (lastAiIndex !== -1) {
-activeChat.messages.splice(lastAiIndex, 1);
-const aiMessages = chatContainer.querySelectorAll('.ai-wrapper');
-if (aiMessages.length > 0) aiMessages[aiMessages.length - 1].remove();
-typingIndicator.classList.add('active');
-chatContainer.scrollTop = chatContainer.scrollHeight;
-try {
-const reply = await callAI(activeChat.messages, getSystemPromptForMode(activeChat.mode));
-typingIndicator.classList.remove('active');
-appendMessageUI(reply, 'ai');
-activeChat.messages.push({ role: 'assistant', content: reply });
-saveChats();
-} catch (error) {
-typingIndicator.classList.remove('active');
-appendMessageUI(`Yeniden oluşturma hatası: ${error.message}`, 'ai');
+  const activeChat = state.chats.find(c => c.id === state.currentChatId);
+  if (!activeChat) return;
+  const lastAiIndex = activeChat.messages.map(m => m.role).lastIndexOf('assistant');
+  if (lastAiIndex !== -1) {
+    activeChat.messages.splice(lastAiIndex, 1);
+    const aiMessages = chatContainer.querySelectorAll('.ai-wrapper');
+    if (aiMessages.length > 0) aiMessages[aiMessages.length - 1].remove();
+    typingIndicator.classList.add('active');
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+    try {
+      const reply = await callAI(activeChat.messages, getSystemPromptForMode(activeChat.mode), activeChat.mode);
+      typingIndicator.classList.remove('active');
+      appendMessageUI(reply, 'ai');
+      activeChat.messages.push({ role: 'assistant', content: reply });
+      saveChats();
+    } catch (error) {
+      typingIndicator.classList.remove('active');
+      appendMessageUI(`Yeniden oluşturma hatası: ${error.message}`, 'ai');
+    }
+  }
 }
-}
-}
+
 let currentUtterance = null;
 function toggleSpeech(text, btn) {
-if (!('speechSynthesis' in window)) { showToast('Tarayıcınız sesli okumayı desteklemiyor', true); return; }
-if (speechSynthesis.speaking) { speechSynthesis.cancel(); btn.classList.remove('active'); return; }
-const tempDiv = document.createElement('div');
-tempDiv.innerHTML = text;
-const plainText = tempDiv.textContent || tempDiv.innerText || '';
-currentUtterance = new SpeechSynthesisUtterance(plainText);
-currentUtterance.lang = 'tr-TR';
-currentUtterance.onend = () => btn.classList.remove('active');
-currentUtterance.onerror = () => btn.classList.remove('active');
-speechSynthesis.speak(currentUtterance);
-btn.classList.add('active');
+  if (!('speechSynthesis' in window)) { showToast('Tarayıcınız sesli okumayı desteklemiyor', true); return; }
+  if (speechSynthesis.speaking) { speechSynthesis.cancel(); btn.classList.remove('active'); return; }
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = text;
+  const plainText = tempDiv.textContent || tempDiv.innerText || '';
+  currentUtterance = new SpeechSynthesisUtterance(plainText);
+  currentUtterance.lang = 'tr-TR';
+  currentUtterance.onend = () => btn.classList.remove('active');
+  currentUtterance.onerror = () => btn.classList.remove('active');
+  speechSynthesis.speak(currentUtterance);
+  btn.classList.add('active');
 }
+
 attachBtn.addEventListener('click', () => fileInput.click());
+
 fileInput.addEventListener('change', (e) => {
-const files = Array.from(e.target.files);
-files.forEach(file => {
-if (file.size > 10 * 1024 * 1024) { showToast('Dosya 10MB\'dan küçük olmalı', true); return; }
-const reader = new FileReader();
-reader.onload = (event) => {
-state.attachments.push({ name: file.name, type: file.type, data: event.target.result });
-renderAttachments();
-};
-reader.readAsDataURL(file);
+  const files = Array.from(e.target.files);
+  files.forEach(file => {
+    if (file.size > 10 * 1024 * 1024) { showToast('Dosya 10MB\'dan küçük olmalı', true); return; }
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      state.attachments.push({ name: file.name, type: file.type, data: event.target.result });
+      renderAttachments();
+    };
+    reader.readAsDataURL(file);
+  });
+  fileInput.value = '';
 });
-fileInput.value = '';
-});
+
 function renderAttachments() {
-if (state.attachments.length === 0) { attachmentPreview.classList.remove('active'); attachmentPreview.innerHTML = ''; return; }
-attachmentPreview.classList.add('active');
-attachmentPreview.innerHTML = '';
-state.attachments.forEach((att, index) => {
-const chip = document.createElement('div');
-chip.className = 'attachment-chip';
-if (att.type.startsWith('image/')) chip.innerHTML = `<img src="${att.data}" alt="${att.name}"><span>${att.name.substring(0, 15)}${att.name.length > 15 ? '...' : ''}</span>`;
-else chip.innerHTML = `<i class="fas fa-file"></i><span>${att.name.substring(0, 20)}${att.name.length > 20 ? '...' : ''}</span>`;
-const removeBtn = document.createElement('button');
-removeBtn.className = 'attachment-remove';
-removeBtn.innerHTML = '<i class="fas fa-times"></i>';
-removeBtn.onclick = () => { state.attachments.splice(index, 1); renderAttachments(); };
-chip.appendChild(removeBtn);
-attachmentPreview.appendChild(chip);
-});
+  if (state.attachments.length === 0) { attachmentPreview.classList.remove('active'); attachmentPreview.innerHTML = ''; return; }
+  attachmentPreview.classList.add('active');
+  attachmentPreview.innerHTML = '';
+  state.attachments.forEach((att, index) => {
+    const chip = document.createElement('div');
+    chip.className = 'attachment-chip';
+    if (att.type.startsWith('image/')) chip.innerHTML = `<img src="${att.data}" alt="${att.name}"><span>${att.name.substring(0, 15)}${att.name.length > 15 ? '...' : ''}</span>`;
+    else chip.innerHTML = `<i class="fas fa-file"></i><span>${att.name.substring(0, 20)}${att.name.length > 20 ? '...' : ''}</span>`;
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'attachment-remove';
+    removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+    removeBtn.onclick = () => { state.attachments.splice(index, 1); renderAttachments(); };
+    chip.appendChild(removeBtn);
+    attachmentPreview.appendChild(chip);
+  });
 }
+
 let recognition = null;
 if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-recognition = new SpeechRecognition();
-recognition.lang = 'tr-TR';
-recognition.continuous = false;
-recognition.interimResults = true;
-recognition.onresult = (event) => {
-userInput.value = Array.from(event.results).map(result => result[0].transcript).join('');
-autoResizeTextarea();
-};
-recognition.onend = () => { state.isRecording = false; micBtn.classList.remove('recording'); };
-recognition.onerror = () => { state.isRecording = false; micBtn.classList.remove('recording'); showToast('Ses tanıma hatası', true); };
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SpeechRecognition();
+  recognition.lang = 'tr-TR';
+  recognition.continuous = false;
+  recognition.interimResults = true;
+  recognition.onresult = (event) => {
+    userInput.value = Array.from(event.results).map(result => result[0].transcript).join('');
+    autoResizeTextarea();
+  };
+  recognition.onend = () => { state.isRecording = false; micBtn.classList.remove('recording'); };
+  recognition.onerror = () => { state.isRecording = false; micBtn.classList.remove('recording'); showToast('Ses tanıma hatası', true); };
 }
+
 micBtn.addEventListener('click', () => {
-if (!recognition) { showToast('Tarayıcınız sesli girişi desteklemiyor', true); return; }
-if (state.isRecording) recognition.stop();
-else {
-try {
-recognition.start();
-state.isRecording = true;
-micBtn.classList.add('recording');
-showToast('Dinleniyor...');
-} catch (e) { showToast('Mikrofon başlatılamadı', true); }
-}
+  if (!recognition) { showToast('Tarayıcınız sesli girişi desteklemiyor', true); return; }
+  if (state.isRecording) recognition.stop();
+  else {
+    try {
+      recognition.start();
+      state.isRecording = true;
+      micBtn.classList.add('recording');
+      showToast('Dinleniyor...');
+    } catch (e) { showToast('Mikrofon başlatılamadı', true); }
+  }
 });
+
 userInput.addEventListener('input', (e) => {
-const val = e.target.value;
-const activeChat = state.chats.find(c => c.id === state.currentChatId);
-if (!activeChat || activeChat.mode !== 'smart') {
-commandMenu.classList.remove('active');
-autoResizeTextarea();
-return;
-}
-const lastSlashIndex = val.lastIndexOf('/');
-if (lastSlashIndex !== -1 && (lastSlashIndex === val.length - 1 || !val.slice(lastSlashIndex).includes(' '))) {
-const query = val.slice(lastSlashIndex + 1).toLowerCase();
-const items = commandMenu.querySelectorAll('.command-item');
-let hasVisible = false;
-items.forEach(item => {
-const cmd = (item.dataset.cmd || '').replace('/', '').toLowerCase();
-if (cmd && cmd.includes(query)) {
-item.style.display = 'flex';
-hasVisible = true;
-} else if (item.dataset.cmd) {
-item.style.display = 'none';
-}
+  const val = e.target.value;
+  const activeChat = state.chats.find(c => c.id === state.currentChatId);
+  if (!activeChat || activeChat.mode !== 'smart') {
+    commandMenu.classList.remove('active');
+    autoResizeTextarea();
+    return;
+  }
+  const lastSlashIndex = val.lastIndexOf('/');
+  if (lastSlashIndex !== -1 && (lastSlashIndex === val.length - 1 || !val.slice(lastSlashIndex).includes(' '))) {
+    const query = val.slice(lastSlashIndex + 1).toLowerCase();
+    const items = commandMenu.querySelectorAll('.command-item');
+    let hasVisible = false;
+    items.forEach(item => {
+      const cmd = (item.dataset.cmd || '').replace('/', '').toLowerCase();
+      if (cmd && cmd.includes(query)) {
+        item.style.display = 'flex';
+        hasVisible = true;
+      } else if (item.dataset.cmd) {
+        item.style.display = 'none';
+      }
+    });
+    if (hasVisible) commandMenu.classList.add('active');
+    else commandMenu.classList.remove('active');
+  } else {
+    commandMenu.classList.remove('active');
+  }
+  autoResizeTextarea();
 });
-if (hasVisible) commandMenu.classList.add('active');
-else commandMenu.classList.remove('active');
-} else {
-commandMenu.classList.remove('active');
-}
-autoResizeTextarea();
-});
+
 userInput.addEventListener('blur', () => {
-setTimeout(() => commandMenu.classList.remove('active'), 150);
+  setTimeout(() => commandMenu.classList.remove('active'), 150);
 });
+
 async function generateImage(prompt) {
-return new Promise((resolve) => {
-const seed = Math.floor(Math.random() * 999999);
-const enhancedPrompt = encodeURIComponent(prompt + ", masterpiece, best quality, highly detailed, 8k resolution, cinematic lighting, professional photography, stunning visuals");
-const imageUrl = `https://image.pollinations.ai/prompt/${enhancedPrompt}?width=1024&height=1024&nologo=true&seed=${seed}&model=flux`;
-const img = new Image();
-img.crossOrigin = "anonymous";
-let isResolved = false;
-img.onload = () => {
-if (!isResolved) {
-isResolved = true;
-resolve(imageUrl);
+  return new Promise((resolve) => {
+    const seed = Math.floor(Math.random() * 999999);
+    const enhancedPrompt = encodeURIComponent(prompt + ", masterpiece, best quality, highly detailed, 8k resolution, cinematic lighting, professional photography, stunning visuals");
+    const imageUrl = `https://image.pollinations.ai/prompt/${enhancedPrompt}?width=1024&height=1024&nologo=true&seed=${seed}&model=flux`;
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    let isResolved = false;
+    img.onload = () => {
+      if (!isResolved) {
+        isResolved = true;
+        resolve(imageUrl);
+      }
+    };
+    img.onerror = () => {
+      if (!isResolved) {
+        isResolved = true;
+        const fallbackUrl = `https://image.pollinations.ai/prompt/${enhancedPrompt}?width=1024&height=1024&nologo=true&seed=${seed}`;
+        resolve(fallbackUrl);
+      }
+    };
+    img.src = imageUrl;
+    setTimeout(() => {
+      if (!isResolved) {
+        isResolved = true;
+        resolve(`https://image.pollinations.ai/prompt/${encodeURIComponent("abstract beautiful high quality art, 8k, masterpiece")}?width=1024&height=1024&nologo=true&seed=${seed}`);
+      }
+    }, 60000);
+  });
 }
-};
-img.onerror = () => {
-if (!isResolved) {
-isResolved = true;
-const fallbackUrl = `https://image.pollinations.ai/prompt/${enhancedPrompt}?width=1024&height=1024&nologo=true&seed=${seed}`;
-resolve(fallbackUrl);
-}
-};
-img.src = imageUrl;
-setTimeout(() => {
-if (!isResolved) {
-isResolved = true;
-resolve(`https://image.pollinations.ai/prompt/${encodeURIComponent("abstract beautiful high quality art, 8k, masterpiece")}?width=1024&height=1024&nologo=true&seed=${seed}`);
-}
-}, 60000);
-});
-}
+
 async function handleSmartCommand(text, activeChat) {
-if (text.startsWith('/imagine')) {
-const prompt = text.replace(/^\/imagine\s*/, '').trim();
-if (!prompt) {
-appendMessageUI("Lütfen /imagine komutundan sonra bir görsel açıklaması yazın.", 'ai');
-userInput.value = '';
-autoResizeTextarea();
-return true;
+  if (text.startsWith('/imagine')) {
+    const prompt = text.replace(/^\/imagine\s*/, '').trim();
+    if (!prompt) {
+      appendMessageUI("Lütfen /imagine komutundan sonra bir görsel açıklaması yazın.", 'ai');
+      userInput.value = '';
+      autoResizeTextarea();
+      return true;
+    }
+    if (activeChat.messages.length === 1 && text) {
+      activeChat.title = "Görsel: " + prompt.substring(0, 20) + "...";
+      renderChatList();
+    }
+    appendMessageUI(text, 'user');
+    activeChat.messages.push({ role: "user", content: text });
+    const loadingId = 'img-loading-' + Date.now();
+    const loadingWrapper = document.createElement('div');
+    loadingWrapper.className = 'message-wrapper ai-wrapper';
+    loadingWrapper.id = loadingId;
+    loadingWrapper.innerHTML = `
+      <div class="message-row">
+        <div class="message-avatar"><i class="fas fa-bolt" style="color:var(--accent)"></i></div>
+        <div class="message">
+          <div class="typing-dots" style="margin-bottom: 8px;">
+            <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+          </div>
+          Görsel oluşturuluyor...
+        </div>
+      </div>
+    `;
+    chatContainer.insertBefore(loadingWrapper, typingIndicator);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+    try {
+      const imageUrl = await generateImage(prompt);
+      const loader = document.getElementById(loadingId);
+      if (loader) {
+        loader.innerHTML = `
+          <div class="message-row">
+            <div class="message-avatar"><i class="fas fa-bolt" style="color:var(--accent)"></i></div>
+            <div class="message" style="display:flex; flex-direction:column; gap:10px;">
+              <div>İşte görseliniz: <strong>${prompt}</strong></div>
+              <img src="${imageUrl}" alt="${prompt}" style="max-width:100%; border-radius:8px; cursor:pointer; box-shadow: var(--shadow-md);" onclick="window.open(this.src, '_blank')">
+              <div class="message-actions" style="opacity:1; margin-top:4px;">
+                <button class="action-btn" onclick="navigator.clipboard.writeText('${imageUrl}'); showToast('Görsel bağlantısı kopyalandı')" title="Bağlantıyı Kopyala"><i class="fas fa-link"></i></button>
+                <a href="${imageUrl}" download="g3-image.png" class="action-btn" title="İndir" style="text-decoration:none;"><i class="fas fa-download"></i></a>
+                <a href="${imageUrl}" target="_blank" class="action-btn" title="Yeni Sekmede Aç" style="text-decoration:none;"><i class="fas fa-external-link-alt"></i></a>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+      activeChat.messages.push({ role: "assistant", content: `![Görsel](${imageUrl})\n_Oluşturulan görsel: ${prompt}_` });
+      await saveChats();
+    } catch (error) {
+      console.error('Görsel oluşturma hatası:', error);
+      const loader = document.getElementById(loadingId);
+      if (loader) {
+        loader.innerHTML = `<div class="message-row"><div class="message-avatar"><i class="fas fa-bolt" style="color:var(--accent)"></i></div><div class="message">Görsel oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.</div></div>`;
+      }
+    } finally {
+      userInput.disabled = false;
+      sendBtn.disabled = false;
+      userInput.value = '';
+      autoResizeTextarea();
+      userInput.focus();
+      incrementConversationCount();
+      updateChatFooter();
+    }
+    return true;
+  }
+  return false;
 }
-if (activeChat.messages.length === 1 && text) {
-activeChat.title = "Görsel: " + prompt.substring(0, 20) + "...";
-renderChatList();
-}
-appendMessageUI(text, 'user');
-activeChat.messages.push({ role: "user", content: text });
-const loadingId = 'img-loading-' + Date.now();
-const loadingWrapper = document.createElement('div');
-loadingWrapper.className = 'message-wrapper ai-wrapper';
-loadingWrapper.id = loadingId;
-loadingWrapper.innerHTML = `
-<div class="message-row">
-<div class="message-avatar"><i class="fas fa-bolt" style="color:var(--accent)"></i></div>
-<div class="message">
-<div class="typing-dots" style="margin-bottom: 8px;">
-<div class="dot"></div><div class="dot"></div><div class="dot"></div>
-</div>
-Görsel oluşturuluyor...
-</div>
-</div>
-`;
-chatContainer.insertBefore(loadingWrapper, typingIndicator);
-chatContainer.scrollTop = chatContainer.scrollHeight;
-try {
-const imageUrl = await generateImage(prompt);
-const loader = document.getElementById(loadingId);
-if (loader) {
-loader.innerHTML = `
-<div class="message-row">
-<div class="message-avatar"><i class="fas fa-bolt" style="color:var(--accent)"></i></div>
-<div class="message" style="display:flex; flex-direction:column; gap:10px;">
-<div>İşte görseliniz: <strong>${prompt}</strong></div>
-<img src="${imageUrl}" alt="${prompt}" style="max-width:100%; border-radius:8px; cursor:pointer; box-shadow: var(--shadow-md);" onclick="window.open(this.src, '_blank')">
-<div class="message-actions" style="opacity:1; margin-top:4px;">
-<button class="action-btn" onclick="navigator.clipboard.writeText('${imageUrl}'); showToast('Görsel bağlantısı kopyalandı')" title="Bağlantıyı Kopyala"><i class="fas fa-link"></i></button>
-<a href="${imageUrl}" download="g3-image.png" class="action-btn" title="İndir" style="text-decoration:none;"><i class="fas fa-download"></i></a>
-<a href="${imageUrl}" target="_blank" class="action-btn" title="Yeni Sekmede Aç" style="text-decoration:none;"><i class="fas fa-external-link-alt"></i></a>
-</div>
-</div>
-</div>
-`;
-}
-activeChat.messages.push({ role: "assistant", content: `![Görsel](${imageUrl})\n_Oluşturulan görsel: ${prompt}_` });
-await saveChats();
-} catch (error) {
-console.error('Görsel oluşturma hatası:', error);
-const loader = document.getElementById(loadingId);
-if (loader) {
-loader.innerHTML = `<div class="message-row"><div class="message-avatar"><i class="fas fa-bolt" style="color:var(--accent)"></i></div><div class="message">Görsel oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.</div></div>`;
-}
-} finally {
-userInput.disabled = false;
-sendBtn.disabled = false;
-userInput.value = '';
-autoResizeTextarea();
-userInput.focus();
-incrementConversationCount();
-updateChatFooter();
-}
-return true;
-}
-return false;
-}
+
 async function sendMessage() {
-const text = userInput.value.trim();
-if (!text && state.attachments.length === 0) return;
-const activeChat = state.chats.find(c => c.id === state.currentChatId);
-if (!activeChat) return;
-if (!checkLimit(activeChat.mode)) {
-return;
+  const text = userInput.value.trim();
+  if (!text && state.attachments.length === 0) return;
+  const activeChat = state.chats.find(c => c.id === state.currentChatId);
+  if (!activeChat) return;
+  if (!checkLimit(activeChat.mode)) {
+    return;
+  }
+  const isCommand = text.startsWith('/');
+  if (isCommand && activeChat.mode !== 'smart') {
+    appendMessageUI("Komutlar sadece Zeki (Hawkweed) modunda kullanılabilir. Lütfen yeni bir sohbet başlatıp Zeki modunu seçin.", 'ai');
+    userInput.value = '';
+    autoResizeTextarea();
+    return;
+  }
+  if (activeChat.mode === 'smart' && isCommand) {
+    const handled = await handleSmartCommand(text, activeChat);
+    if (handled) return;
+  }
+  if (activeChat.messages.length === 1 && text) {
+    activeChat.title = text.substring(0, 30) + (text.length > 30 ? "..." : "");
+    renderChatList();
+  }
+  const currentAttachments = [...state.attachments];
+  userInput.value = '';
+  autoResizeTextarea();
+  userInput.disabled = true;
+  sendBtn.disabled = true;
+  state.attachments = [];
+  renderAttachments();
+  appendMessageUI(text || '[Dosya yüklendi]', 'user', true, currentAttachments);
+  let messageContent = text;
+  if (currentAttachments.some(a => a.type.startsWith('image/'))) messageContent += '\n[Kullanıcı bir görsel yükledi]';
+  else if (currentAttachments.length > 0) messageContent += `\n[Yüklenen dosyalar: ${currentAttachments.map(a => a.name).join(', ')}]`;
+  activeChat.messages.push({ role: "user", content: messageContent, attachments: currentAttachments });
+  incrementConversationCount();
+  updateChatFooter();
+  await saveChats();
+  typingIndicator.classList.add('active');
+  chatContainer.scrollTop = chatContainer.scrollHeight;
+  try {
+    const reply = await callAI(activeChat.messages, getSystemPromptForMode(activeChat.mode), activeChat.mode);
+    typingIndicator.classList.remove('active');
+    appendMessageUI(reply, 'ai');
+    activeChat.messages.push({ role: 'assistant', content: reply });
+    await saveChats();
+  } catch (error) {
+    console.error('Mesaj gönderme hatası:', error);
+    typingIndicator.classList.remove('active');
+    let userFriendlyMessage = 'Bir sorun oluştu: ';
+    if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+      userFriendlyMessage = 'Ağ bağlantısı hatası. İnternetini kontrol et.';
+    } else {
+      userFriendlyMessage = error.message;
+    }
+    appendMessageUI(userFriendlyMessage, 'ai');
+  } finally {
+    userInput.disabled = false;
+    sendBtn.disabled = false;
+    userInput.focus();
+  }
 }
-const isCommand = text.startsWith('/');
-if (isCommand && activeChat.mode !== 'smart') {
-appendMessageUI("Komutlar sadece Zeki (Hawkweed) modunda kullanılabilir. Lütfen yeni bir sohbet başlatıp Zeki modunu seçin.", 'ai');
-userInput.value = '';
-autoResizeTextarea();
-return;
-}
-if (activeChat.mode === 'smart' && isCommand) {
-const handled = await handleSmartCommand(text, activeChat);
-if (handled) return;
-}
-if (activeChat.messages.length === 1 && text) {
-activeChat.title = text.substring(0, 30) + (text.length > 30 ? "..." : "");
-renderChatList();
-}
-const currentAttachments = [...state.attachments];
-userInput.value = '';
-autoResizeTextarea();
-userInput.disabled = true;
-sendBtn.disabled = true;
-state.attachments = [];
-renderAttachments();
-appendMessageUI(text || '[Dosya yüklendi]', 'user', true, currentAttachments);
-let messageContent = text;
-if (currentAttachments.some(a => a.type.startsWith('image/'))) messageContent += '\n[Kullanıcı bir görsel yükledi]';
-else if (currentAttachments.length > 0) messageContent += `\n[Yüklenen dosyalar: ${currentAttachments.map(a => a.name).join(', ')}]`;
-activeChat.messages.push({ role: "user", content: messageContent, attachments: currentAttachments });
-incrementConversationCount();
-updateChatFooter();
-await saveChats();
-typingIndicator.classList.add('active');
-chatContainer.scrollTop = chatContainer.scrollHeight;
-try {
-const reply = await callAI(activeChat.messages, getSystemPromptForMode(activeChat.mode));
-typingIndicator.classList.remove('active');
-appendMessageUI(reply, 'ai');
-activeChat.messages.push({ role: 'assistant', content: reply });
-await saveChats();
-} catch (error) {
-console.error('Mesaj gönderme hatası:', error);
-typingIndicator.classList.remove('active');
-let userFriendlyMessage = 'Bir sorun oluştu: ';
-if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-userFriendlyMessage = 'Ağ bağlantısı hatası. İnternetini kontrol et.';
-} else {
-userFriendlyMessage = error.message;
-}
-appendMessageUI(userFriendlyMessage, 'ai');
-} finally {
-userInput.disabled = false;
-sendBtn.disabled = false;
-userInput.focus();
-}
-}
+
 sendBtn.addEventListener('click', sendMessage);
 userInput.addEventListener('keydown', (e) => {
-if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
 });
+
 function autoResizeTextarea() {
-userInput.style.height = 'auto';
-userInput.style.height = Math.min(userInput.scrollHeight, 120) + 'px';
+  userInput.style.height = 'auto';
+  userInput.style.height = Math.min(userInput.scrollHeight, 120) + 'px';
 }
+
 userInput.addEventListener('input', autoResizeTextarea);
+
 document.querySelectorAll('.suggestion-card').forEach(card => {
-card.addEventListener('click', () => {
-userInput.value = card.dataset.prompt;
-autoResizeTextarea();
-sendMessage();
+  card.addEventListener('click', () => {
+    userInput.value = card.dataset.prompt;
+    autoResizeTextarea();
+    sendMessage();
+  });
 });
-});
+
 $('exportBtn').addEventListener('click', () => {
-const activeChat = state.chats.find(c => c.id === state.currentChatId);
-if (!activeChat) return;
-let exportText = `# ${activeChat.title}\n\n`;
-activeChat.messages.forEach(msg => {
-if (msg.role === 'system') return;
-const role = msg.role === 'user' ? '👤 Kullanıcı' : '🤖 G3';
-exportText += `## ${role}\n${msg.content}\n\n---\n\n`;
+  const activeChat = state.chats.find(c => c.id === state.currentChatId);
+  if (!activeChat) return;
+  let exportText = `# ${activeChat.title}\n\n`;
+  activeChat.messages.forEach(msg => {
+    if (msg.role === 'system') return;
+    const role = msg.role === 'user' ? '👤 Kullanıcı' : '🤖 G3';
+    exportText += `## ${role}\n${msg.content}\n\n---\n\n`;
+  });
+  const blob = new Blob([exportText], { type: 'text/markdown' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${activeChat.title.replace(/[^a-z0-9]/gi, '_')}.md`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Sohbet dışa aktarıldı');
+  userDropdown.classList.remove('active');
 });
-const blob = new Blob([exportText], { type: 'text/markdown' });
-const url = URL.createObjectURL(blob);
-const a = document.createElement('a');
-a.href = url;
-a.download = `${activeChat.title.replace(/[^a-z0-9]/gi, '_')}.md`;
-a.click();
-URL.revokeObjectURL(url);
-showToast('Sohbet dışa aktarıldı');
-userDropdown.classList.remove('active');
-});
+
 $('githubSaveBtn').addEventListener('click', saveToGitHub);
 $('githubLoadBtn').addEventListener('click', loadFromGitHub);
+
 $('accentColorPicker').addEventListener('input', (e) => {
-state.accentColor = e.target.value;
-applyCustomization();
+  state.accentColor = e.target.value;
+  applyCustomization();
 });
+
 $('fontSizeSlider').addEventListener('input', (e) => {
-state.fontSize = e.target.value;
-applyCustomization();
+  state.fontSize = e.target.value;
+  applyCustomization();
 });
+
 $('bgAnimToggle').addEventListener('change', (e) => {
-state.bgAnimation = e.target.checked;
-applyCustomization();
+  state.bgAnimation = e.target.checked;
+  applyCustomization();
 });
+
 let toastTimeout;
 function showToast(message, isError = false) {
-toastText.textContent = message;
-toast.classList.toggle('error', isError);
-const icon = toast.querySelector('i');
-icon.className = isError ? 'fas fa-exclamation-circle' : 'fas fa-check-circle';
-toast.classList.add('show');
-clearTimeout(toastTimeout);
-toastTimeout = setTimeout(() => toast.classList.remove('show'), 3000);
+  toastText.textContent = message;
+  toast.classList.toggle('error', isError);
+  const icon = toast.querySelector('i');
+  icon.className = isError ? 'fas fa-exclamation-circle' : 'fas fa-check-circle';
+  toast.classList.add('show');
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => toast.classList.remove('show'), 3000);
 }
+
 document.addEventListener('keydown', (e) => {
-if ((e.ctrlKey || e.metaKey) && e.key === 'n') { e.preventDefault(); createNewChat(); }
-if (e.key === 'Escape') {
-userDropdown.classList.remove('active');
-profileModal.classList.remove('active');
-commandMenu.classList.remove('active');
-if (window.innerWidth <= 768) overlay.click();
-}
+  if ((e.ctrlKey || e.metaKey) && e.key === 'n') { e.preventDefault(); createNewChat(); }
+  if (e.key === 'Escape') {
+    userDropdown.classList.remove('active');
+    profileModal.classList.remove('active');
+    commandMenu.classList.remove('active');
+    if (window.innerWidth <= 768) overlay.click();
+  }
 });
+
 window.addEventListener('beforeunload', () => {
-if (state.chats && state.chats.length > 0) {
-try {
-localStorage.setItem('g3_chats', JSON.stringify(state.chats));
-if (db) {
-const transaction = db.transaction([STORE_NAME], 'readwrite');
-transaction.objectStore(STORE_NAME).put({ id: 'chats', data: state.chats, timestamp: Date.now() });
-}
-} catch (e) {}
-}
-if (state.user) try { localStorage.setItem('g3_user', JSON.stringify(state.user)); } catch (e) {}
+  if (state.chats && state.chats.length > 0) {
+    try {
+      localStorage.setItem('g3_chats', JSON.stringify(state.chats));
+      if (db) {
+        const transaction = db.transaction([STORE_NAME], 'readwrite');
+        transaction.objectStore(STORE_NAME).put({ id: 'chats', data: state.chats, timestamp: Date.now() });
+      }
+    } catch (e) {}
+  }
+  if (state.user) try { localStorage.setItem('g3_user', JSON.stringify(state.user)); } catch (e) {}
 });
+
 window.addEventListener('pagehide', () => {
-if (state.chats && state.chats.length > 0) {
-try {
-localStorage.setItem('g3_chats', JSON.stringify(state.chats));
-if (db) {
-const transaction = db.transaction([STORE_NAME], 'readwrite');
-transaction.objectStore(STORE_NAME).put({ id: 'chats', data: state.chats, timestamp: Date.now() });
-}
-} catch (e) {}
-}
-if (state.user) try { localStorage.setItem('g3_user', JSON.stringify(state.user)); } catch (e) {}
+  if (state.chats && state.chats.length > 0) {
+    try {
+      localStorage.setItem('g3_chats', JSON.stringify(state.chats));
+      if (db) {
+        const transaction = db.transaction([STORE_NAME], 'readwrite');
+        transaction.objectStore(STORE_NAME).put({ id: 'chats', data: state.chats, timestamp: Date.now() });
+      }
+    } catch (e) {}
+  }
+  if (state.user) try { localStorage.setItem('g3_user', JSON.stringify(state.user)); } catch (e) {}
 });
+
 document.addEventListener('visibilitychange', () => {
-if (document.visibilityState === 'hidden') {
-if (state.chats && state.chats.length > 0) {
-try {
-localStorage.setItem('g3_chats', JSON.stringify(state.chats));
-if (db) {
-const transaction = db.transaction([STORE_NAME], 'readwrite');
-transaction.objectStore(STORE_NAME).put({ id: 'chats', data: state.chats, timestamp: Date.now() });
-}
-} catch (e) {}
-}
-if (state.user) try { localStorage.setItem('g3_user', JSON.stringify(state.user)); } catch (e) {}
-}
+  if (document.visibilityState === 'hidden') {
+    if (state.chats && state.chats.length > 0) {
+      try {
+        localStorage.setItem('g3_chats', JSON.stringify(state.chats));
+        if (db) {
+          const transaction = db.transaction([STORE_NAME], 'readwrite');
+          transaction.objectStore(STORE_NAME).put({ id: 'chats', data: state.chats, timestamp: Date.now() });
+        }
+      } catch (e) {}
+    }
+    if (state.user) try { localStorage.setItem('g3_user', JSON.stringify(state.user)); } catch (e) {}
+  }
 });
+
 setInterval(async () => {
-if (state.chats && state.chats.length > 0) {
-try { await saveChats(); } catch (e) {}
-}
+  if (state.chats && state.chats.length > 0) {
+    try { await saveChats(); } catch (e) {}
+  }
 }, 15000);
+
 window.addEventListener('online', () => {
-showToast('İnternet bağlantısı geri geldi');
-if (state.chats && state.chats.length > 0) saveChats();
+  showToast('İnternet bağlantısı geri geldi');
+  if (state.chats && state.chats.length > 0) saveChats();
 });
+
 window.addEventListener('offline', () => {
-showToast('İnternet bağlantısı kesildi - Veriler yerel olarak kaydedildi', true);
-if (state.chats && state.chats.length > 0) saveChats();
+  showToast('İnternet bağlantısı kesildi - Veriler yerel olarak kaydedildi', true);
+  if (state.chats && state.chats.length > 0) saveChats();
 });
+
 if ('serviceWorker' in navigator) {
-window.addEventListener('load', () => {
-navigator.serviceWorker.register('./sw.js')
-.then(reg => console.log('Service Worker kaydedildi:', reg.scope))
-.catch(err => console.log('Service Worker hatası:', err));
-});
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => console.log('Service Worker kaydedildi:', reg.scope))
+      .catch(err => console.log('Service Worker hatası:', err));
+  });
 }
+
 console.log('%c G3 AI ', 'background: linear-gradient(135deg, #ef4444, #6366f1); color: white; font-size: 20px; padding: 10px; border-radius: 5px;');
 console.log('Muhammed Eren Bayram tarafından geliştirilmiştir.');
 </script>
