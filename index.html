@@ -23,11 +23,11 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
 :root {
---bg-primary: #0f0f12;
---bg-secondary: #1a1a1f;
---bg-tertiary: #24242b;
---bg-hover: #2d2d35;
---bg-elevated: #1e1e24;
+--bg-primary: rgba(15, 15, 18, 0.85); /* Hafif şeffaf yapıldı ki arka plan görünsün */
+--bg-secondary: rgba(26, 26, 31, 0.9);
+--bg-tertiary: rgba(36, 36, 43, 0.9);
+--bg-hover: rgba(45, 45, 53, 0.9);
+--bg-elevated: rgba(30, 30, 36, 0.95);
 --text-primary: #ffffff;
 --text-secondary: #a1a1aa;
 --text-muted: #71717a;
@@ -37,7 +37,7 @@
 --border: rgba(255, 255, 255, 0.08);
 --border-strong: rgba(255, 255, 255, 0.15);
 --user-msg: linear-gradient(135deg, #ef4444, #6366f1);
---ai-msg: #1e1e24;
+--ai-msg: rgba(30, 30, 36, 0.9);
 --success: #10b981;
 --danger: #ef4444;
 --warning: #f59e0b;
@@ -55,18 +55,18 @@
 --safe-right: env(safe-area-inset-right);
 }
 [data-theme="light"] {
---bg-primary: #ffffff;
---bg-secondary: #f8f9fa;
---bg-tertiary: #f1f3f5;
---bg-hover: #e9ecef;
---bg-elevated: #ffffff;
+--bg-primary: rgba(255, 255, 255, 0.85);
+--bg-secondary: rgba(248, 249, 250, 0.9);
+--bg-tertiary: rgba(241, 243, 245, 0.9);
+--bg-hover: rgba(233, 236, 239, 0.9);
+--bg-elevated: rgba(255, 255, 255, 0.95);
 --text-primary: #1a1a1f;
 --text-secondary: #4a4a52;
 --text-muted: #71717a;
 --border: rgba(0, 0, 0, 0.08);
 --border-strong: rgba(0, 0, 0, 0.15);
 --user-msg: linear-gradient(135deg, #ef4444, #6366f1);
---ai-msg: #f1f3f5;
+--ai-msg: rgba(241, 243, 245, 0.9);
 --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
 --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
 --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.12);
@@ -74,47 +74,37 @@
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 html, body { 
     height: 100%; 
-    height: 100dvh; /* Apple cihazlar için düzeltme */
+    height: 100dvh; 
     overflow: hidden; 
     overscroll-behavior-y: none; 
     -webkit-overflow-scrolling: touch; 
 }
 body {
-font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-background-color: var(--bg-primary);
-color: var(--text-primary);
-display: flex;
-transition: background-color 0.3s, color 0.3s;
--webkit-font-smoothing: antialiased;
-position: relative;
-padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background-color: #020014; /* Galaksi için temel arka plan */
+    color: var(--text-primary);
+    display: flex;
+    transition: color 0.3s;
+    -webkit-font-smoothing: antialiased;
+    position: relative;
+    padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
 }
-.bg-animation { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
-.bg-square {
-position: absolute;
-border: 1px solid var(--accent);
-background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(139, 92, 246, 0.04));
-border-radius: 4px;
-animation: fallDown linear infinite, blink ease-in-out infinite;
-opacity: 0;
+
+/* GALAKSİ ARKA PLAN CSS */
+#galaxy-canvas {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    transition: opacity 0.5s ease;
 }
-@keyframes fallDown {
-0% { transform: translateY(-100px) rotate(0deg); }
-100% { transform: translateY(110vh) rotate(180deg); }
-}
-@keyframes blink { 0%, 100% { opacity: 0; } 50% { opacity: 0.6; } }
-button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
-input, textarea { font-family: inherit; border: none; outline: none; background: none; color: inherit; }
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
 .auth-overlay, #sidebar, #main-view, #overlay, .toast { position: relative; z-index: 1; }
 .auth-overlay { z-index: 1000; }
 #overlay { z-index: 90; }
 .auth-overlay {
 position: fixed; inset: 0;
-background: rgba(0, 0, 0, 0.75);
+background: rgba(2, 0, 20, 0.75);
 backdrop-filter: blur(10px);
 -webkit-backdrop-filter: blur(10px);
 display: flex; align-items: center; justify-content: center;
@@ -229,6 +219,7 @@ border-right: 1px solid var(--border);
 display: flex; flex-direction: column;
 transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 z-index: 100; flex-shrink: 0;
+backdrop-filter: blur(10px);
 }
 .sidebar-header { padding: 16px; border-bottom: 1px solid var(--border); }
 #new-chat-btn {
@@ -368,6 +359,7 @@ background: var(--bg-secondary);
 border-bottom: 1px solid var(--border);
 display: flex; align-items: center; justify-content: space-between;
 gap: 12px; flex-shrink: 0;
+backdrop-filter: blur(10px);
 }
 .header-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
 #menu-toggle {
@@ -412,7 +404,7 @@ flex: 1; overflow-y: auto; padding: 24px;
 display: flex; flex-direction: column; gap: 20px;
 scroll-behavior: smooth;
 overscroll-behavior-y: contain;
--webkit-overflow-scrolling: touch; /* Apple düzeltmesi */
+-webkit-overflow-scrolling: touch;
 }
 .welcome-screen {
 display: flex; flex-direction: column;
@@ -596,6 +588,7 @@ background: var(--bg-primary);
 border-top: 1px solid var(--border);
 flex-shrink: 0;
 position: relative;
+backdrop-filter: blur(10px);
 }
 .attachment-preview {
 display: none; gap: 8px; padding: 8px;
@@ -723,7 +716,7 @@ transition: var(--transition); flex-shrink: 0;
 .input-hint { text-align: center; font-size: 0.72rem; color: var(--text-muted); margin-top: 8px; }
 #overlay {
 display: none; position: fixed; inset: 0;
-background: rgba(0, 0, 0, 0.5);
+background: rgba(2, 0, 20, 0.5);
 opacity: 0; transition: opacity 0.3s;
 }
 #overlay.show { display: block; opacity: 1; }
@@ -748,7 +741,7 @@ display: flex; align-items: center; gap: 8px;
 display: none;
 position: fixed;
 inset: 0;
-background: rgba(0,0,0,0.7);
+background: rgba(2, 0, 20, 0.7);
 backdrop-filter: blur(8px);
 z-index: 1500;
 align-items: center;
@@ -882,7 +875,7 @@ font-weight: 600;
 #menu-toggle { display: flex; }
 .header-profile-btn { display: flex; }
 #sidebar {
-position: fixed; top: 0; left: 0; height: 100dvh; /* Apple düzeltmesi */
+position: fixed; top: 0; left: 0; height: 100dvh;
 transform: translateX(-100%);
 box-shadow: var(--shadow-lg);
 }
@@ -1005,7 +998,7 @@ transition-duration: 0.01ms !important;
 }
 }
 @media print {
-.bg-animation, #sidebar, .input-area, .auth-overlay, .toast, .profile-modal, .storage-indicator {
+#galaxy-canvas, #sidebar, .input-area, .auth-overlay, .toast, .profile-modal, .storage-indicator {
 display: none !important;
 }
 #main-view { width: 100%; }
@@ -1014,7 +1007,9 @@ display: none !important;
 </style>
 </head>
 <body>
-<div class="bg-animation" id="bgAnimation"></div>
+<!-- YENİ GALAKSİ ARKA PLAN -->
+<canvas id="galaxy-canvas"></canvas>
+
 <div class="auth-overlay" id="authOverlay">
 <div class="auth-modal">
 <div class="auth-logo">
@@ -1267,7 +1262,140 @@ Google ile devam et
 <div class="dot-indicator"></div>
 <span id="storageText">Cihaza güvenle kaydedildi</span>
 </div>
+
 <script>
+// ==========================================
+// GALAKSİ ARKA PLAN ANİMASYONU (YENİ)
+// ==========================================
+function initGalaxyBackground() {
+    const canvas = document.getElementById('galaxy-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let width, height, cx, cy;
+
+    function resize() {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+        cx = width / 2;
+        cy = height / 2;
+    }
+
+    window.addEventListener('resize', resize);
+    resize();
+
+    const ARMS = 3, PARTICLES_PER_ARM = 600, CORE_PARTICLES = 400;
+    const particles = [];
+
+    class Star {
+        constructor(isCore = false) {
+            this.isCore = isCore;
+            this.reset();
+        }
+        reset() {
+            if (this.isCore) {
+                this.radius = Math.random() * 40;
+                this.angle = Math.random() * Math.PI * 2;
+                this.size = Math.random() * 1.5 + 0.5;
+                this.color = `hsl(${Math.random() * 60 + 30}, 100%, ${Math.random() * 30 + 70}%)`;
+                this.speed = 0.02 + Math.random() * 0.03;
+            } else {
+                const arm = Math.floor(Math.random() * ARMS);
+                const armAngle = (arm / ARMS) * Math.PI * 2;
+                this.radius = 50 + Math.random() * (Math.min(width, height) * 0.45);
+                this.angle = armAngle + (this.radius * 0.015) + (Math.random() - 0.5) * 0.8;
+                this.size = Math.random() * 1.8 + 0.3;
+                const hue = 200 + (this.radius / (Math.min(width, height) * 0.45)) * 100;
+                this.color = `hsl(${hue}, 80%, ${Math.random() * 30 + 60}%)`;
+                this.speed = 50 / (this.radius * this.radius + 100) + 0.002;
+            }
+            this.opacity = Math.random() * 0.5 + 0.5;
+            this.twinkleSpeed = Math.random() * 0.05 + 0.01;
+            this.twinklePhase = Math.random() * Math.PI * 2;
+        }
+        update() {
+            this.angle += this.speed;
+            this.twinklePhase += this.twinkleSpeed;
+            this.currentOpacity = this.opacity * (0.7 + 0.3 * Math.sin(this.twinklePhase));
+        }
+        draw() {
+            const x = cx + Math.cos(this.angle) * this.radius;
+            const y = cy + Math.sin(this.angle) * this.radius * 0.45;
+            const fade = Math.max(0, 1 - Math.sqrt((x - cx) ** 2 + (y - cy) ** 2) / (Math.min(width, height) * 0.55));
+            
+            ctx.beginPath();
+            ctx.arc(x, y, this.size, 0, Math.PI * 2);
+            ctx.fillStyle = this.color;
+            ctx.globalAlpha = this.currentOpacity * fade;
+            ctx.fill();
+            
+            if (this.isCore && this.size > 1.2) {
+                ctx.beginPath();
+                ctx.arc(x, y, this.size * 3, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.globalAlpha = 0.1 * fade;
+                ctx.fill();
+            }
+            ctx.globalAlpha = 1.0;
+        }
+    }
+
+    for (let i = 0; i < CORE_PARTICLES; i++) particles.push(new Star(true));
+    for (let i = 0; i < ARMS * PARTICLES_PER_ARM; i++) particles.push(new Star(false));
+
+    let mouseX = cx, mouseY = cy;
+    window.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+    });
+
+    let time = 0;
+    let animationId;
+
+    function animate() {
+        ctx.fillStyle = 'rgba(2, 0, 20, 0.25)';
+        ctx.fillRect(0, 0, width, height);
+        time += 0.005;
+
+        const glowSize = 120 + Math.sin(time) * 10;
+        const gradient = ctx.createRadialGradient(cx, cy, 10, cx, cy, glowSize);
+        gradient.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
+        gradient.addColorStop(0.2, 'rgba(139, 92, 246, 0.6)');
+        gradient.addColorStop(0.5, 'rgba(6, 182, 212, 0.2)');
+        gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(cx, cy, glowSize, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.save();
+        ctx.translate((mouseX - cx) * 0.02, (mouseY - cy) * 0.02);
+        particles.forEach(p => {
+            p.update();
+            p.draw();
+        });
+        ctx.restore();
+
+        ctx.globalCompositeOperation = 'source-over';
+        animationId = requestAnimationFrame(animate);
+    }
+
+    animate();
+
+    // Arka planı açma/kapama için global bir referans sakla
+    window.galaxyAnimationId = animationId;
+    window.toggleGalaxy = function(show) {
+        const canvasEl = document.getElementById('galaxy-canvas');
+        if (canvasEl) {
+            canvasEl.style.display = show ? 'block' : 'none';
+        }
+    };
+}
+
+// ==========================================
+// ANA UYGULAMA MANTIĞI
+// ==========================================
 const HF_API_KEY = "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";
 const GEMINI_API_KEY = "AQ.Ab8RN6ICmyYKnOyhaVnjaOpAd330yEBYFAHRXKBWZ89WeIvK5w";
 const GEMINI_MODELS = ["gemini-2.0-flash", "gemini-1.5-flash"];
@@ -1342,16 +1470,14 @@ async function saveChats() {
 
 async function loadChats() {
     try {
-        // Önce yeni sürümü kontrol et
         const data = localStorage.getItem('g3_chats_v2');
         if (data) return JSON.parse(data);
         
-        // Eski sürüm varsa taşı (bozuk depolama düzeltmesi)
         const oldData = localStorage.getItem('g3_chats');
         if (oldData) {
             const parsed = JSON.parse(oldData);
             localStorage.setItem('g3_chats_v2', JSON.stringify(parsed));
-            localStorage.removeItem('g3_chats'); // Eskiyi temizle
+            localStorage.removeItem('g3_chats');
             return parsed;
         }
     } catch (e) { 
@@ -1425,40 +1551,18 @@ function updateChatFooter() {
   chatFooterText.innerHTML = `<i class="fas fa-clock"></i> G3 AI <strong>${days} gün, ${hours} saat, ${minutes} dakika</strong> süredir aktif`;
 }
 
-function createBackgroundSquares() {
-  const container = $('bgAnimation');
-  if (!container) return;
-  for (let i = 0; i < 15; i++) {
-    const square = document.createElement('div');
-    square.className = 'bg-square';
-    const size = Math.random() * 60 + 20;
-    square.style.width = size + 'px';
-    square.style.height = size + 'px';
-    square.style.left = Math.random() * 100 + '%';
-    square.style.top = -(Math.random() * 100 + 50) + 'px';
-    const fallDuration = Math.random() * 15 + 10;
-    const blinkDuration = Math.random() * 3 + 2;
-    const delay = Math.random() * 10;
-    square.style.animationDuration = `${fallDuration}s, ${blinkDuration}s`;
-    square.style.animationDelay = `${delay}s, ${delay}s`;
-    container.appendChild(square);
-  }
-}
-
 function applyCustomization() {
   if (state.accentColor) {
     document.documentElement.style.setProperty('--accent', state.accentColor);
     document.documentElement.style.setProperty('--accent-hover', state.accentColor);
   }
   if (state.fontSize) document.body.style.fontSize = state.fontSize + 'px';
-  const bgAnim = $('bgAnimation');
-  if (bgAnim) {
-    if (state.bgAnimation === false) bgAnim.style.display = 'none';
-    else {
-      bgAnim.style.display = 'block';
-      if (bgAnim.children.length === 0) createBackgroundSquares();
-    }
+  
+  // Galaksi arka plan açma/kapama mantığı
+  if (typeof window.toggleGalaxy === 'function') {
+      window.toggleGalaxy(state.bgAnimation !== false);
   }
+  
   if ($('accentColorPicker')) $('accentColorPicker').value = state.accentColor;
   if ($('fontSizeSlider')) $('fontSizeSlider').value = state.fontSize;
   if ($('bgAnimToggle')) $('bgAnimToggle').checked = state.bgAnimation;
@@ -1466,8 +1570,6 @@ function applyCustomization() {
     accentColor: state.accentColor, fontSize: state.fontSize, bgAnimation: state.bgAnimation
   }));
 }
-
-// ... (GitHub, Google SignIn, Auth fonksiyonları aynı kalır, sadece kısaltmak için atlanmadı, aşağıda tam blok var)
 
 function handleGoogleCredentialResponse(response) {
   try {
@@ -1514,6 +1616,7 @@ function initializeGoogleSignIn() {
 window.addEventListener('load', () => {
   setTimeout(initializeGoogleSignIn, 500);
   setTimeout(updateStorageUsage, 500);
+  initGalaxyBackground(); // Galaksi animasyonunu başlat
 });
 
 document.querySelectorAll('.auth-tab').forEach(tab => {
@@ -1615,7 +1718,6 @@ $('editNameBtn').addEventListener('click', () => {
   }
 });
 
-// ... (Dışa aktarma fonksiyonları aynı kalır)
 $('exportAllBtn').addEventListener('click', () => {
   let exportText = '# G3 AI - Tüm Sohbetler\n';
   state.chats.forEach(chat => {
@@ -1840,7 +1942,6 @@ document.querySelectorAll('.mode-btn').forEach(btn => {
     btn.classList.add('active');
     updateCommandMenu(newMode);
 
-    // O moda ait en son sohbeti bul, yoksa yeni oluştur
     const modeChat = state.chats.find(c => c.mode === newMode);
     if (modeChat) {
       loadChat(modeChat.id);
@@ -1885,8 +1986,6 @@ function renderChatList() {
   const day = 24 * 60 * 60 * 1000;
   const groups = { 'Bugün': [], 'Dün': [], 'Son 7 Gün': [], 'Daha Eski': [] };
   
-  // Sadece mevcut modun sohbetlerini veya hepsini göstermek isterseniz:
-  // Şu an tüm sohbetleri gösteriyoruz ama mod ikonlarıyla ayırt ediliyor.
   state.chats.forEach(chat => {
     const age = now - chat.createdAt;
     if (age < day && new Date(chat.createdAt).toDateString() === new Date().toDateString()) groups['Bugün'].push(chat);
@@ -2059,7 +2158,6 @@ function renderMarkdown(text) {
     wrapper.className = 'code-block';
     const header = document.createElement('div');
     header.className = 'code-header';
-    // Olay dinleyicisi burada DEĞİL, aşağıda event delegation ile ekleniyor
     header.innerHTML = `<span>${lang}</span><button class="copy-code-btn"><i class="fas fa-copy"></i> Kopyala</button>`;
     wrapper.appendChild(header);
     pre.parentNode.insertBefore(wrapper, pre);
@@ -2140,7 +2238,6 @@ function buildOpenAiMessages(messages, systemPrompt) {
   return { messages: out, hasImages: hasImages, lastImage: lastImage, lastUserText: lastUserText };
 }
 
-// ... (AI Provider Fonksiyonları: tryPuter, tryHackClub, tryHuggingFace, tryPollinations, tryGemini, callAI aynı kalır)
 async function tryPuter(openAiMessages, hasImages, lastImage, lastUserText, mode) {
   if (typeof puter === 'undefined' || !puter.ai) throw new Error('Puter.js yüklenmedi');
   let resp;
@@ -2503,8 +2600,6 @@ async function sendMessage() {
   if (!text && state.attachments.length === 0) return;
   const activeChat = state.chats.find(c => c.id === state.currentChatId);
   if (!activeChat) return;
-  
-  // Sınır kontrolü kaldırıldı, her zaman true döner
   
   const isCommand = text.startsWith('/');
   if (isCommand && activeChat.mode !== 'smart') {
