@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>G3 AI - Profesyonel Asistan</title>
 <link rel="icon" href="./g3.png" type="image/png">
 <link rel="manifest" href="./manifest.json">
@@ -71,8 +71,14 @@
 --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
 --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.12);
 }
-* { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { height: 100%; overflow: hidden; overscroll-behavior-y: none; -webkit-overflow-scrolling: touch; }
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { 
+    height: 100%; 
+    height: 100dvh; /* Apple cihazlar için düzeltme */
+    overflow: hidden; 
+    overscroll-behavior-y: none; 
+    -webkit-overflow-scrolling: touch; 
+}
 body {
 font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 background-color: var(--bg-primary);
@@ -406,6 +412,7 @@ flex: 1; overflow-y: auto; padding: 24px;
 display: flex; flex-direction: column; gap: 20px;
 scroll-behavior: smooth;
 overscroll-behavior-y: contain;
+-webkit-overflow-scrolling: touch; /* Apple düzeltmesi */
 }
 .welcome-screen {
 display: flex; flex-direction: column;
@@ -698,7 +705,9 @@ position: relative;
 }
 #userInput {
 flex: 1; resize: none; max-height: 120px; min-height: 24px;
-padding: 8px 4px; font-size: 0.95rem; line-height: 1.5;
+padding: 8px 4px; 
+font-size: 16px; /* iOS otomatik zoom engelleme */
+line-height: 1.5;
 overflow-y: auto;
 }
 #send-btn {
@@ -873,7 +882,7 @@ font-weight: 600;
 #menu-toggle { display: flex; }
 .header-profile-btn { display: flex; }
 #sidebar {
-position: fixed; top: 0; left: 0; height: 100vh;
+position: fixed; top: 0; left: 0; height: 100dvh; /* Apple düzeltmesi */
 transform: translateX(-100%);
 box-shadow: var(--shadow-lg);
 }
@@ -900,7 +909,7 @@ header h1 .badge { display: none; }
 .profile-content {
 max-width: 100%;
 width: 100%;
-height: 100%;
+height: 100dvh;
 border-radius: 0;
 overflow-y: auto;
 padding: 24px 20px;
@@ -1158,13 +1167,13 @@ Google ile devam et
 </div>
 <div class="input-area">
 <div class="mode-selector" id="modeSelector">
-<button class="mode-btn active" data-mode="fast" title="Firethron: En hızlı yanıt. Günlük 25 mesaj.">
+<button class="mode-btn active" data-mode="fast" title="Firethron: En hızlı yanıt.">
 <i class="fas fa-bolt"></i> Firethron
 </button>
-<button class="mode-btn" data-mode="smart" title="Hawkweed: Zeki mod, komutlar burada açılır. Günlük 10 mesaj.">
+<button class="mode-btn" data-mode="smart" title="Hawkweed: Zeki mod, komutlar burada açılır.">
 <i class="fas fa-brain"></i> Hawkweed
 </button>
-<button class="mode-btn" data-mode="extra" title="Nightplox: Düşünen mod. Günlük 5 mesaj.">
+<button class="mode-btn" data-mode="extra" title="Nightplox: Düşünen mod.">
 <i class="fas fa-star"></i> Nightplox
 </button>
 </div>
@@ -1259,33 +1268,13 @@ Google ile devam et
 <span id="storageText">Cihaza güvenle kaydedildi</span>
 </div>
 <script>
-// ============================================
-// 5 KATMANLI API SİSTEMİ - BİRİ MUTLAKA ÇALIŞIR
-// 1) Puter.js: ANAHTARSIZ, en güvenilir (GPT-4o, DeepSeek-R1)
-// 2) HackClub AI: ANAHTARSIZ, OpenAI uyumlu
-// 3) Hugging Face: hf_ anahtarın
-// 4) Pollinations: anahtarsız yedek
-// 5) Gemini: AIza... anahtarın olursa çalışır
-// ============================================
 const HF_API_KEY = "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";
 const GEMINI_API_KEY = "AQ.Ab8RN6ICmyYKnOyhaVnjaOpAd330yEBYFAHRXKBWZ89WeIvK5w";
 const GEMINI_MODELS = ["gemini-2.0-flash", "gemini-1.5-flash"];
 
-const HF_MODELS_FAST = [
-  "Qwen/Qwen2.5-7B-Instruct",
-  "meta-llama/Llama-3.1-8B-Instruct",
-  "mistralai/Mistral-7B-Instruct-v0.3"
-];
-const HF_MODELS_THINKING = [
-  "deepseek-ai/DeepSeek-R1",
-  "Qwen/QwQ-32B",
-  "Qwen/Qwen3-32B"
-];
-const HF_MODELS_VISION = [
-  "meta-llama/Llama-3.2-11B-Vision-Instruct",
-  "Qwen/Qwen2.5-VL-72B-Instruct",
-  "microsoft/Phi-3.5-vision-instruct"
-];
+const HF_MODELS_FAST = ["Qwen/Qwen2.5-7B-Instruct", "meta-llama/Llama-3.1-8B-Instruct", "mistralai/Mistral-7B-Instruct-v0.3"];
+const HF_MODELS_THINKING = ["deepseek-ai/DeepSeek-R1", "Qwen/QwQ-32B", "Qwen/Qwen3-32B"];
+const HF_MODELS_VISION = ["meta-llama/Llama-3.2-11B-Vision-Instruct", "Qwen/Qwen2.5-VL-72B-Instruct", "microsoft/Phi-3.5-vision-instruct"];
 
 const AI_AVATAR_URL = "./g3.png";
 const GOOGLE_CLIENT_ID = "";
@@ -1330,67 +1319,47 @@ let state = {
   accentColor: '#6366f1', fontSize: 16, bgAnimation: true
 };
 
-function getDailyLimits() {
-  const today = new Date().toISOString().split('T')[0];
-  const stored = localStorage.getItem('g3_daily_limits');
-  if (stored) {
-    const data = JSON.parse(stored);
-    if (data.date === today) return data;
-  }
-  return { date: today, fast: 0, smart: 0, extra: 0 };
-}
-function saveDailyLimits(data) { localStorage.setItem('g3_daily_limits', JSON.stringify(data)); }
+// Sınırsız erişim için limit kontrolü devre dışı bırakıldı
 function checkLimit(mode) {
-  const limits = getDailyLimits();
-  const limitsMap = { 'fast': 25, 'smart': 10, 'extra': 5 };
-  const namesMap = { 'fast': 'Firethron (Hızlı)', 'smart': 'Hawkweed (Zeki)', 'extra': 'Nightplox (Düşünen)' };
-  if (limits[mode] >= limitsMap[mode]) {
-    showToast(`${namesMap[mode]} modu günlük sınırına (${limitsMap[mode]}) ulaştı. Yarın tekrar deneyin.`, true);
-    return false;
-  }
-  limits[mode]++;
-  saveDailyLimits(limits);
-  return true;
+  return true; 
 }
 
-let db = null;
-const DB_NAME = 'G3_AI_Database';
-const DB_VERSION = 1;
-const STORE_NAME = 'chats';
-function initDB() {
-  return new Promise((resolve, reject) => {
-    if (db) return resolve(db);
-    const request = indexedDB.open(DB_NAME, DB_VERSION);
-    request.onerror = () => reject(request.error);
-    request.onsuccess = () => { db = request.result; resolve(db); };
-    request.onupgradeneeded = (event) => {
-      const database = event.target.result;
-      if (!database.objectStoreNames.contains(STORE_NAME)) {
-        database.createObjectStore(STORE_NAME, { keyPath: 'id' });
-      }
-    };
-  });
+// GÜVENİLİR DEPOLAMA SİSTEMİ (v2)
+async function saveChats() {
+    if (!state.chats || state.chats.length === 0) return;
+    try {
+        const dataToSave = JSON.stringify(state.chats);
+        localStorage.setItem('g3_chats_v2', dataToSave);
+        updateStorageIndicator('success', 'Cihaza güvenle kaydedildi');
+        updateStorageUsage();
+        return true;
+    } catch (e) {
+        console.error('Depolama hatası:', e);
+        updateStorageIndicator('error', 'Depolama alanı dolu veya hata oluştu!');
+        return false;
+    }
 }
-async function saveToIndexedDB(data) {
-  await initDB();
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction([STORE_NAME], 'readwrite');
-    const store = transaction.objectStore(STORE_NAME);
-    const request = store.put({ id: 'chats', data: data, timestamp: Date.now() });
-    request.onsuccess = () => resolve(true);
-    request.onerror = () => reject(request.error);
-  });
+
+async function loadChats() {
+    try {
+        // Önce yeni sürümü kontrol et
+        const data = localStorage.getItem('g3_chats_v2');
+        if (data) return JSON.parse(data);
+        
+        // Eski sürüm varsa taşı (bozuk depolama düzeltmesi)
+        const oldData = localStorage.getItem('g3_chats');
+        if (oldData) {
+            const parsed = JSON.parse(oldData);
+            localStorage.setItem('g3_chats_v2', JSON.stringify(parsed));
+            localStorage.removeItem('g3_chats'); // Eskiyi temizle
+            return parsed;
+        }
+    } catch (e) { 
+        console.error('Yükleme hatası:', e); 
+    }
+    return null;
 }
-async function loadFromIndexedDB() {
-  await initDB();
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction([STORE_NAME], 'readonly');
-    const store = transaction.objectStore(STORE_NAME);
-    const request = store.get('chats');
-    request.onsuccess = () => resolve(request.result?.data || null);
-    request.onerror = () => reject(request.error);
-  });
-}
+
 function updateStorageIndicator(type, text) {
   if (!storageIndicator) return;
   storageIndicator.className = 'storage-indicator show';
@@ -1399,13 +1368,10 @@ function updateStorageIndicator(type, text) {
   storageText.textContent = text;
   setTimeout(() => storageIndicator.classList.remove('show'), 2500);
 }
+
 async function updateStorageUsage() {
   try {
     let totalSize = 0;
-    if (db) {
-      const data = await loadFromIndexedDB();
-      if (data) totalSize += new Blob([JSON.stringify(data)]).size;
-    }
     for (let key in localStorage) {
       if (localStorage.hasOwnProperty(key)) totalSize += (localStorage[key].length * 2);
     }
@@ -1425,37 +1391,7 @@ async function updateStorageUsage() {
     if (storageTextDetail) storageTextDetail.textContent = `${sizeMB} MB / 50 MB`;
   } catch (e) { console.error('Depolama hesaplama hatası:', e); }
 }
-async function saveChats() {
-  if (!state.chats || state.chats.length === 0) return;
-  try {
-    await saveToIndexedDB(state.chats);
-    try { localStorage.setItem('g3_chats', JSON.stringify(state.chats)); } catch (e) {}
-    updateStorageIndicator('success', 'Cihaza güvenle kaydedildi');
-    updateStorageUsage();
-    return true;
-  } catch (e) {
-    console.error('Depolama hatası:', e);
-    updateStorageIndicator('error', 'Kaydetme hatası!');
-    return false;
-  }
-}
-async function loadChats() {
-  try {
-    const indexedData = await loadFromIndexedDB();
-    if (indexedData && Array.isArray(indexedData) && indexedData.length > 0) return indexedData;
-  } catch (e) {}
-  try {
-    const localData = localStorage.getItem('g3_chats');
-    if (localData) {
-      const parsed = JSON.parse(localData);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        try { await saveToIndexedDB(parsed); } catch (migrateErr) {}
-        return parsed;
-      }
-    }
-  } catch (e) {}
-  return null;
-}
+
 function saveUserState() {
   try {
     if (state.user) localStorage.setItem('g3_user', JSON.stringify(state.user));
@@ -1463,18 +1399,21 @@ function saveUserState() {
     updateStorageUsage();
   } catch (e) {}
 }
+
 function incrementUserCount() {
   try {
     const current = parseInt(localStorage.getItem('g3_total_users') || '0');
     localStorage.setItem('g3_total_users', String(current + 1));
   } catch (e) {}
 }
+
 function incrementConversationCount() {
   try {
     const current = parseInt(localStorage.getItem('g3_total_conversations') || '0');
     localStorage.setItem('g3_total_conversations', String(current + 1));
   } catch (e) {}
 }
+
 function updateChatFooter() {
   if (!chatFooterText) return;
   const launchDate = new Date('2026-06-01T00:00:00');
@@ -1485,8 +1424,10 @@ function updateChatFooter() {
   const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
   chatFooterText.innerHTML = `<i class="fas fa-clock"></i> G3 AI <strong>${days} gün, ${hours} saat, ${minutes} dakika</strong> süredir aktif`;
 }
+
 function createBackgroundSquares() {
   const container = $('bgAnimation');
+  if (!container) return;
   for (let i = 0; i < 15; i++) {
     const square = document.createElement('div');
     square.className = 'bg-square';
@@ -1503,6 +1444,7 @@ function createBackgroundSquares() {
     container.appendChild(square);
   }
 }
+
 function applyCustomization() {
   if (state.accentColor) {
     document.documentElement.style.setProperty('--accent', state.accentColor);
@@ -1524,69 +1466,9 @@ function applyCustomization() {
     accentColor: state.accentColor, fontSize: state.fontSize, bgAnimation: state.bgAnimation
   }));
 }
-async function saveToGitHub() {
-  const token = $('githubToken').value.trim();
-  if (!token) { showToast('Lütfen GitHub Token girin', true); return; }
-  const gistId = $('githubGistId').value.trim();
-  const data = {
-    version: "4.9", timestamp: new Date().toISOString(), user: state.user, chats: state.chats,
-    settings: { theme: state.theme, accentColor: state.accentColor, fontSize: state.fontSize, bgAnimation: state.bgAnimation }
-  };
-  const url = gistId ? `https://api.github.com/gists/${gistId}` : 'https://api.github.com/gists';
-  const method = gistId ? 'PATCH' : 'POST';
-  try {
-    showToast('GitHub\'a gönderiliyor...');
-    const response = await fetch(url, {
-      method: method,
-      headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json' },
-      body: JSON.stringify({ description: "G3 AI Chat Backup", public: false, files: { "g3_backup.json": { content: JSON.stringify(data, null, 2) } } })
-    });
-    if (!response.ok) { const err = await response.json(); throw new Error(err.message || 'GitHub API hatası'); }
-    const result = await response.json();
-    localStorage.setItem('g3_github_token', token);
-    localStorage.setItem('g3_github_gist_id', result.id);
-    $('githubGistId').value = result.id;
-    showToast('GitHub\'a başarıyla yedeklendi!');
-  } catch (error) {
-    console.error(error);
-    showToast('Yedekleme hatası: ' + error.message, true);
-  }
-}
-async function loadFromGitHub() {
-  const token = $('githubToken').value.trim() || localStorage.getItem('g3_github_token');
-  const gistId = $('githubGistId').value.trim() || localStorage.getItem('g3_github_gist_id');
-  if (!token || !gistId) { showToast('Token ve Gist ID gerekli', true); return; }
-  try {
-    showToast('GitHub\'dan yükleniyor...');
-    const response = await fetch(`https://api.github.com/gists/${gistId}`, {
-      headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
-    });
-    if (!response.ok) throw new Error('Gist bulunamadı veya yetki hatası');
-    const data = await response.json();
-    const backup = JSON.parse(data.files['g3_backup.json'].content);
-    if (confirm('Mevcut veriler silinip GitHub\'daki verilerle değiştirilecek. Emin misiniz?')) {
-      state.user = backup.user;
-      state.chats = backup.chats;
-      if (backup.settings) {
-        state.theme = backup.settings.theme || 'dark';
-        state.accentColor = backup.settings.accentColor || '#6366f1';
-        state.fontSize = backup.settings.fontSize || 16;
-        state.bgAnimation = backup.settings.bgAnimation !== undefined ? backup.settings.bgAnimation : true;
-      }
-      await saveChats();
-      saveUserState();
-      applyCustomization();
-      renderChatList();
-      if (state.chats.length > 0) loadChat(state.chats[0].id);
-      else createNewChat();
-      updateUserUI();
-      showToast('GitHub\'dan başarıyla yüklendi!');
-    }
-  } catch (error) {
-    console.error(error);
-    showToast('Yükleme hatası: ' + error.message, true);
-  }
-}
+
+// ... (GitHub, Google SignIn, Auth fonksiyonları aynı kalır, sadece kısaltmak için atlanmadı, aşağıda tam blok var)
+
 function handleGoogleCredentialResponse(response) {
   try {
     const token = response.credential;
@@ -1607,6 +1489,7 @@ function handleGoogleCredentialResponse(response) {
     showToast('Google girişi başarısız oldu', true);
   }
 }
+
 function initializeGoogleSignIn() {
   if (typeof google === 'undefined' || !google.accounts || !google.accounts.id) {
     setTimeout(initializeGoogleSignIn, 500);
@@ -1627,11 +1510,12 @@ function initializeGoogleSignIn() {
     });
   }
 }
+
 window.addEventListener('load', () => {
   setTimeout(initializeGoogleSignIn, 500);
   setTimeout(updateStorageUsage, 500);
-  initDB().then(() => updateStorageUsage());
 });
+
 document.querySelectorAll('.auth-tab').forEach(tab => {
   tab.addEventListener('click', () => {
     document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
@@ -1641,6 +1525,7 @@ document.querySelectorAll('.auth-tab').forEach(tab => {
     $('registerForm').classList.toggle('hidden', target !== 'register');
   });
 });
+
 function handleAuth(e) {
   e.preventDefault();
   const isRegister = e.target.id === 'registerForm';
@@ -1655,8 +1540,10 @@ function handleAuth(e) {
   authOverlay.classList.remove('active');
   showToast('Hoş geldin! 👋');
 }
+
 $('loginForm').addEventListener('submit', handleAuth);
 $('registerForm').addEventListener('submit', handleAuth);
+
 $('logoutBtn').addEventListener('click', () => {
   state.user = null;
   try {
@@ -1667,6 +1554,7 @@ $('logoutBtn').addEventListener('click', () => {
   authOverlay.classList.add('active');
   updateStorageUsage();
 });
+
 function updateUserUI() {
   if (!state.user) return;
   $('userName').textContent = state.user.name;
@@ -1679,6 +1567,7 @@ function updateUserUI() {
   }
   updateHeaderProfileBtn();
 }
+
 function updateHeaderProfileBtn() {
   if (!headerProfileBtn || !state.user) return;
   if (state.user.avatar && (state.user.avatar.startsWith('http') || state.user.avatar.startsWith('data:'))) {
@@ -1687,6 +1576,7 @@ function updateHeaderProfileBtn() {
     headerProfileBtn.textContent = state.user.avatar || 'K';
   }
 }
+
 function openProfileModal() {
   if (!state.user) return;
   $('profileName').textContent = state.user.name;
@@ -1708,10 +1598,12 @@ function openProfileModal() {
   profileModal.classList.add('active');
   userDropdown.classList.remove('active');
 }
+
 $('profileClose').addEventListener('click', () => profileModal.classList.remove('active'));
 profileModal.addEventListener('click', (e) => { if (e.target === profileModal) profileModal.classList.remove('active'); });
 $('openProfileBtn').addEventListener('click', openProfileModal);
 headerProfileBtn.addEventListener('click', openProfileModal);
+
 $('editNameBtn').addEventListener('click', () => {
   const newName = prompt('Yeni adınız:', state.user?.name || '');
   if (newName && newName.trim()) {
@@ -1722,6 +1614,8 @@ $('editNameBtn').addEventListener('click', () => {
     showToast('İsim güncellendi');
   }
 });
+
+// ... (Dışa aktarma fonksiyonları aynı kalır)
 $('exportAllBtn').addEventListener('click', () => {
   let exportText = '# G3 AI - Tüm Sohbetler\n';
   state.chats.forEach(chat => {
@@ -1741,6 +1635,7 @@ $('exportAllBtn').addEventListener('click', () => {
   URL.revokeObjectURL(url);
   showToast('Tüm veriler dışa aktarıldı');
 });
+
 $('exportPdfBtn').addEventListener('click', () => {
   const activeChat = state.chats.find(c => c.id === state.currentChatId);
   if (!activeChat) return;
@@ -1750,14 +1645,7 @@ $('exportPdfBtn').addEventListener('click', () => {
   element.style.fontFamily = 'Arial, sans-serif';
   element.style.color = '#333';
   element.style.backgroundColor = '#ffffff';
-  let htmlContent = `
-    <div style="text-align: center; margin-bottom: 30px;">
-      <h1 style="color: #6366f1; margin: 0;">G3 AI Sohbet</h1>
-      <h2 style="color: #4a5568; font-weight: normal; margin: 5px 0 0 0;">${activeChat.title}</h2>
-      <p style="color: #a0aec0; font-size: 12px; margin-top: 10px;">${new Date(activeChat.createdAt).toLocaleString('tr-TR')}</p>
-    </div>
-    <hr style="border: 1px solid #e2e8f0; margin-bottom: 20px;">
-  `;
+  let htmlContent = `<div style="text-align: center; margin-bottom: 30px;"><h1 style="color: #6366f1; margin: 0;">G3 AI Sohbet</h1><h2 style="color: #4a5568; font-weight: normal; margin: 5px 0 0 0;">${activeChat.title}</h2><p style="color: #a0aec0; font-size: 12px; margin-top: 10px;">${new Date(activeChat.createdAt).toLocaleString('tr-TR')}</p></div><hr style="border: 1px solid #e2e8f0; margin-bottom: 20px;">`;
   activeChat.messages.forEach(msg => {
     if (msg.role === 'system') return;
     const isUser = msg.role === 'user';
@@ -1765,34 +1653,14 @@ $('exportPdfBtn').addEventListener('click', () => {
     const bgColor = isUser ? '#f7fafc' : '#ffffff';
     const borderColor = isUser ? '#6366f1' : '#cbd5e0';
     const roleColor = isUser ? '#6366f1' : '#2d3748';
-    let content = msg.content
-      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-      .replace(/\n/g, '<br>')
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.*?)\*/g, '<em>$1</em>')
-      .replace(/`([^`]+)`/g, '<code style="background:#edf2f7;padding:2px 4px;border-radius:3px;font-family:monospace;">$1</code>');
-    htmlContent += `
-      <div style="margin-bottom: 20px; padding: 15px; background: ${bgColor}; border-left: 4px solid ${borderColor}; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-        <h3 style="margin: 0 0 10px 0; color: ${roleColor}; font-size: 16px;">${role}</h3>
-        <div style="line-height: 1.6; font-size: 14px; color: #2d3748;">${content}</div>
-      </div>
-    `;
+    let content = msg.content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>').replace(/`([^`]+)`/g, '<code style="background:#edf2f7;padding:2px 4px;border-radius:3px;font-family:monospace;">$1</code>');
+    htmlContent += `<div style="margin-bottom: 20px; padding: 15px; background: ${bgColor}; border-left: 4px solid ${borderColor}; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);"><h3 style="margin: 0 0 10px 0; color: ${roleColor}; font-size: 16px;">${role}</h3><div style="line-height: 1.6; font-size: 14px; color: #2d3748;">${content}</div></div>`;
   });
   element.innerHTML = htmlContent;
-  const opt = {
-    margin: 10,
-    filename: `G3_${activeChat.title.replace(/[^a-z0-9]/gi, '_').substring(0, 20)}.pdf`,
-    image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2, useCORS: true, logging: false },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-  };
-  html2pdf().set(opt).from(element).save().then(() => {
-    showToast('PDF başarıyla indirildi');
-  }).catch(err => {
-    console.error(err);
-    showToast('PDF oluşturulurken hata oluştu', true);
-  });
+  const opt = { margin: 10, filename: `G3_${activeChat.title.replace(/[^a-z0-9]/gi, '_').substring(0, 20)}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true, logging: false }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
+  html2pdf().set(opt).from(element).save().then(() => showToast('PDF başarıyla indirildi')).catch(err => { console.error(err); showToast('PDF oluşturulurken hata oluştu', true); });
 });
+
 $('exportJsonBtn').addEventListener('click', () => {
   const exportData = { app: "G3 AI", version: "4.9", exportDate: new Date().toISOString(), user: state.user, chats: state.chats };
   const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
@@ -1804,6 +1672,7 @@ $('exportJsonBtn').addEventListener('click', () => {
   URL.revokeObjectURL(url);
   showToast('JSON yedekleme başarıyla indirildi');
 });
+
 $('importJsonBtn').addEventListener('click', () => $('importJsonInput').click());
 $('importJsonInput').addEventListener('change', (e) => {
   const file = e.target.files[0];
@@ -1824,49 +1693,36 @@ $('importJsonInput').addEventListener('change', (e) => {
           else createNewChat();
           showToast('Yedek başarıyla geri yüklendi');
         }
-      } else {
-        showToast('Geçersiz yedek dosyası', true);
-      }
-    } catch (err) {
-      showToast('Dosya okunurken hata oluştu', true);
-    }
+      } else { showToast('Geçersiz yedek dosyası', true); }
+    } catch (err) { showToast('Dosya okunurken hata oluştu', true); }
   };
   reader.readAsText(file);
   e.target.value = '';
 });
+
 $('deleteAllBtn').addEventListener('click', async () => {
   if (confirm('TÜM SOHBETLER silinecek. Emin misiniz?')) {
     state.chats = [];
     state.currentChatId = null;
-    try {
-      localStorage.removeItem('g3_chats');
-      if (db) {
-        const transaction = db.transaction([STORE_NAME], 'readwrite');
-        transaction.objectStore(STORE_NAME).clear();
-      }
-    } catch (e) {}
+    try { localStorage.removeItem('g3_chats_v2'); localStorage.removeItem('g3_chats'); } catch (e) {}
     createNewChat();
     profileModal.classList.remove('active');
     showToast('Tüm veriler silindi');
     await updateStorageUsage();
   }
 });
+
 $('clearAllBtn').addEventListener('click', async () => {
   if (confirm('Tüm sohbetler silinecek. Emin misiniz?')) {
     state.chats = [];
-    try {
-      localStorage.removeItem('g3_chats');
-      if (db) {
-        const transaction = db.transaction([STORE_NAME], 'readwrite');
-        transaction.objectStore(STORE_NAME).clear();
-      }
-    } catch (e) {}
+    try { localStorage.removeItem('g3_chats_v2'); localStorage.removeItem('g3_chats'); } catch (e) {}
     createNewChat();
     userDropdown.classList.remove('active');
     showToast('Tüm sohbetler silindi');
     await updateStorageUsage();
   }
 });
+
 const savedUser = localStorage.getItem('g3_user');
 const savedJoinDate = localStorage.getItem('g3_joinDate');
 if (savedUser) {
@@ -1878,9 +1734,11 @@ if (savedUser) {
 } else {
   setTimeout(() => authOverlay.classList.add('active'), 300);
 }
+
 const savedTheme = localStorage.getItem('g3_theme') || 'dark';
 document.documentElement.setAttribute('data-theme', savedTheme);
 state.theme = savedTheme;
+
 themeToggle.addEventListener('click', () => {
   state.theme = state.theme === 'dark' ? 'light' : 'dark';
   document.documentElement.setAttribute('data-theme', state.theme);
@@ -1888,6 +1746,7 @@ themeToggle.addEventListener('click', () => {
   updateThemeIcon();
   updateStorageUsage();
 });
+
 $('themeToggleDropdown').addEventListener('click', () => {
   state.theme = state.theme === 'dark' ? 'light' : 'dark';
   document.documentElement.setAttribute('data-theme', state.theme);
@@ -1896,26 +1755,30 @@ $('themeToggleDropdown').addEventListener('click', () => {
   userDropdown.classList.remove('active');
   updateStorageUsage();
 });
+
 function updateThemeIcon() {
   const icon = themeToggle.querySelector('i');
   icon.className = state.theme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
 }
+
 menuToggle.addEventListener('click', () => { sidebar.classList.add('open'); overlay.classList.add('show'); });
 overlay.addEventListener('click', () => {
   sidebar.classList.remove('open');
   overlay.classList.remove('show');
   userDropdown.classList.remove('active');
 });
+
 userProfileBtn.addEventListener('click', (e) => { e.stopPropagation(); userDropdown.classList.toggle('active'); });
 document.addEventListener('click', (e) => {
   if (!userDropdown.contains(e.target) && !userProfileBtn.contains(e.target)) {
     userDropdown.classList.remove('active');
   }
 });
+
 function getSystemPromptForMode(mode) {
   let prompt = SYSTEM_PROMPT_BASE;
   if (mode === 'fast') {
-    prompt += "\nMOD: Firethron (Hızlı). KURALLAR: Son derece hızlı, kısa ve öz yanıtlar ver. Gereksiz açıklamalardan kaçın. Komut sistemi yok.";
+    prompt += "\nMOD: Firethron (Hızlı). KURALLAR: Son derece hızlı, kısa ve öz yanıtlar ver. Gereksiz açıklamalardan kaçın.";
   } else if (mode === 'smart') {
     prompt += "\nMOD: Hawkweed (Zeki). KURALLAR: Derinlemesine, bağlamsal yanıtlar ver. Eski mesajlarla yeni mesajlar arasında güçlü bağ kur. Kullanıcı /imagine, /video, /music, /analyze, /code, /translate, /summarize, /story, /math veya /roleplay gibi komutlar girerse ilgili alanda dünya çapında bir uzman gibi davran. Sana bir görsel gönderilirse görseli en ince detayına kadar analiz et.";
     try {
@@ -1923,10 +1786,11 @@ function getSystemPromptForMode(mode) {
       prompt += `\nCANLI VERİ BAĞLANTISI AKTİF: Şu anki tarih ve saat: ${now.toLocaleString('tr-TR')}.`;
     } catch (e) {}
   } else if (mode === 'extra') {
-    prompt += "\nMOD: Nightplox (Düşünen). KURALLAR: Adım adım düşün, derinlemesine analiz et, çok detaylı ve kapsamlı yanıtlar ver. Karmaşık problemlerde mantık yürüt. Komut sistemi kapalıdır.";
+    prompt += "\nMOD: Nightplox (Düşünen). KURALLAR: Adım adım düşün, derinlemesine analiz et, çok detaylı ve kapsamlı yanıtlar ver. Karmaşık problemlerde mantık yürüt.";
   }
   return prompt;
 }
+
 function updateCommandMenu(mode) {
   commandMenu.innerHTML = '';
   if (mode === 'smart') {
@@ -1964,49 +1828,65 @@ function updateCommandMenu(mode) {
     commandMenu.appendChild(div);
   }
 }
+
+// MOD DEĞİŞTİRME VE AYRI SOHBET MANTIĞI
 document.querySelectorAll('.mode-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     if (btn.classList.contains('locked')) return;
+    const newMode = btn.dataset.mode;
+    state.currentMode = newMode;
+
     document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    state.currentMode = btn.dataset.mode;
-    updateCommandMenu(state.currentMode);
+    updateCommandMenu(newMode);
+
+    // O moda ait en son sohbeti bul, yoksa yeni oluştur
+    const modeChat = state.chats.find(c => c.mode === newMode);
+    if (modeChat) {
+      loadChat(modeChat.id);
+    } else {
+      createNewChat(newMode);
+    }
   });
 });
-function createNewChat() {
+
+function createNewChat(specificMode = null) {
   const chatId = Date.now().toString();
+  const mode = specificMode || state.currentMode;
   state.currentChatId = chatId;
   state.chats.unshift({
-    id: chatId, title: "Yeni Sohbet", mode: state.currentMode || 'fast',
-    createdAt: Date.now(), messages: [{ role: "system", content: SYSTEM_PROMPT_BASE }]
+    id: chatId, 
+    title: "Yeni Sohbet", 
+    mode: mode,
+    createdAt: Date.now(), 
+    messages: [{ role: "system", content: getSystemPromptForMode(mode) }]
   });
   renderChatList();
   clearChatUI();
   welcomeScreen.style.display = 'flex';
-  document.querySelectorAll('.mode-btn').forEach(b => {
-    b.classList.remove('locked');
-    b.disabled = false;
-    if (b.dataset.mode === (state.currentMode || 'fast')) b.classList.add('active');
-    else b.classList.remove('active');
-  });
-  updateCommandMenu(state.currentMode || 'fast');
   saveChats();
 }
+
 newChatBtn.addEventListener('click', () => {
   createNewChat();
   if (window.innerWidth <= 768) overlay.click();
 });
+
 function clearChatUI() {
   Array.from(chatContainer.children).forEach(child => {
     if (child !== welcomeScreen && child !== typingIndicator && child.id !== 'chatFooter') child.remove();
   });
   typingIndicator.classList.remove('active');
 }
+
 function renderChatList() {
   chatListEl.innerHTML = '';
   const now = Date.now();
   const day = 24 * 60 * 60 * 1000;
   const groups = { 'Bugün': [], 'Dün': [], 'Son 7 Gün': [], 'Daha Eski': [] };
+  
+  // Sadece mevcut modun sohbetlerini veya hepsini göstermek isterseniz:
+  // Şu an tüm sohbetleri gösteriyoruz ama mod ikonlarıyla ayırt ediliyor.
   state.chats.forEach(chat => {
     const age = now - chat.createdAt;
     if (age < day && new Date(chat.createdAt).toDateString() === new Date().toDateString()) groups['Bugün'].push(chat);
@@ -2014,6 +1894,7 @@ function renderChatList() {
     else if (age < 7 * day) groups['Son 7 Gün'].push(chat);
     else groups['Daha Eski'].push(chat);
   });
+
   Object.entries(groups).forEach(([label, chats]) => {
     if (chats.length === 0) return;
     const labelEl = document.createElement('div');
@@ -2043,25 +1924,30 @@ function renderChatList() {
     });
   });
 }
+
 function loadChat(chatId) {
   state.currentChatId = chatId;
   const activeChat = state.chats.find(c => c.id === chatId);
+  if (!activeChat) return;
+  
+  state.currentMode = activeChat.mode;
   document.querySelectorAll('.mode-btn').forEach(b => {
-    b.classList.add('locked');
-    b.disabled = true;
-    b.classList.remove('active');
+    b.classList.remove('active', 'locked');
+    b.disabled = false;
     if (b.dataset.mode === activeChat.mode) b.classList.add('active');
   });
+  
   updateCommandMenu(activeChat.mode);
   renderChatList();
   clearChatUI();
   welcomeScreen.style.display = 'none';
-  if (!activeChat) return;
+  
   activeChat.messages.forEach(msg => {
     if (msg.role !== 'system') appendMessageUI(msg.content, msg.role === 'user' ? 'user' : 'ai', false, msg.attachments);
   });
   if (window.innerWidth <= 768) overlay.click();
 }
+
 async function initApp() {
   const savedSettings = localStorage.getItem('g3_settings');
   if (savedSettings) {
@@ -2074,21 +1960,25 @@ async function initApp() {
   const savedGist = localStorage.getItem('g3_github_gist_id');
   if (savedToken && $('githubToken')) $('githubToken').value = savedToken;
   if (savedGist && $('githubGistId')) $('githubGistId').value = savedGist;
+  
   applyCustomization();
-  await initDB();
   const savedChats = await loadChats();
   if (savedChats) {
     state.chats = savedChats;
     if (state.chats.length > 0) {
       state.currentChatId = state.chats[0].id;
+      state.currentMode = state.chats[0].mode || 'fast';
       renderChatList();
       loadChat(state.currentChatId);
     } else { createNewChat(); }
   } else { createNewChat(); }
+  
   updateChatFooter();
   setInterval(updateChatFooter, 60000);
 }
+
 initApp();
+
 function appendMessageUI(text, sender, animate = true, attachments = []) {
   welcomeScreen.style.display = 'none';
   const wrapper = document.createElement('div');
@@ -2148,6 +2038,7 @@ function appendMessageUI(text, sender, animate = true, attachments = []) {
   chatContainer.insertBefore(wrapper, typingIndicator);
   chatContainer.scrollTop = chatContainer.scrollHeight;
 }
+
 function renderMarkdown(text) {
   marked.setOptions({
     breaks: true, gfm: true,
@@ -2168,18 +2059,34 @@ function renderMarkdown(text) {
     wrapper.className = 'code-block';
     const header = document.createElement('div');
     header.className = 'code-header';
+    // Olay dinleyicisi burada DEĞİL, aşağıda event delegation ile ekleniyor
     header.innerHTML = `<span>${lang}</span><button class="copy-code-btn"><i class="fas fa-copy"></i> Kopyala</button>`;
     wrapper.appendChild(header);
     pre.parentNode.insertBefore(wrapper, pre);
     wrapper.appendChild(pre);
-    header.querySelector('.copy-code-btn').addEventListener('click', (e) => {
-      e.stopPropagation();
-      navigator.clipboard.writeText(code.textContent);
-      showToast('Kod kopyalandı');
-    });
   });
   return tempDiv.innerHTML;
 }
+
+// KOD KOPYALAMA DÜZELTMESİ (Event Delegation)
+chatContainer.addEventListener('click', (e) => {
+  const copyBtn = e.target.closest('.copy-code-btn');
+  if (copyBtn) {
+    const codeBlock = copyBtn.closest('.code-block');
+    const code = codeBlock.querySelector('code');
+    if (code) {
+      navigator.clipboard.writeText(code.textContent).then(() => {
+        showToast('Kod panoya kopyalandı');
+        const originalHTML = copyBtn.innerHTML;
+        copyBtn.innerHTML = '<i class="fas fa-check"></i> Kopyalandı';
+        setTimeout(() => { copyBtn.innerHTML = originalHTML; }, 2000);
+      }).catch(() => {
+        showToast('Kopyalama başarısız oldu', true);
+      });
+    }
+  }
+});
+
 function handleAction(btn, text) {
   const action = btn.dataset.action;
   switch (action) {
@@ -2196,10 +2103,12 @@ function handleAction(btn, text) {
     case 'speak': toggleSpeech(text, btn); break;
   }
 }
+
 function extractBase64(dataUrl) {
   const parts = dataUrl.split(',');
   return parts.length > 1 ? parts[1] : dataUrl;
 }
+
 function buildOpenAiMessages(messages, systemPrompt) {
   const out = [{ role: "system", content: systemPrompt }];
   let hasImages = false;
@@ -2231,9 +2140,7 @@ function buildOpenAiMessages(messages, systemPrompt) {
   return { messages: out, hasImages: hasImages, lastImage: lastImage, lastUserText: lastUserText };
 }
 
-// ============================================
-// 1) PUTER.JS - ANAHTARSIZ, EN GÜVENİLİR
-// ============================================
+// ... (AI Provider Fonksiyonları: tryPuter, tryHackClub, tryHuggingFace, tryPollinations, tryGemini, callAI aynı kalır)
 async function tryPuter(openAiMessages, hasImages, lastImage, lastUserText, mode) {
   if (typeof puter === 'undefined' || !puter.ai) throw new Error('Puter.js yüklenmedi');
   let resp;
@@ -2248,9 +2155,6 @@ async function tryPuter(openAiMessages, hasImages, lastImage, lastUserText, mode
   return reply;
 }
 
-// ============================================
-// 2) HACKCLUB AI - ANAHTARSIZ, OpenAI uyumlu
-// ============================================
 async function tryHackClub(openAiMessages, mode) {
   const list = mode === 'extra' ? ['o3-mini', 'gpt-4o', 'gpt-4o-mini'] : ['gpt-4o-mini', 'gpt-4o', 'gemini-2.5-flash'];
   let lastErr = null;
@@ -2259,12 +2163,7 @@ async function tryHackClub(openAiMessages, mode) {
       const r = await fetch('https://ai.hackclub.com/chat/completions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: model,
-          messages: openAiMessages,
-          temperature: 0.7,
-          max_tokens: mode === 'extra' ? 2000 : 900
-        })
+        body: JSON.stringify({ model: model, messages: openAiMessages, temperature: 0.7, max_tokens: mode === 'extra' ? 2000 : 900 })
       });
       if (r.ok) {
         const d = await r.json();
@@ -2277,14 +2176,8 @@ async function tryHackClub(openAiMessages, mode) {
   throw lastErr || new Error('HackClub başarısız');
 }
 
-// ============================================
-// 3) HUGGING FACE - hf_ anahtarın
-// ============================================
 async function tryHuggingFace(openAiMessages, hasImages, mode) {
-  const endpoints = [
-    "https://router.huggingface.co/v1/chat/completions",
-    "https://api-inference.huggingface.co/v1/chat/completions"
-  ];
+  const endpoints = ["https://router.huggingface.co/v1/chat/completions", "https://api-inference.huggingface.co/v1/chat/completions"];
   let models = [];
   let maxTokens = 800;
   if (hasImages) { models = HF_MODELS_VISION; maxTokens = 1000; }
@@ -2312,9 +2205,6 @@ async function tryHuggingFace(openAiMessages, hasImages, mode) {
   throw lastError || new Error("HF başarısız");
 }
 
-// ============================================
-// 4) POLLINATIONS - POST + GET yedek
-// ============================================
 async function tryPollinations(openAiMessages, lastUserText, systemPrompt) {
   try {
     const r = await fetch("https://text.pollinations.ai/openai", {
@@ -2336,9 +2226,6 @@ async function tryPollinations(openAiMessages, lastUserText, systemPrompt) {
   return reply;
 }
 
-// ============================================
-// 5) GEMINI - sadece AIza... anahtarın varsa çalışır
-// ============================================
 async function tryGemini(messages, systemPrompt) {
   if (!GEMINI_API_KEY || !GEMINI_API_KEY.startsWith('AIza')) throw new Error('Gemini anahtarı geçersiz (AIza... gerekli)');
   const contents = [];
@@ -2383,28 +2270,15 @@ async function tryGemini(messages, systemPrompt) {
   throw lastError || new Error('Gemini başarısız');
 }
 
-// ============================================
-// ANA ÇAĞRI - 5 KATMAN, BİRİ MUTLAKA ÇALIŞIR
-// ============================================
 async function callAI(messages, systemPrompt, mode) {
   const built = buildOpenAiMessages(messages, systemPrompt);
   const errors = [];
-  try {
-    return await tryPuter(built.messages, built.hasImages, built.lastImage, built.lastUserText, mode);
-  } catch (e) { errors.push('Puter: ' + e.message); console.warn('Puter başarısız:', e.message); }
-  try {
-    return await tryHackClub(built.messages, mode);
-  } catch (e) { errors.push('HackClub: ' + e.message); console.warn('HackClub başarısız:', e.message); }
-  try {
-    return await tryHuggingFace(built.messages, built.hasImages, mode);
-  } catch (e) { errors.push('HF: ' + e.message); console.warn('HF başarısız:', e.message); }
-  try {
-    return await tryPollinations(built.messages, built.lastUserText, systemPrompt);
-  } catch (e) { errors.push('Pollinations: ' + e.message); console.warn('Pollinations başarısız:', e.message); }
-  try {
-    return await tryGemini(messages, systemPrompt);
-  } catch (e) { errors.push('Gemini: ' + e.message); console.warn('Gemini başarısız:', e.message); }
-  throw new Error('Tüm sağlayıcılar başarısız. Konsolu aç ve hataları bak: ' + errors.join(' | '));
+  try { return await tryPuter(built.messages, built.hasImages, built.lastImage, built.lastUserText, mode); } catch (e) { errors.push('Puter: ' + e.message); }
+  try { return await tryHackClub(built.messages, mode); } catch (e) { errors.push('HackClub: ' + e.message); }
+  try { return await tryHuggingFace(built.messages, built.hasImages, mode); } catch (e) { errors.push('HF: ' + e.message); }
+  try { return await tryPollinations(built.messages, built.lastUserText, systemPrompt); } catch (e) { errors.push('Pollinations: ' + e.message); }
+  try { return await tryGemini(messages, systemPrompt); } catch (e) { errors.push('Gemini: ' + e.message); }
+  throw new Error('Tüm sağlayıcılar başarısız: ' + errors.join(' | '));
 }
 
 async function regenerateResponse() {
@@ -2444,6 +2318,7 @@ function toggleSpeech(text, btn) {
   speechSynthesis.speak(currentUtterance);
   btn.classList.add('active');
 }
+
 attachBtn.addEventListener('click', () => fileInput.click());
 fileInput.addEventListener('change', (e) => {
   const files = Array.from(e.target.files);
@@ -2458,6 +2333,7 @@ fileInput.addEventListener('change', (e) => {
   });
   fileInput.value = '';
 });
+
 function renderAttachments() {
   if (state.attachments.length === 0) { attachmentPreview.classList.remove('active'); attachmentPreview.innerHTML = ''; return; }
   attachmentPreview.classList.add('active');
@@ -2475,6 +2351,7 @@ function renderAttachments() {
     attachmentPreview.appendChild(chip);
   });
 }
+
 let recognition = null;
 if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -2489,6 +2366,7 @@ if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
   recognition.onend = () => { state.isRecording = false; micBtn.classList.remove('recording'); };
   recognition.onerror = () => { state.isRecording = false; micBtn.classList.remove('recording'); showToast('Ses tanıma hatası', true); };
 }
+
 micBtn.addEventListener('click', () => {
   if (!recognition) { showToast('Tarayıcınız sesli girişi desteklemiyor', true); return; }
   if (state.isRecording) recognition.stop();
@@ -2501,6 +2379,7 @@ micBtn.addEventListener('click', () => {
     } catch (e) { showToast('Mikrofon başlatılamadı', true); }
   }
 });
+
 userInput.addEventListener('input', (e) => {
   const val = e.target.value;
   const activeChat = state.chats.find(c => c.id === state.currentChatId);
@@ -2526,9 +2405,11 @@ userInput.addEventListener('input', (e) => {
   }
   autoResizeTextarea();
 });
+
 userInput.addEventListener('blur', () => {
   setTimeout(() => commandMenu.classList.remove('active'), 150);
 });
+
 async function generateImage(prompt) {
   return new Promise((resolve) => {
     const seed = Math.floor(Math.random() * 999999);
@@ -2543,6 +2424,7 @@ async function generateImage(prompt) {
     setTimeout(() => { if (!isResolved) { isResolved = true; resolve(imageUrl); } }, 60000);
   });
 }
+
 async function handleSmartCommand(text, activeChat) {
   if (text.startsWith('/imagine')) {
     const prompt = text.replace(/^\/imagine\s*/, '').trim();
@@ -2615,12 +2497,15 @@ async function handleSmartCommand(text, activeChat) {
   }
   return false;
 }
+
 async function sendMessage() {
   const text = userInput.value.trim();
   if (!text && state.attachments.length === 0) return;
   const activeChat = state.chats.find(c => c.id === state.currentChatId);
   if (!activeChat) return;
-  if (!checkLimit(activeChat.mode)) return;
+  
+  // Sınır kontrolü kaldırıldı, her zaman true döner
+  
   const isCommand = text.startsWith('/');
   if (isCommand && activeChat.mode !== 'smart') {
     appendMessageUI("Komutlar sadece Zeki (Hawkweed) modunda kullanılabilir. Lütfen yeni bir sohbet başlatıp Zeki modunu seçin.", 'ai');
@@ -2675,15 +2560,18 @@ async function sendMessage() {
     userInput.focus();
   }
 }
+
 sendBtn.addEventListener('click', sendMessage);
 userInput.addEventListener('keydown', (e) => {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
 });
+
 function autoResizeTextarea() {
   userInput.style.height = 'auto';
   userInput.style.height = Math.min(userInput.scrollHeight, 120) + 'px';
 }
 userInput.addEventListener('input', autoResizeTextarea);
+
 document.querySelectorAll('.suggestion-card').forEach(card => {
   card.addEventListener('click', () => {
     userInput.value = card.dataset.prompt;
@@ -2691,6 +2579,7 @@ document.querySelectorAll('.suggestion-card').forEach(card => {
     sendMessage();
   });
 });
+
 $('exportBtn').addEventListener('click', () => {
   const activeChat = state.chats.find(c => c.id === state.currentChatId);
   if (!activeChat) return;
@@ -2710,20 +2599,67 @@ $('exportBtn').addEventListener('click', () => {
   showToast('Sohbet dışa aktarıldı');
   userDropdown.classList.remove('active');
 });
-$('githubSaveBtn').addEventListener('click', saveToGitHub);
-$('githubLoadBtn').addEventListener('click', loadFromGitHub);
-$('accentColorPicker').addEventListener('input', (e) => {
-  state.accentColor = e.target.value;
-  applyCustomization();
+
+$('githubSaveBtn').addEventListener('click', async () => {
+  const token = $('githubToken').value.trim();
+  if (!token) { showToast('Lütfen GitHub Token girin', true); return; }
+  const gistId = $('githubGistId').value.trim();
+  const data = { version: "4.9", timestamp: new Date().toISOString(), user: state.user, chats: state.chats, settings: { theme: state.theme, accentColor: state.accentColor, fontSize: state.fontSize, bgAnimation: state.bgAnimation } };
+  const url = gistId ? `https://api.github.com/gists/${gistId}` : 'https://api.github.com/gists';
+  const method = gistId ? 'PATCH' : 'POST';
+  try {
+    showToast('GitHub\'a gönderiliyor...');
+    const response = await fetch(url, { method: method, headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json' }, body: JSON.stringify({ description: "G3 AI Chat Backup", public: false, files: { "g3_backup.json": { content: JSON.stringify(data, null, 2) } } }) });
+    if (!response.ok) { const err = await response.json(); throw new Error(err.message || 'GitHub API hatası'); }
+    const result = await response.json();
+    localStorage.setItem('g3_github_token', token);
+    localStorage.setItem('g3_github_gist_id', result.id);
+    $('githubGistId').value = result.id;
+    showToast('GitHub\'a başarıyla yedeklendi!');
+  } catch (error) {
+    console.error(error);
+    showToast('Yedekleme hatası: ' + error.message, true);
+  }
 });
-$('fontSizeSlider').addEventListener('input', (e) => {
-  state.fontSize = e.target.value;
-  applyCustomization();
+
+$('githubLoadBtn').addEventListener('click', async () => {
+  const token = $('githubToken').value.trim() || localStorage.getItem('g3_github_token');
+  const gistId = $('githubGistId').value.trim() || localStorage.getItem('g3_github_gist_id');
+  if (!token || !gistId) { showToast('Token ve Gist ID gerekli', true); return; }
+  try {
+    showToast('GitHub\'dan yükleniyor...');
+    const response = await fetch(`https://api.github.com/gists/${gistId}`, { headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' } });
+    if (!response.ok) throw new Error('Gist bulunamadı veya yetki hatası');
+    const data = await response.json();
+    const backup = JSON.parse(data.files['g3_backup.json'].content);
+    if (confirm('Mevcut veriler silinip GitHub\'daki verilerle değiştirilecek. Emin misiniz?')) {
+      state.user = backup.user;
+      state.chats = backup.chats;
+      if (backup.settings) {
+        state.theme = backup.settings.theme || 'dark';
+        state.accentColor = backup.settings.accentColor || '#6366f1';
+        state.fontSize = backup.settings.fontSize || 16;
+        state.bgAnimation = backup.settings.bgAnimation !== undefined ? backup.settings.bgAnimation : true;
+      }
+      await saveChats();
+      saveUserState();
+      applyCustomization();
+      renderChatList();
+      if (state.chats.length > 0) loadChat(state.chats[0].id);
+      else createNewChat();
+      updateUserUI();
+      showToast('GitHub\'dan başarıyla yüklendi!');
+    }
+  } catch (error) {
+    console.error(error);
+    showToast('Yükleme hatası: ' + error.message, true);
+  }
 });
-$('bgAnimToggle').addEventListener('change', (e) => {
-  state.bgAnimation = e.target.checked;
-  applyCustomization();
-});
+
+$('accentColorPicker').addEventListener('input', (e) => { state.accentColor = e.target.value; applyCustomization(); });
+$('fontSizeSlider').addEventListener('input', (e) => { state.fontSize = e.target.value; applyCustomization(); });
+$('bgAnimToggle').addEventListener('change', (e) => { state.bgAnimation = e.target.checked; applyCustomization(); });
+
 let toastTimeout;
 function showToast(message, isError = false) {
   toastText.textContent = message;
@@ -2734,6 +2670,7 @@ function showToast(message, isError = false) {
   clearTimeout(toastTimeout);
   toastTimeout = setTimeout(() => toast.classList.remove('show'), 3000);
 }
+
 document.addEventListener('keydown', (e) => {
   if ((e.ctrlKey || e.metaKey) && e.key === 'n') { e.preventDefault(); createNewChat(); }
   if (e.key === 'Escape') {
@@ -2743,57 +2680,43 @@ document.addEventListener('keydown', (e) => {
     if (window.innerWidth <= 768) overlay.click();
   }
 });
+
 window.addEventListener('beforeunload', () => {
   if (state.chats && state.chats.length > 0) {
-    try {
-      localStorage.setItem('g3_chats', JSON.stringify(state.chats));
-      if (db) {
-        const transaction = db.transaction([STORE_NAME], 'readwrite');
-        transaction.objectStore(STORE_NAME).put({ id: 'chats', data: state.chats, timestamp: Date.now() });
-      }
-    } catch (e) {}
+    try { saveChats(); } catch (e) {}
   }
-  if (state.user) try { localStorage.setItem('g3_user', JSON.stringify(state.user)); } catch (e) {}
 });
+
 window.addEventListener('pagehide', () => {
   if (state.chats && state.chats.length > 0) {
-    try {
-      localStorage.setItem('g3_chats', JSON.stringify(state.chats));
-      if (db) {
-        const transaction = db.transaction([STORE_NAME], 'readwrite');
-        transaction.objectStore(STORE_NAME).put({ id: 'chats', data: state.chats, timestamp: Date.now() });
-      }
-    } catch (e) {}
+    try { saveChats(); } catch (e) {}
   }
-  if (state.user) try { localStorage.setItem('g3_user', JSON.stringify(state.user)); } catch (e) {}
 });
+
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'hidden') {
     if (state.chats && state.chats.length > 0) {
-      try {
-        localStorage.setItem('g3_chats', JSON.stringify(state.chats));
-        if (db) {
-          const transaction = db.transaction([STORE_NAME], 'readwrite');
-          transaction.objectStore(STORE_NAME).put({ id: 'chats', data: state.chats, timestamp: Date.now() });
-        }
-      } catch (e) {}
+      try { saveChats(); } catch (e) {}
     }
-    if (state.user) try { localStorage.setItem('g3_user', JSON.stringify(state.user)); } catch (e) {}
   }
 });
+
 setInterval(async () => {
   if (state.chats && state.chats.length > 0) {
     try { await saveChats(); } catch (e) {}
   }
 }, 15000);
+
 window.addEventListener('online', () => {
   showToast('İnternet bağlantısı geri geldi');
   if (state.chats && state.chats.length > 0) saveChats();
 });
+
 window.addEventListener('offline', () => {
   showToast('İnternet bağlantısı kesildi - Veriler yerel olarak kaydedildi', true);
   if (state.chats && state.chats.length > 0) saveChats();
 });
+
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js')
@@ -2801,6 +2724,7 @@ if ('serviceWorker' in navigator) {
       .catch(err => console.log('Service Worker hatası:', err));
   });
 }
+
 console.log('%c G3 AI v4.9 ', 'background: linear-gradient(135deg, #ef4444, #6366f1); color: white; font-size: 20px; padding: 10px; border-radius: 5px;');
 console.log('Muhammed Eren Bayram tarafından geliştirilmiştir.');
 </script>
