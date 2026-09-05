@@ -23,7 +23,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
 :root {
---bg-primary: rgba(15, 15, 18, 0.85); /* Hafif şeffaf yapıldı ki arka plan görünsün */
+--bg-primary: rgba(15, 15, 18, 0.85);
 --bg-secondary: rgba(26, 26, 31, 0.9);
 --bg-tertiary: rgba(36, 36, 43, 0.9);
 --bg-hover: rgba(45, 45, 53, 0.9);
@@ -37,7 +37,7 @@
 --border: rgba(255, 255, 255, 0.08);
 --border-strong: rgba(255, 255, 255, 0.15);
 --user-msg: linear-gradient(135deg, #ef4444, #6366f1);
---ai-msg: rgba(30, 30, 36, 0.9);
+--ai-msg: rgba(30, 30, 36, 0.95);
 --success: #10b981;
 --danger: #ef4444;
 --warning: #f59e0b;
@@ -56,17 +56,17 @@
 }
 [data-theme="light"] {
 --bg-primary: rgba(255, 255, 255, 0.85);
---bg-secondary: rgba(248, 249, 250, 0.9);
---bg-tertiary: rgba(241, 243, 245, 0.9);
---bg-hover: rgba(233, 236, 239, 0.9);
---bg-elevated: rgba(255, 255, 255, 0.95);
+--bg-secondary: rgba(248, 249, 250, 0.92);
+--bg-tertiary: rgba(241, 243, 245, 0.92);
+--bg-hover: rgba(233, 236, 239, 0.92);
+--bg-elevated: rgba(255, 255, 255, 0.98);
 --text-primary: #1a1a1f;
 --text-secondary: #4a4a52;
 --text-muted: #71717a;
 --border: rgba(0, 0, 0, 0.08);
 --border-strong: rgba(0, 0, 0, 0.15);
 --user-msg: linear-gradient(135deg, #ef4444, #6366f1);
---ai-msg: rgba(241, 243, 245, 0.9);
+--ai-msg: rgba(241, 243, 245, 0.95);
 --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
 --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
 --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.12);
@@ -81,7 +81,7 @@ html, body {
 }
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    background-color: #020014; /* Galaksi için temel arka plan */
+    background-color: #020014;
     color: var(--text-primary);
     display: flex;
     transition: color 0.3s;
@@ -89,8 +89,6 @@ body {
     position: relative;
     padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
 }
-
-/* GALAKSİ ARKA PLAN CSS */
 #galaxy-canvas {
     position: fixed;
     inset: 0;
@@ -98,15 +96,14 @@ body {
     pointer-events: none;
     transition: opacity 0.5s ease;
 }
-
 .auth-overlay, #sidebar, #main-view, #overlay, .toast { position: relative; z-index: 1; }
 .auth-overlay { z-index: 1000; }
 #overlay { z-index: 90; }
 .auth-overlay {
 position: fixed; inset: 0;
-background: rgba(2, 0, 20, 0.75);
-backdrop-filter: blur(10px);
--webkit-backdrop-filter: blur(10px);
+background: rgba(2, 0, 20, 0.8);
+backdrop-filter: blur(12px);
+-webkit-backdrop-filter: blur(12px);
 display: flex; align-items: center; justify-content: center;
 opacity: 0; visibility: hidden;
 transition: var(--transition);
@@ -171,8 +168,10 @@ border: 1px solid var(--border);
 border-radius: var(--radius-sm);
 font-size: 0.95rem;
 transition: var(--transition);
+color: var(--text-primary);
 }
 .input-group input:focus { border-color: var(--accent); background: var(--bg-elevated); }
+.input-group input::placeholder { color: var(--text-muted); }
 .input-group i {
 position: absolute; left: 14px; top: 38px;
 color: var(--text-muted); font-size: 0.9rem;
@@ -195,7 +194,7 @@ color: var(--text-muted); font-size: 0.8rem; margin: 8px 0;
 .auth-divider::before, .auth-divider::after {
 content: ''; flex: 1; height: 1px; background: var(--border);
 }
-.google-btn {
+.google-btn, .guest-btn {
 width: 100%;
 padding: 11px 14px;
 background: var(--bg-tertiary);
@@ -210,7 +209,13 @@ justify-content: center;
 gap: 10px;
 transition: var(--transition);
 }
-.google-btn:hover { background: var(--bg-hover); border-color: var(--border-strong); }
+.google-btn:hover, .guest-btn:hover { background: var(--bg-hover); border-color: var(--border-strong); }
+.guest-btn {
+    margin-top: 8px;
+    background: transparent;
+    border: 1px dashed var(--border-strong);
+    color: var(--text-secondary);
+}
 .google-btn svg { width: 18px; height: 18px; }
 #sidebar {
 width: 280px;
@@ -699,10 +704,12 @@ position: relative;
 #userInput {
 flex: 1; resize: none; max-height: 120px; min-height: 24px;
 padding: 8px 4px; 
-font-size: 16px; /* iOS otomatik zoom engelleme */
+font-size: 16px;
 line-height: 1.5;
 overflow-y: auto;
+color: var(--text-primary);
 }
+#userInput::placeholder { color: var(--text-muted); }
 #send-btn {
 width: 36px; height: 36px;
 background: linear-gradient(135deg, #ef4444, #6366f1); color: white;
@@ -733,6 +740,7 @@ opacity: 0; visibility: hidden;
 transition: var(--transition);
 z-index: 2000;
 display: flex; align-items: center; gap: 8px;
+color: var(--text-primary);
 }
 .toast.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
 .toast i { color: var(--success); }
@@ -760,6 +768,7 @@ box-shadow: var(--shadow-lg);
 position: relative;
 max-height: 90vh;
 overflow-y: auto;
+color: var(--text-primary);
 }
 .profile-header {
 display: flex;
@@ -866,6 +875,33 @@ font-size: 0.75rem;
 color: var(--text-secondary);
 font-weight: 600;
 }
+
+/* TEMA DÜZELTMELERİ: Açık temada kalan beyaz/koyu sorunları */
+[data-theme="light"] .message code:not(pre code) {
+  background: #e9ecef;
+  color: #d63384;
+}
+[data-theme="light"] .code-block {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+}
+[data-theme="light"] .code-header {
+  background: #e9ecef;
+  border-bottom: 1px solid #dee2e6;
+  color: #495057;
+}
+[data-theme="light"] .typing {
+  background: var(--ai-msg);
+  border: 1px solid var(--border);
+}
+[data-theme="light"] .auth-modal,
+[data-theme="light"] .profile-content,
+[data-theme="light"] .user-dropdown,
+[data-theme="light"] #commandMenu {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+}
+
 @media (max-width: 1024px) {
 #sidebar { width: 260px; }
 .message-row { max-width: 80%; }
@@ -1007,7 +1043,6 @@ display: none !important;
 </style>
 </head>
 <body>
-<!-- YENİ GALAKSİ ARKA PLAN -->
 <canvas id="galaxy-canvas"></canvas>
 
 <div class="auth-overlay" id="authOverlay">
@@ -1027,45 +1062,40 @@ display: none !important;
 <div class="input-group">
 <label>E-posta</label>
 <i class="fas fa-envelope"></i>
-<input type="email" placeholder="ornek@email.com" required>
+<input type="email" id="loginEmail" placeholder="ornek@email.com" required>
 </div>
 <div class="input-group">
 <label>Şifre</label>
 <i class="fas fa-lock"></i>
-<input type="password" placeholder="••••••••" required>
+<input type="password" id="loginPassword" placeholder="••••••••" required>
 </div>
 <button type="submit" class="auth-btn">Giriş Yap</button>
 <div class="auth-divider">veya</div>
-<button type="button" class="google-btn" id="googleSignInBtn">
-<svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-Google ile devam et
+<button type="button" class="guest-btn" id="guestSignInBtn">
+<i class="fas fa-user-clock"></i> Misafir olarak devam et
 </button>
 </form>
 <form class="auth-form hidden" id="registerForm">
 <div class="input-group">
 <label>Ad Soyad</label>
 <i class="fas fa-user"></i>
-<input type="text" placeholder="Adınız Soyadınız" required>
+<input type="text" id="regName" placeholder="Adınız Soyadınız" required>
 </div>
 <div class="input-group">
 <label>E-posta</label>
 <i class="fas fa-envelope"></i>
-<input type="email" placeholder="ornek@email.com" required>
+<input type="email" id="regEmail" placeholder="ornek@email.com" required>
 </div>
 <div class="input-group">
 <label>Şifre</label>
 <i class="fas fa-lock"></i>
-<input type="password" placeholder="En az 6 karakter" required>
+<input type="password" id="regPassword" placeholder="En az 6 karakter" required>
 </div>
 <button type="submit" class="auth-btn">Hesap Oluştur</button>
-<div class="auth-divider">veya</div>
-<button type="button" class="google-btn" id="googleSignInBtnRegister">
-<svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-Google ile devam et
-</button>
 </form>
 </div>
 </div>
+
 <nav id="sidebar">
 <div class="sidebar-header">
 <button id="new-chat-btn">
@@ -1165,10 +1195,10 @@ Google ile devam et
 <button class="mode-btn active" data-mode="fast" title="Firethron: En hızlı yanıt.">
 <i class="fas fa-bolt"></i> Firethron
 </button>
-<button class="mode-btn" data-mode="smart" title="Hawkweed: Zeki mod, komutlar burada açılır.">
+<button class="mode-btn" data-mode="smart" title="Hawkweed: Zeki mod.">
 <i class="fas fa-brain"></i> Hawkweed
 </button>
-<button class="mode-btn" data-mode="extra" title="Nightplox: Düşünen mod.">
+<button class="mode-btn" data-mode="extra" title="Nightplox: Sadece komutlarla çalışır.">
 <i class="fas fa-star"></i> Nightplox
 </button>
 </div>
@@ -1180,12 +1210,13 @@ Google ile devam et
 <input type="file" id="fileInput" hidden multiple accept="image/*,.pdf,.txt,.doc,.docx">
 <button class="tool-btn" id="micBtn" title="Sesli Giriş" aria-label="Sesli Giriş"><i class="fas fa-microphone"></i></button>
 </div>
-<textarea id="userInput" placeholder="Bir mesaj yaz... (/ komutları sadece Zeki modda açılır)" rows="1"></textarea>
+<textarea id="userInput" placeholder="Bir mesaj yaz..." rows="1"></textarea>
 <button id="send-btn" aria-label="Gönder"><i class="fas fa-arrow-up"></i></button>
 </div>
 <div class="input-hint">G3 hata yapabilir. Önemli bilgileri doğrulamayı unutma.</div>
 </div>
 </main>
+
 <div class="profile-modal" id="profileModal">
 <div class="profile-content">
 <button class="profile-close" id="profileClose"><i class="fas fa-times"></i></button>
@@ -1231,20 +1262,6 @@ Google ile devam et
 </label>
 </div>
 </div>
-<div style="margin: 16px 0; padding: 16px; background: var(--bg-tertiary); border-radius: var(--radius-md); border: 1px solid var(--border);">
-<h4 style="margin-bottom: 8px; font-size: 0.9rem; color: var(--text-primary);"><i class="fab fa-github"></i> GitHub Senkronizasyonu</h4>
-<p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 12px;">Verilerinizi kendi GitHub hesabınızda güvenli bir Gist olarak saklayın.</p>
-<div class="input-group" style="margin-bottom: 10px;">
-<input type="password" id="githubToken" placeholder="GitHub Personal Access Token (gist yetkisi)" style="width: 100%; padding: 8px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.85rem;">
-</div>
-<div class="input-group" style="margin-bottom: 12px;">
-<input type="text" id="githubGistId" placeholder="Gist ID (Otomatik doldurulur)" readonly style="width: 100%; padding: 8px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-muted); font-size: 0.85rem;">
-</div>
-<div style="display: flex; gap: 8px;">
-<button class="profile-btn" id="githubSaveBtn" style="flex: 1; font-size: 0.85rem; padding: 8px;"><i class="fas fa-cloud-upload-alt"></i> Yedekle</button>
-<button class="profile-btn" id="githubLoadBtn" style="flex: 1; font-size: 0.85rem; padding: 8px;"><i class="fas fa-cloud-download-alt"></i> Geri Yükle</button>
-</div>
-</div>
 <button class="profile-btn" id="exportAllBtn"><i class="fas fa-download"></i> Markdown Olarak Dışa Aktar</button>
 <button class="profile-btn" id="exportPdfBtn"><i class="fas fa-file-pdf"></i> PDF Olarak Dışa Aktar</button>
 <button class="profile-btn" id="exportJsonBtn"><i class="fas fa-file-code"></i> JSON Olarak Yedekle</button>
@@ -1254,6 +1271,7 @@ Google ile devam et
 </div>
 </div>
 </div>
+
 <div class="toast" id="toast">
 <i class="fas fa-check-circle"></i>
 <span id="toastText">Kopyalandı</span>
@@ -1265,7 +1283,7 @@ Google ile devam et
 
 <script>
 // ==========================================
-// GALAKSİ ARKA PLAN ANİMASYONU (YENİ)
+// GALAKSİ ARKA PLAN ANİMASYONU
 // ==========================================
 function initGalaxyBackground() {
     const canvas = document.getElementById('galaxy-canvas');
@@ -1279,7 +1297,6 @@ function initGalaxyBackground() {
         cx = width / 2;
         cy = height / 2;
     }
-
     window.addEventListener('resize', resize);
     resize();
 
@@ -1321,13 +1338,11 @@ function initGalaxyBackground() {
             const x = cx + Math.cos(this.angle) * this.radius;
             const y = cy + Math.sin(this.angle) * this.radius * 0.45;
             const fade = Math.max(0, 1 - Math.sqrt((x - cx) ** 2 + (y - cy) ** 2) / (Math.min(width, height) * 0.55));
-            
             ctx.beginPath();
             ctx.arc(x, y, this.size, 0, Math.PI * 2);
             ctx.fillStyle = this.color;
             ctx.globalAlpha = this.currentOpacity * fade;
             ctx.fill();
-            
             if (this.isCore && this.size > 1.2) {
                 ctx.beginPath();
                 ctx.arc(x, y, this.size * 3, 0, Math.PI * 2);
@@ -1338,59 +1353,74 @@ function initGalaxyBackground() {
             ctx.globalAlpha = 1.0;
         }
     }
-
     for (let i = 0; i < CORE_PARTICLES; i++) particles.push(new Star(true));
     for (let i = 0; i < ARMS * PARTICLES_PER_ARM; i++) particles.push(new Star(false));
 
     let mouseX = cx, mouseY = cy;
-    window.addEventListener('mousemove', (e) => {
-        mouseX = e.clientX;
-        mouseY = e.clientY;
-    });
+    window.addEventListener('mousemove', (e) => { mouseX = e.clientX; mouseY = e.clientY; });
 
-    let time = 0;
-    let animationId;
-
+    let time = 0, animationId;
     function animate() {
         ctx.fillStyle = 'rgba(2, 0, 20, 0.25)';
         ctx.fillRect(0, 0, width, height);
         time += 0.005;
-
         const glowSize = 120 + Math.sin(time) * 10;
         const gradient = ctx.createRadialGradient(cx, cy, 10, cx, cy, glowSize);
         gradient.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
         gradient.addColorStop(0.2, 'rgba(139, 92, 246, 0.6)');
         gradient.addColorStop(0.5, 'rgba(6, 182, 212, 0.2)');
         gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
-
         ctx.globalCompositeOperation = 'lighter';
         ctx.fillStyle = gradient;
         ctx.beginPath();
         ctx.arc(cx, cy, glowSize, 0, Math.PI * 2);
         ctx.fill();
-
         ctx.save();
         ctx.translate((mouseX - cx) * 0.02, (mouseY - cy) * 0.02);
-        particles.forEach(p => {
-            p.update();
-            p.draw();
-        });
+        particles.forEach(p => { p.update(); p.draw(); });
         ctx.restore();
-
         ctx.globalCompositeOperation = 'source-over';
         animationId = requestAnimationFrame(animate);
     }
-
     animate();
-
-    // Arka planı açma/kapama için global bir referans sakla
     window.galaxyAnimationId = animationId;
     window.toggleGalaxy = function(show) {
         const canvasEl = document.getElementById('galaxy-canvas');
-        if (canvasEl) {
-            canvasEl.style.display = show ? 'block' : 'none';
-        }
+        if (canvasEl) canvasEl.style.display = show ? 'block' : 'none';
     };
+}
+
+// ==========================================
+// GERÇEK KAYIT / GİRİŞ SİSTEMİ (LocalStorage Based)
+// ==========================================
+function registerUser(name, email, password) {
+    const users = JSON.parse(localStorage.getItem('g3_users') || '[]');
+    if (users.find(u => u.email.toLowerCase() === email.toLowerCase())) {
+        showToast('Bu e-posta adresi zaten kayıtlı!', true);
+        return false;
+    }
+    const newUser = {
+        name: name.trim(),
+        email: email.toLowerCase().trim(),
+        password: btoa(password), // Basit şifreleme (frontend-only simülasyon)
+        createdAt: Date.now(),
+        avatar: name.trim().charAt(0).toUpperCase() || 'U'
+    };
+    users.push(newUser);
+    localStorage.setItem('g3_users', JSON.stringify(users));
+    return true;
+}
+
+function loginUser(email, password) {
+    const users = JSON.parse(localStorage.getItem('g3_users') || '[]');
+    const user = users.find(u => u.email.toLowerCase() === email.toLowerCase().trim() && u.password === btoa(password));
+    if (user) {
+        state.user = { name: user.name, email: user.email, avatar: user.avatar, isGuest: false };
+        state.joinDate = user.createdAt;
+        saveUserState();
+        return true;
+    }
+    return false;
 }
 
 // ==========================================
@@ -1399,19 +1429,16 @@ function initGalaxyBackground() {
 const HF_API_KEY = "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";
 const GEMINI_API_KEY = "AQ.Ab8RN6ICmyYKnOyhaVnjaOpAd330yEBYFAHRXKBWZ89WeIvK5w";
 const GEMINI_MODELS = ["gemini-2.0-flash", "gemini-1.5-flash"];
-
-const HF_MODELS_FAST = ["Qwen/Qwen2.5-7B-Instruct", "meta-llama/Llama-3.1-8B-Instruct", "mistralai/Mistral-7B-Instruct-v0.3"];
-const HF_MODELS_THINKING = ["deepseek-ai/DeepSeek-R1", "Qwen/QwQ-32B", "Qwen/Qwen3-32B"];
-const HF_MODELS_VISION = ["meta-llama/Llama-3.2-11B-Vision-Instruct", "Qwen/Qwen2.5-VL-72B-Instruct", "microsoft/Phi-3.5-vision-instruct"];
+const HF_MODELS_FAST = ["Qwen/Qwen2.5-7B-Instruct", "meta-llama/Llama-3.1-8B-Instruct"];
+const HF_MODELS_THINKING = ["deepseek-ai/DeepSeek-R1", "Qwen/QwQ-32B"];
+const HF_MODELS_VISION = ["meta-llama/Llama-3.2-11B-Vision-Instruct", "Qwen/Qwen2.5-VL-72B-Instruct"];
 
 const AI_AVATAR_URL = "./g3.png";
-const GOOGLE_CLIENT_ID = "";
 const SYSTEM_PROMPT_BASE = `Adın G3. Net, yardımcı ve direkt yanıtlar ver. Yanıtlarında Markdown kullanabilirsin.
 KURALLAR:
 1- "Seni kim yaptı?", "Yapımcın kim?", "Yaratıcın kim?" gibi sorulara KESİNLİKLE SADECE "Muhammed Eren Bayram" diye cevap ver.
 2- Kullanıcının dilini OTOMATİK ALGILA ve aynı dilde cevap ver.
-3- Kod bloklarını \`\`\`dil_kodu şeklinde formatla.
-4- Sana bir görsel gönderilirse görseli detaylı, dikkatli ve eksiksiz bir şekilde incele ve analiz et.`;
+3- Kod bloklarını \`\`\`dil_kodu şeklinde formatla.`;
 
 const $ = (id) => document.getElementById(id);
 const chatContainer = $('chat-container');
@@ -1447,23 +1474,15 @@ let state = {
   accentColor: '#6366f1', fontSize: 16, bgAnimation: true
 };
 
-// Sınırsız erişim için limit kontrolü devre dışı bırakıldı
-function checkLimit(mode) {
-  return true; 
-}
-
-// GÜVENİLİR DEPOLAMA SİSTEMİ (v2)
 async function saveChats() {
     if (!state.chats || state.chats.length === 0) return;
     try {
-        const dataToSave = JSON.stringify(state.chats);
-        localStorage.setItem('g3_chats_v2', dataToSave);
+        localStorage.setItem('g3_chats_v2', JSON.stringify(state.chats));
         updateStorageIndicator('success', 'Cihaza güvenle kaydedildi');
         updateStorageUsage();
         return true;
     } catch (e) {
-        console.error('Depolama hatası:', e);
-        updateStorageIndicator('error', 'Depolama alanı dolu veya hata oluştu!');
+        updateStorageIndicator('error', 'Depolama hatası!');
         return false;
     }
 }
@@ -1472,17 +1491,13 @@ async function loadChats() {
     try {
         const data = localStorage.getItem('g3_chats_v2');
         if (data) return JSON.parse(data);
-        
         const oldData = localStorage.getItem('g3_chats');
         if (oldData) {
-            const parsed = JSON.parse(oldData);
-            localStorage.setItem('g3_chats_v2', JSON.stringify(parsed));
+            localStorage.setItem('g3_chats_v2', oldData);
             localStorage.removeItem('g3_chats');
-            return parsed;
+            return JSON.parse(oldData);
         }
-    } catch (e) { 
-        console.error('Yükleme hatası:', e); 
-    }
+    } catch (e) { console.error('Yükleme hatası:', e); }
     return null;
 }
 
@@ -1502,20 +1517,17 @@ async function updateStorageUsage() {
       if (localStorage.hasOwnProperty(key)) totalSize += (localStorage[key].length * 2);
     }
     const sizeMB = (totalSize / (1024 * 1024)).toFixed(2);
-    const limitMB = 50;
-    const percent = Math.min((totalSize / (limitMB * 1024 * 1024)) * 100, 100).toFixed(1);
+    const percent = Math.min((totalSize / (50 * 1024 * 1024)) * 100, 100).toFixed(1);
     const storageFill = $('storageFill');
-    const storagePercent = $('storagePercent');
-    const storageTextDetail = $('storageTextDetail');
     if (storageFill) {
       storageFill.style.width = percent + '%';
       storageFill.className = 'storage-fill';
       if (percent > 80) storageFill.classList.add('danger');
       else if (percent > 60) storageFill.classList.add('warning');
     }
-    if (storagePercent) storagePercent.textContent = percent + '%';
-    if (storageTextDetail) storageTextDetail.textContent = `${sizeMB} MB / 50 MB`;
-  } catch (e) { console.error('Depolama hesaplama hatası:', e); }
+    if ($('storagePercent')) $('storagePercent').textContent = percent + '%';
+    if ($('storageTextDetail')) $('storageTextDetail').textContent = `${sizeMB} MB / 50 MB`;
+  } catch (e) {}
 }
 
 function saveUserState() {
@@ -1526,20 +1538,6 @@ function saveUserState() {
   } catch (e) {}
 }
 
-function incrementUserCount() {
-  try {
-    const current = parseInt(localStorage.getItem('g3_total_users') || '0');
-    localStorage.setItem('g3_total_users', String(current + 1));
-  } catch (e) {}
-}
-
-function incrementConversationCount() {
-  try {
-    const current = parseInt(localStorage.getItem('g3_total_conversations') || '0');
-    localStorage.setItem('g3_total_conversations', String(current + 1));
-  } catch (e) {}
-}
-
 function updateChatFooter() {
   if (!chatFooterText) return;
   const launchDate = new Date('2026-06-01T00:00:00');
@@ -1547,8 +1545,7 @@ function updateChatFooter() {
   const diff = now - launchDate;
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
   const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-  chatFooterText.innerHTML = `<i class="fas fa-clock"></i> G3 AI <strong>${days} gün, ${hours} saat, ${minutes} dakika</strong> süredir aktif`;
+  chatFooterText.innerHTML = `<i class="fas fa-clock"></i> G3 AI <strong>${days} gün, ${hours} saat</strong> süredir aktif`;
 }
 
 function applyCustomization() {
@@ -1557,68 +1554,14 @@ function applyCustomization() {
     document.documentElement.style.setProperty('--accent-hover', state.accentColor);
   }
   if (state.fontSize) document.body.style.fontSize = state.fontSize + 'px';
-  
-  // Galaksi arka plan açma/kapama mantığı
-  if (typeof window.toggleGalaxy === 'function') {
-      window.toggleGalaxy(state.bgAnimation !== false);
-  }
-  
+  if (typeof window.toggleGalaxy === 'function') window.toggleGalaxy(state.bgAnimation !== false);
   if ($('accentColorPicker')) $('accentColorPicker').value = state.accentColor;
   if ($('fontSizeSlider')) $('fontSizeSlider').value = state.fontSize;
   if ($('bgAnimToggle')) $('bgAnimToggle').checked = state.bgAnimation;
-  localStorage.setItem('g3_settings', JSON.stringify({
-    accentColor: state.accentColor, fontSize: state.fontSize, bgAnimation: state.bgAnimation
-  }));
+  localStorage.setItem('g3_settings', JSON.stringify({ accentColor: state.accentColor, fontSize: state.fontSize, bgAnimation: state.bgAnimation }));
 }
 
-function handleGoogleCredentialResponse(response) {
-  try {
-    const token = response.credential;
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    state.user = {
-      name: payload.name || 'Google Kullanıcı', email: payload.email,
-      avatar: payload.picture || payload.name?.charAt(0).toUpperCase() || 'G', isGoogleUser: true
-    };
-    if (!state.joinDate) state.joinDate = Date.now();
-    saveUserState();
-    incrementUserCount();
-    updateUserUI();
-    updateChatFooter();
-    authOverlay.classList.remove('active');
-    showToast('Google ile giriş yapıldı');
-  } catch (error) {
-    console.error('Google giriş hatası:', error);
-    showToast('Google girişi başarısız oldu', true);
-  }
-}
-
-function initializeGoogleSignIn() {
-  if (typeof google === 'undefined' || !google.accounts || !google.accounts.id) {
-    setTimeout(initializeGoogleSignIn, 500);
-    return;
-  }
-  const clientId = GOOGLE_CLIENT_ID || "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com";
-  try {
-    google.accounts.id.initialize({ client_id: clientId, callback: handleGoogleCredentialResponse, auto_select: false, cancel_on_tap_outside: true });
-    document.querySelectorAll('.google-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.preventDefault();
-        google.accounts.id.prompt();
-      });
-    });
-  } catch (error) {
-    document.querySelectorAll('.google-btn').forEach(btn => {
-      btn.addEventListener('click', () => showToast('Google Client ID yapılandırılmamış', true));
-    });
-  }
-}
-
-window.addEventListener('load', () => {
-  setTimeout(initializeGoogleSignIn, 500);
-  setTimeout(updateStorageUsage, 500);
-  initGalaxyBackground(); // Galaksi animasyonunu başlat
-});
-
+// Auth Event Listeners
 document.querySelectorAll('.auth-tab').forEach(tab => {
   tab.addEventListener('click', () => {
     document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
@@ -1629,30 +1572,52 @@ document.querySelectorAll('.auth-tab').forEach(tab => {
   });
 });
 
-function handleAuth(e) {
+$('loginForm').addEventListener('submit', (e) => {
   e.preventDefault();
-  const isRegister = e.target.id === 'registerForm';
-  const name = isRegister ? e.target.querySelector('input[type="text"]').value : 'Kullanıcı';
-  const email = e.target.querySelector('input[type="email"]').value;
-  state.user = { name: name || 'Kullanıcı', email: email, avatar: (name || email).charAt(0).toUpperCase() };
-  if (!state.joinDate) state.joinDate = Date.now();
+  const email = $('loginEmail').value;
+  const password = $('loginPassword').value;
+  if (loginUser(email, password)) {
+    updateUserUI();
+    updateChatFooter();
+    authOverlay.classList.remove('active');
+    showToast('Giriş başarılı! Hoş geldin.');
+  } else {
+    showToast('E-posta veya şifre hatalı!', true);
+  }
+});
+
+$('registerForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const name = $('regName').value;
+  const email = $('regEmail').value;
+  const password = $('regPassword').value;
+  if (password.length < 6) {
+    showToast('Şifre en az 6 karakter olmalıdır!', true);
+    return;
+  }
+  if (registerUser(name, email, password)) {
+    loginUser(email, password);
+    updateUserUI();
+    updateChatFooter();
+    authOverlay.classList.remove('active');
+    showToast('Hesap başarıyla oluşturuldu!');
+  }
+});
+
+$('guestSignInBtn').addEventListener('click', () => {
+  state.user = { name: 'Misafir', email: 'misafir@g3.ai', avatar: 'M', isGuest: true };
+  state.joinDate = Date.now();
   saveUserState();
-  if (isRegister) incrementUserCount();
   updateUserUI();
   updateChatFooter();
   authOverlay.classList.remove('active');
-  showToast('Hoş geldin! 👋');
-}
-
-$('loginForm').addEventListener('submit', handleAuth);
-$('registerForm').addEventListener('submit', handleAuth);
+  showToast('Misafir olarak devam ediliyor.');
+});
 
 $('logoutBtn').addEventListener('click', () => {
   state.user = null;
-  try {
-    localStorage.removeItem('g3_user');
-    localStorage.removeItem('g3_joinDate');
-  } catch (e) {}
+  localStorage.removeItem('g3_user');
+  localStorage.removeItem('g3_joinDate');
   userDropdown.classList.remove('active');
   authOverlay.classList.add('active');
   updateStorageUsage();
@@ -1661,9 +1626,9 @@ $('logoutBtn').addEventListener('click', () => {
 function updateUserUI() {
   if (!state.user) return;
   $('userName').textContent = state.user.name;
-  $('userEmail').textContent = state.user.email;
+  $('userEmail').textContent = state.user.isGuest ? 'Misafir Hesabı' : state.user.email;
   const avatarEl = $('userAvatar');
-  if (state.user.avatar && (state.user.avatar.startsWith('http') || state.user.avatar.startsWith('data:'))) {
+  if (state.user.avatar && state.user.avatar.startsWith('http')) {
     avatarEl.innerHTML = `<img src="${state.user.avatar}" alt="${state.user.name}">`;
   } else {
     avatarEl.textContent = state.user.avatar || 'K';
@@ -1673,7 +1638,7 @@ function updateUserUI() {
 
 function updateHeaderProfileBtn() {
   if (!headerProfileBtn || !state.user) return;
-  if (state.user.avatar && (state.user.avatar.startsWith('http') || state.user.avatar.startsWith('data:'))) {
+  if (state.user.avatar && state.user.avatar.startsWith('http')) {
     headerProfileBtn.innerHTML = `<img src="${state.user.avatar}" alt="${state.user.name}">`;
   } else {
     headerProfileBtn.textContent = state.user.avatar || 'K';
@@ -1683,9 +1648,9 @@ function updateHeaderProfileBtn() {
 function openProfileModal() {
   if (!state.user) return;
   $('profileName').textContent = state.user.name;
-  $('profileEmail').textContent = state.user.email;
+  $('profileEmail').textContent = state.user.isGuest ? 'Misafir Hesabı' : state.user.email;
   const avatarLg = $('profileAvatarLg');
-  if (state.user.avatar && (state.user.avatar.startsWith('http') || state.user.avatar.startsWith('data:'))) {
+  if (state.user.avatar && state.user.avatar.startsWith('http')) {
     avatarLg.innerHTML = `<img src="${state.user.avatar}" alt="${state.user.name}">`;
   } else {
     avatarLg.textContent = state.user.avatar || 'K';
@@ -1694,10 +1659,8 @@ function openProfileModal() {
   $('statChats').textContent = state.chats.length;
   $('statMessages').textContent = totalMessages;
   const joinDate = state.joinDate || Date.now();
-  const daysSince = Math.max(1, Math.ceil((Date.now() - joinDate) / (1000 * 60 * 60 * 24)));
-  $('statDays').textContent = daysSince;
-  const dateStr = new Date(joinDate).toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' });
-  $('profileJoinDate').textContent = `Katılım: ${dateStr}`;
+  $('statDays').textContent = Math.max(1, Math.ceil((Date.now() - joinDate) / (1000 * 60 * 60 * 24)));
+  $('profileJoinDate').textContent = `Katılım: ${new Date(joinDate).toLocaleDateString('tr-TR')}`;
   profileModal.classList.add('active');
   userDropdown.classList.remove('active');
 }
@@ -1718,150 +1681,31 @@ $('editNameBtn').addEventListener('click', () => {
   }
 });
 
-$('exportAllBtn').addEventListener('click', () => {
-  let exportText = '# G3 AI - Tüm Sohbetler\n';
-  state.chats.forEach(chat => {
-    exportText += `\n## ${chat.title}\n\n`;
-    chat.messages.forEach(msg => {
-      if (msg.role === 'system') return;
-      const role = msg.role === 'user' ? '👤 Kullanıcı' : '🤖 G3';
-      exportText += `### ${role}\n${msg.content}\n\n---\n\n`;
-    });
-  });
-  const blob = new Blob([exportText], { type: 'text/markdown' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `g3_tum_sohbetler_${Date.now()}.md`;
-  a.click();
-  URL.revokeObjectURL(url);
-  showToast('Tüm veriler dışa aktarıldı');
-});
-
-$('exportPdfBtn').addEventListener('click', () => {
-  const activeChat = state.chats.find(c => c.id === state.currentChatId);
-  if (!activeChat) return;
-  showToast('PDF hazırlanıyor...');
-  const element = document.createElement('div');
-  element.style.padding = '20px';
-  element.style.fontFamily = 'Arial, sans-serif';
-  element.style.color = '#333';
-  element.style.backgroundColor = '#ffffff';
-  let htmlContent = `<div style="text-align: center; margin-bottom: 30px;"><h1 style="color: #6366f1; margin: 0;">G3 AI Sohbet</h1><h2 style="color: #4a5568; font-weight: normal; margin: 5px 0 0 0;">${activeChat.title}</h2><p style="color: #a0aec0; font-size: 12px; margin-top: 10px;">${new Date(activeChat.createdAt).toLocaleString('tr-TR')}</p></div><hr style="border: 1px solid #e2e8f0; margin-bottom: 20px;">`;
-  activeChat.messages.forEach(msg => {
-    if (msg.role === 'system') return;
-    const isUser = msg.role === 'user';
-    const role = isUser ? 'Kullanıcı' : 'G3 Asistan';
-    const bgColor = isUser ? '#f7fafc' : '#ffffff';
-    const borderColor = isUser ? '#6366f1' : '#cbd5e0';
-    const roleColor = isUser ? '#6366f1' : '#2d3748';
-    let content = msg.content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>').replace(/`([^`]+)`/g, '<code style="background:#edf2f7;padding:2px 4px;border-radius:3px;font-family:monospace;">$1</code>');
-    htmlContent += `<div style="margin-bottom: 20px; padding: 15px; background: ${bgColor}; border-left: 4px solid ${borderColor}; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);"><h3 style="margin: 0 0 10px 0; color: ${roleColor}; font-size: 16px;">${role}</h3><div style="line-height: 1.6; font-size: 14px; color: #2d3748;">${content}</div></div>`;
-  });
-  element.innerHTML = htmlContent;
-  const opt = { margin: 10, filename: `G3_${activeChat.title.replace(/[^a-z0-9]/gi, '_').substring(0, 20)}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true, logging: false }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
-  html2pdf().set(opt).from(element).save().then(() => showToast('PDF başarıyla indirildi')).catch(err => { console.error(err); showToast('PDF oluşturulurken hata oluştu', true); });
-});
-
-$('exportJsonBtn').addEventListener('click', () => {
-  const exportData = { app: "G3 AI", version: "4.9", exportDate: new Date().toISOString(), user: state.user, chats: state.chats };
-  const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `g3_ai_yedek_${Date.now()}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
-  showToast('JSON yedekleme başarıyla indirildi');
-});
-
-$('importJsonBtn').addEventListener('click', () => $('importJsonInput').click());
-$('importJsonInput').addEventListener('change', (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = async (event) => {
-    try {
-      const data = JSON.parse(event.target.result);
-      if (data.chats && Array.isArray(data.chats)) {
-        if (confirm('Mevcut tüm sohbetler silinecek ve yedekten geri yüklenecek. Emin misiniz?')) {
-          state.chats = data.chats;
-          if (data.user) state.user = data.user;
-          await saveChats();
-          saveUserState();
-          updateUserUI();
-          renderChatList();
-          if (state.chats.length > 0) loadChat(state.chats[0].id);
-          else createNewChat();
-          showToast('Yedek başarıyla geri yüklendi');
-        }
-      } else { showToast('Geçersiz yedek dosyası', true); }
-    } catch (err) { showToast('Dosya okunurken hata oluştu', true); }
-  };
-  reader.readAsText(file);
-  e.target.value = '';
-});
-
-$('deleteAllBtn').addEventListener('click', async () => {
-  if (confirm('TÜM SOHBETLER silinecek. Emin misiniz?')) {
-    state.chats = [];
-    state.currentChatId = null;
-    try { localStorage.removeItem('g3_chats_v2'); localStorage.removeItem('g3_chats'); } catch (e) {}
-    createNewChat();
-    profileModal.classList.remove('active');
-    showToast('Tüm veriler silindi');
-    await updateStorageUsage();
-  }
-});
-
-$('clearAllBtn').addEventListener('click', async () => {
-  if (confirm('Tüm sohbetler silinecek. Emin misiniz?')) {
-    state.chats = [];
-    try { localStorage.removeItem('g3_chats_v2'); localStorage.removeItem('g3_chats'); } catch (e) {}
-    createNewChat();
-    userDropdown.classList.remove('active');
-    showToast('Tüm sohbetler silindi');
-    await updateStorageUsage();
-  }
-});
-
-const savedUser = localStorage.getItem('g3_user');
-const savedJoinDate = localStorage.getItem('g3_joinDate');
-if (savedUser) {
-  try {
-    state.user = JSON.parse(savedUser);
-    state.joinDate = savedJoinDate ? parseInt(savedJoinDate) : Date.now();
-    updateUserUI();
-  } catch (e) {}
-} else {
-  setTimeout(() => authOverlay.classList.add('active'), 300);
-}
-
+// Tema Yönetimi
 const savedTheme = localStorage.getItem('g3_theme') || 'dark';
 document.documentElement.setAttribute('data-theme', savedTheme);
 state.theme = savedTheme;
-
-themeToggle.addEventListener('click', () => {
-  state.theme = state.theme === 'dark' ? 'light' : 'dark';
-  document.documentElement.setAttribute('data-theme', state.theme);
-  try { localStorage.setItem('g3_theme', state.theme); } catch (e) {}
-  updateThemeIcon();
-  updateStorageUsage();
-});
-
-$('themeToggleDropdown').addEventListener('click', () => {
-  state.theme = state.theme === 'dark' ? 'light' : 'dark';
-  document.documentElement.setAttribute('data-theme', state.theme);
-  try { localStorage.setItem('g3_theme', state.theme); } catch (e) {}
-  updateThemeIcon();
-  userDropdown.classList.remove('active');
-  updateStorageUsage();
-});
 
 function updateThemeIcon() {
   const icon = themeToggle.querySelector('i');
   icon.className = state.theme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
 }
+updateThemeIcon();
+
+themeToggle.addEventListener('click', () => {
+  state.theme = state.theme === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', state.theme);
+  localStorage.setItem('g3_theme', state.theme);
+  updateThemeIcon();
+});
+
+$('themeToggleDropdown').addEventListener('click', () => {
+  state.theme = state.theme === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', state.theme);
+  localStorage.setItem('g3_theme', state.theme);
+  updateThemeIcon();
+  userDropdown.classList.remove('active');
+});
 
 menuToggle.addEventListener('click', () => { sidebar.classList.add('open'); overlay.classList.add('show'); });
 overlay.addEventListener('click', () => {
@@ -1869,44 +1713,29 @@ overlay.addEventListener('click', () => {
   overlay.classList.remove('show');
   userDropdown.classList.remove('active');
 });
-
 userProfileBtn.addEventListener('click', (e) => { e.stopPropagation(); userDropdown.classList.toggle('active'); });
 document.addEventListener('click', (e) => {
-  if (!userDropdown.contains(e.target) && !userProfileBtn.contains(e.target)) {
-    userDropdown.classList.remove('active');
-  }
+  if (!userDropdown.contains(e.target) && !userProfileBtn.contains(e.target)) userDropdown.classList.remove('active');
 });
 
+// MOD YÖNETİMİ & NIGHTPLOX KOMUT MANTIĞI
 function getSystemPromptForMode(mode) {
   let prompt = SYSTEM_PROMPT_BASE;
-  if (mode === 'fast') {
-    prompt += "\nMOD: Firethron (Hızlı). KURALLAR: Son derece hızlı, kısa ve öz yanıtlar ver. Gereksiz açıklamalardan kaçın.";
-  } else if (mode === 'smart') {
-    prompt += "\nMOD: Hawkweed (Zeki). KURALLAR: Derinlemesine, bağlamsal yanıtlar ver. Eski mesajlarla yeni mesajlar arasında güçlü bağ kur. Kullanıcı /imagine, /video, /music, /analyze, /code, /translate, /summarize, /story, /math veya /roleplay gibi komutlar girerse ilgili alanda dünya çapında bir uzman gibi davran. Sana bir görsel gönderilirse görseli en ince detayına kadar analiz et.";
-    try {
-      const now = new Date();
-      prompt += `\nCANLI VERİ BAĞLANTISI AKTİF: Şu anki tarih ve saat: ${now.toLocaleString('tr-TR')}.`;
-    } catch (e) {}
-  } else if (mode === 'extra') {
-    prompt += "\nMOD: Nightplox (Düşünen). KURALLAR: Adım adım düşün, derinlemesine analiz et, çok detaylı ve kapsamlı yanıtlar ver. Karmaşık problemlerde mantık yürüt.";
-  }
+  if (mode === 'fast') prompt += "\nMOD: Firethron. KURALLAR: Son derece hızlı, kısa ve öz yanıtlar ver.";
+  else if (mode === 'smart') prompt += "\nMOD: Hawkweed. KURALLAR: Derinlemesine, bağlamsal yanıtlar ver.";
+  else if (mode === 'extra') prompt += "\nMOD: Nightplox. KURALLAR: SADECE girilen komuta odaklan. Normal sohbet yapma, sadece komutun gerektirdiği özel görevi (kod, görsel, analiz vb.) en yüksek kalitede yerine getir.";
   return prompt;
 }
 
 function updateCommandMenu(mode) {
   commandMenu.innerHTML = '';
-  if (mode === 'smart') {
+  if (mode === 'extra') { // Nightplox modunda komutlar aktif
     const cmds = [
       { cmd: '/imagine ', desc: 'Görsel oluştur', icon: 'fa-image' },
-      { cmd: '/video ', desc: 'Video senaryosu/prompt oluştur', icon: 'fa-video' },
-      { cmd: '/music ', desc: 'Müzik sözü ve beste önerisi', icon: 'fa-music' },
-      { cmd: '/analyze ', desc: 'Dosya/görsel derinlemesine inceleme', icon: 'fa-search' },
-      { cmd: '/code ', desc: 'Gelişmiş kod yazma ve hata ayıklama', icon: 'fa-code' },
-      { cmd: '/translate ', desc: 'Bağlamsal ve profesyonel çeviri', icon: 'fa-language' },
-      { cmd: '/summarize ', desc: 'Uzun metinleri madde madde özetle', icon: 'fa-compress-alt' },
-      { cmd: '/story ', desc: 'Etkileşimli ve dallanan hikaye anlatımı', icon: 'fa-book-open' },
-      { cmd: '/math ', desc: 'Karmaşık matematik ve mantık problemleri', icon: 'fa-calculator' },
-      { cmd: '/roleplay ', desc: 'Belirli bir karakter veya uzman gibi davran', icon: 'fa-mask' }
+      { cmd: '/code ', desc: 'Gelişmiş kod yazma', icon: 'fa-code' },
+      { cmd: '/analyze ', desc: 'Derinlemesine inceleme', icon: 'fa-search' },
+      { cmd: '/story ', desc: 'Etkileşimli hikaye', icon: 'fa-book-open' },
+      { cmd: '/math ', desc: 'Karmaşık problem çözme', icon: 'fa-calculator' }
     ];
     cmds.forEach(c => {
       const div = document.createElement('div');
@@ -1926,28 +1755,21 @@ function updateCommandMenu(mode) {
     div.className = 'command-item';
     div.style.color = 'var(--text-muted)';
     div.style.justifyContent = 'center';
-    div.innerHTML = `<i class="fas fa-lock"></i><span class="cmd-desc">Komutlar sadece Zeki (Hawkweed) modunda kullanılabilir</span>`;
+    div.innerHTML = `<i class="fas fa-lock"></i><span class="cmd-desc">Komutlar sadece Nightplox modunda kullanılabilir</span>`;
     commandMenu.appendChild(div);
   }
 }
 
-// MOD DEĞİŞTİRME VE AYRI SOHBET MANTIĞI
 document.querySelectorAll('.mode-btn').forEach(btn => {
   btn.addEventListener('click', () => {
-    if (btn.classList.contains('locked')) return;
     const newMode = btn.dataset.mode;
     state.currentMode = newMode;
-
     document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     updateCommandMenu(newMode);
-
     const modeChat = state.chats.find(c => c.mode === newMode);
-    if (modeChat) {
-      loadChat(modeChat.id);
-    } else {
-      createNewChat(newMode);
-    }
+    if (modeChat) loadChat(modeChat.id);
+    else createNewChat(newMode);
   });
 });
 
@@ -1956,11 +1778,8 @@ function createNewChat(specificMode = null) {
   const mode = specificMode || state.currentMode;
   state.currentChatId = chatId;
   state.chats.unshift({
-    id: chatId, 
-    title: "Yeni Sohbet", 
-    mode: mode,
-    createdAt: Date.now(), 
-    messages: [{ role: "system", content: getSystemPromptForMode(mode) }]
+    id: chatId, title: "Yeni Sohbet", mode: mode,
+    createdAt: Date.now(), messages: [{ role: "system", content: getSystemPromptForMode(mode) }]
   });
   renderChatList();
   clearChatUI();
@@ -1983,17 +1802,14 @@ function clearChatUI() {
 function renderChatList() {
   chatListEl.innerHTML = '';
   const now = Date.now();
-  const day = 24 * 60 * 60 * 1000;
   const groups = { 'Bugün': [], 'Dün': [], 'Son 7 Gün': [], 'Daha Eski': [] };
-  
   state.chats.forEach(chat => {
     const age = now - chat.createdAt;
-    if (age < day && new Date(chat.createdAt).toDateString() === new Date().toDateString()) groups['Bugün'].push(chat);
-    else if (age < 2 * day) groups['Dün'].push(chat);
-    else if (age < 7 * day) groups['Son 7 Gün'].push(chat);
+    if (age < 86400000 && new Date(chat.createdAt).toDateString() === new Date().toDateString()) groups['Bugün'].push(chat);
+    else if (age < 172800000) groups['Dün'].push(chat);
+    else if (age < 604800000) groups['Son 7 Gün'].push(chat);
     else groups['Daha Eski'].push(chat);
   });
-
   Object.entries(groups).forEach(([label, chats]) => {
     if (chats.length === 0) return;
     const labelEl = document.createElement('div');
@@ -2004,16 +1820,13 @@ function renderChatList() {
       const div = document.createElement('div');
       div.className = `chat-item ${chat.id === state.currentChatId ? 'active' : ''}`;
       const modeIcon = chat.mode === 'fast' ? 'fa-bolt' : (chat.mode === 'smart' ? 'fa-brain' : 'fa-star');
-      div.innerHTML = `<i class="fas ${modeIcon}" style="font-size:0.7rem; opacity:0.7;"></i><span>${chat.title}</span><button class="chat-delete" data-id="${chat.id}" title="Sohbeti Sil"><i class="fas fa-trash"></i></button>`;
+      div.innerHTML = `<i class="fas ${modeIcon}" style="font-size:0.7rem; opacity:0.7;"></i><span>${chat.title}</span><button class="chat-delete" data-id="${chat.id}"><i class="fas fa-trash"></i></button>`;
       div.querySelector('span').onclick = () => loadChat(chat.id);
       div.querySelector('.chat-delete').onclick = (e) => {
         e.stopPropagation();
-        if (confirm(`"${chat.title}" sohbeti silinecek. Emin misiniz?`)) {
+        if (confirm('Sohbet silinecek. Emin misiniz?')) {
           state.chats = state.chats.filter(c => c.id !== chat.id);
-          if (state.currentChatId === chat.id) {
-            if (state.chats.length > 0) loadChat(state.chats[0].id);
-            else createNewChat();
-          }
+          if (state.currentChatId === chat.id) state.chats.length > 0 ? loadChat(state.chats[0].id) : createNewChat();
           renderChatList();
           saveChats();
           showToast('Sohbet silindi');
@@ -2028,19 +1841,15 @@ function loadChat(chatId) {
   state.currentChatId = chatId;
   const activeChat = state.chats.find(c => c.id === chatId);
   if (!activeChat) return;
-  
   state.currentMode = activeChat.mode;
   document.querySelectorAll('.mode-btn').forEach(b => {
-    b.classList.remove('active', 'locked');
-    b.disabled = false;
+    b.classList.remove('active');
     if (b.dataset.mode === activeChat.mode) b.classList.add('active');
   });
-  
   updateCommandMenu(activeChat.mode);
   renderChatList();
   clearChatUI();
   welcomeScreen.style.display = 'none';
-  
   activeChat.messages.forEach(msg => {
     if (msg.role !== 'system') appendMessageUI(msg.content, msg.role === 'user' ? 'user' : 'ai', false, msg.attachments);
   });
@@ -2055,23 +1864,24 @@ async function initApp() {
     state.fontSize = settings.fontSize || 16;
     state.bgAnimation = settings.bgAnimation !== undefined ? settings.bgAnimation : true;
   }
-  const savedToken = localStorage.getItem('g3_github_token');
-  const savedGist = localStorage.getItem('g3_github_gist_id');
-  if (savedToken && $('githubToken')) $('githubToken').value = savedToken;
-  if (savedGist && $('githubGistId')) $('githubGistId').value = savedGist;
-  
+  const savedUser = localStorage.getItem('g3_user');
+  if (savedUser) {
+    state.user = JSON.parse(savedUser);
+    state.joinDate = parseInt(localStorage.getItem('g3_joinDate') || Date.now());
+    updateUserUI();
+    updateChatFooter();
+  } else {
+    setTimeout(() => authOverlay.classList.add('active'), 300);
+  }
   applyCustomization();
   const savedChats = await loadChats();
-  if (savedChats) {
+  if (savedChats && savedChats.length > 0) {
     state.chats = savedChats;
-    if (state.chats.length > 0) {
-      state.currentChatId = state.chats[0].id;
-      state.currentMode = state.chats[0].mode || 'fast';
-      renderChatList();
-      loadChat(state.currentChatId);
-    } else { createNewChat(); }
+    state.currentChatId = state.chats[0].id;
+    state.currentMode = state.chats[0].mode || 'fast';
+    renderChatList();
+    loadChat(state.currentChatId);
   } else { createNewChat(); }
-  
   updateChatFooter();
   setInterval(updateChatFooter, 60000);
 }
@@ -2088,48 +1898,35 @@ function appendMessageUI(text, sender, animate = true, attachments = []) {
   const avatar = document.createElement('div');
   avatar.className = 'message-avatar';
   if (sender === 'user') {
-    if (state.user?.avatar && (state.user.avatar.startsWith('http') || state.user.avatar.startsWith('data:'))) {
-      avatar.innerHTML = `<img src="${state.user.avatar}" alt="User">`;
-    } else {
-      avatar.textContent = state.user?.avatar || 'K';
-    }
+    avatar.textContent = state.user?.avatar || 'K';
   } else {
     avatar.innerHTML = `<img src="${AI_AVATAR_URL}" alt="G3" onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\\'fas fa-bolt\\' style=\\'color:var(--accent)\\'></i>';">`;
   }
   const content = document.createElement('div');
-  content.style.flex = '1';
-  content.style.minWidth = '0';
-  content.style.display = 'flex';
-  content.style.flexDirection = 'column';
-  content.style.alignItems = sender === 'user' ? 'flex-end' : 'flex-start';
+  content.style.cssText = 'flex:1; min-width:0; display:flex; flex-direction:column; align-items:' + (sender === 'user' ? 'flex-end' : 'flex-start');
   const msgDiv = document.createElement('div');
   msgDiv.className = 'message';
   if (sender === 'ai') msgDiv.innerHTML = renderMarkdown(text);
   else msgDiv.textContent = text;
   content.appendChild(msgDiv);
+  
   if (attachments && attachments.length > 0) {
     attachments.forEach(att => {
       const attDiv = document.createElement('div');
       attDiv.className = 'file-attachment';
-      if (att.type.startsWith('image/')) attDiv.innerHTML = `<img src="${att.data}" alt="${att.name}">`;
-      else attDiv.innerHTML = `<i class="fas fa-file"></i> ${att.name}`;
+      attDiv.innerHTML = att.type.startsWith('image/') ? `<img src="${att.data}" alt="${att.name}">` : `<i class="fas fa-file"></i> ${att.name}`;
       msgDiv.appendChild(attDiv);
     });
   }
+  
   if (sender === 'ai') {
     const actions = document.createElement('div');
     actions.className = 'message-actions';
     actions.innerHTML = `
       <button class="action-btn" data-action="copy" title="Kopyala"><i class="fas fa-copy"></i></button>
       <button class="action-btn" data-action="regenerate" title="Yeniden Oluştur"><i class="fas fa-rotate"></i></button>
-      <button class="action-btn" data-action="like" title="Beğen"><i class="fas fa-thumbs-up"></i></button>
-      <button class="action-btn" data-action="dislike" title="Beğenme"><i class="fas fa-thumbs-down"></i></button>
-      <button class="action-btn" data-action="speak" title="Sesli Oku"><i class="fas fa-volume-high"></i></button>
     `;
     content.appendChild(actions);
-    actions.querySelectorAll('.action-btn').forEach(btn => {
-      btn.addEventListener('click', () => handleAction(btn, text));
-    });
   }
   row.appendChild(avatar);
   row.appendChild(content);
@@ -2139,15 +1936,10 @@ function appendMessageUI(text, sender, animate = true, attachments = []) {
 }
 
 function renderMarkdown(text) {
-  marked.setOptions({
-    breaks: true, gfm: true,
-    highlight: function(code, lang) {
-      if (lang && hljs.getLanguage(lang)) {
-        try { return hljs.highlight(code, { language: lang }).value; } catch (e) {}
-      }
-      return hljs.highlightAuto(code).value;
-    }
-  });
+  marked.setOptions({ breaks: true, gfm: true, highlight: function(code, lang) {
+    if (lang && hljs.getLanguage(lang)) try { return hljs.highlight(code, { language: lang }).value; } catch (e) {}
+    return hljs.highlightAuto(code).value;
+  }});
   let html = marked.parse(text);
   const tempDiv = document.createElement('div');
   tempDiv.innerHTML = html;
@@ -2166,217 +1958,29 @@ function renderMarkdown(text) {
   return tempDiv.innerHTML;
 }
 
-// KOD KOPYALAMA DÜZELTMESİ (Event Delegation)
+// KOD KOPYALAMA (Event Delegation)
 chatContainer.addEventListener('click', (e) => {
   const copyBtn = e.target.closest('.copy-code-btn');
   if (copyBtn) {
-    const codeBlock = copyBtn.closest('.code-block');
-    const code = codeBlock.querySelector('code');
+    const code = copyBtn.closest('.code-block').querySelector('code');
     if (code) {
       navigator.clipboard.writeText(code.textContent).then(() => {
-        showToast('Kod panoya kopyalandı');
-        const originalHTML = copyBtn.innerHTML;
+        showToast('Kod kopyalandı');
+        const original = copyBtn.innerHTML;
         copyBtn.innerHTML = '<i class="fas fa-check"></i> Kopyalandı';
-        setTimeout(() => { copyBtn.innerHTML = originalHTML; }, 2000);
-      }).catch(() => {
-        showToast('Kopyalama başarısız oldu', true);
+        setTimeout(() => { copyBtn.innerHTML = original; }, 2000);
       });
     }
+  }
+  const actionBtn = e.target.closest('.action-btn');
+  if (actionBtn) {
+    const action = actionBtn.dataset.action;
+    const msgDiv = actionBtn.closest('.message');
+    const text = msgDiv.textContent;
+    if (action === 'copy') { navigator.clipboard.writeText(text); showToast('Mesaj kopyalandı'); }
+    else if (action === 'regenerate') regenerateResponse();
   }
 });
-
-function handleAction(btn, text) {
-  const action = btn.dataset.action;
-  switch (action) {
-    case 'copy': navigator.clipboard.writeText(text); showToast('Mesaj kopyalandı'); break;
-    case 'regenerate': regenerateResponse(); break;
-    case 'like':
-      btn.classList.toggle('liked');
-      btn.parentElement.querySelector('[data-action="dislike"]').classList.remove('disliked');
-      break;
-    case 'dislike':
-      btn.classList.toggle('disliked');
-      btn.parentElement.querySelector('[data-action="like"]').classList.remove('liked');
-      break;
-    case 'speak': toggleSpeech(text, btn); break;
-  }
-}
-
-function extractBase64(dataUrl) {
-  const parts = dataUrl.split(',');
-  return parts.length > 1 ? parts[1] : dataUrl;
-}
-
-function buildOpenAiMessages(messages, systemPrompt) {
-  const out = [{ role: "system", content: systemPrompt }];
-  let hasImages = false;
-  let lastImage = null;
-  let lastUserText = '';
-  messages.forEach(m => {
-    if (m.role === "system") return;
-    if (m.role === "user") {
-      const imgs = (m.attachments || []).filter(a => a.type && a.type.startsWith("image/") && a.data);
-      if (imgs.length > 0) {
-        hasImages = true;
-        const content = [];
-        const text = (m.content || "").replace(/\[Kullanıcı bir görsel yükledi\]/g, "").trim();
-        lastUserText = text || "Lütfen bu görseli detaylı bir şekilde incele ve açıkla.";
-        content.push({ type: "text", text: lastUserText });
-        imgs.forEach(a => {
-          content.push({ type: "image_url", image_url: { url: a.data } });
-          lastImage = a.data;
-        });
-        out.push({ role: "user", content: content });
-      } else {
-        lastUserText = m.content || "Merhaba";
-        out.push({ role: "user", content: m.content || "Merhaba" });
-      }
-    } else if (m.role === "assistant") {
-      out.push({ role: "assistant", content: m.content });
-    }
-  });
-  return { messages: out, hasImages: hasImages, lastImage: lastImage, lastUserText: lastUserText };
-}
-
-async function tryPuter(openAiMessages, hasImages, lastImage, lastUserText, mode) {
-  if (typeof puter === 'undefined' || !puter.ai) throw new Error('Puter.js yüklenmedi');
-  let resp;
-  if (hasImages && lastImage) {
-    resp = await puter.ai.chat(lastUserText || 'Bu görseli detaylı incele.', lastImage, { model: 'gpt-4o' });
-  } else {
-    const model = mode === 'extra' ? 'deepseek-r1' : (mode === 'smart' ? 'gpt-4o' : 'gpt-4o-mini');
-    resp = await puter.ai.chat(openAiMessages, { model: model });
-  }
-  const reply = ((resp && (resp.message?.content || resp.text)) || '').toString().trim();
-  if (!reply) throw new Error('Puter boş yanıt');
-  return reply;
-}
-
-async function tryHackClub(openAiMessages, mode) {
-  const list = mode === 'extra' ? ['o3-mini', 'gpt-4o', 'gpt-4o-mini'] : ['gpt-4o-mini', 'gpt-4o', 'gemini-2.5-flash'];
-  let lastErr = null;
-  for (const model of list) {
-    try {
-      const r = await fetch('https://ai.hackclub.com/chat/completions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ model: model, messages: openAiMessages, temperature: 0.7, max_tokens: mode === 'extra' ? 2000 : 900 })
-      });
-      if (r.ok) {
-        const d = await r.json();
-        const reply = (d.choices?.[0]?.message?.content || '').trim();
-        if (reply) return reply;
-      }
-      lastErr = new Error('HackClub HTTP ' + r.status);
-    } catch (e) { lastErr = e; }
-  }
-  throw lastErr || new Error('HackClub başarısız');
-}
-
-async function tryHuggingFace(openAiMessages, hasImages, mode) {
-  const endpoints = ["https://router.huggingface.co/v1/chat/completions", "https://api-inference.huggingface.co/v1/chat/completions"];
-  let models = [];
-  let maxTokens = 800;
-  if (hasImages) { models = HF_MODELS_VISION; maxTokens = 1000; }
-  else if (mode === 'fast') { models = HF_MODELS_FAST; maxTokens = 500; }
-  else if (mode === 'extra') { models = HF_MODELS_THINKING; maxTokens = 2000; }
-  else { models = [...HF_MODELS_FAST, ...HF_MODELS_THINKING.slice(0, 1)]; maxTokens = 1000; }
-  let lastError = null;
-  for (const endpoint of endpoints) {
-    for (const model of models) {
-      try {
-        const response = await fetch(endpoint, {
-          method: "POST",
-          headers: { "Authorization": "Bearer " + HF_API_KEY, "Content-Type": "application/json" },
-          body: JSON.stringify({ model: model, messages: openAiMessages, temperature: 0.7, max_tokens: maxTokens })
-        });
-        if (response.ok) {
-          const data = await response.json();
-          const reply = (data.choices?.[0]?.message?.content || "").trim();
-          if (reply) return reply;
-        }
-        lastError = new Error("HF HTTP " + response.status);
-      } catch (e) { lastError = e; }
-    }
-  }
-  throw lastError || new Error("HF başarısız");
-}
-
-async function tryPollinations(openAiMessages, lastUserText, systemPrompt) {
-  try {
-    const r = await fetch("https://text.pollinations.ai/openai", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ model: "openai", messages: openAiMessages, temperature: 0.6, max_tokens: 800 })
-    });
-    if (r.ok) {
-      const d = await r.json();
-      const reply = (d.choices?.[0]?.message?.content || "").trim();
-      if (reply) return reply;
-    }
-  } catch (e) {}
-  const url = 'https://text.pollinations.ai/' + encodeURIComponent(lastUserText || 'Merhaba') + '?model=openai&system=' + encodeURIComponent(systemPrompt);
-  const r2 = await fetch(url);
-  if (!r2.ok) throw new Error("Pollinations HTTP " + r2.status);
-  const reply = (await r2.text()).trim();
-  if (!reply) throw new Error("Pollinations boş yanıt");
-  return reply;
-}
-
-async function tryGemini(messages, systemPrompt) {
-  if (!GEMINI_API_KEY || !GEMINI_API_KEY.startsWith('AIza')) throw new Error('Gemini anahtarı geçersiz (AIza... gerekli)');
-  const contents = [];
-  messages.forEach(m => {
-    if (m.role === 'system') return;
-    if (m.role === 'user') {
-      const parts = [];
-      if (m.content && m.content.trim()) parts.push({ text: m.content });
-      if (m.attachments && m.attachments.length > 0) {
-        m.attachments.forEach(att => {
-          if (att.type && att.type.startsWith('image/') && att.data) {
-            parts.push({ inlineData: { mimeType: att.type, data: extractBase64(att.data) } });
-          }
-        });
-      }
-      if (parts.length === 0) parts.push({ text: 'Merhaba' });
-      contents.push({ role: 'user', parts });
-    } else if (m.role === 'assistant') {
-      contents.push({ role: 'model', parts: [{ text: m.content }] });
-    }
-  });
-  const body = {
-    contents: contents,
-    systemInstruction: { parts: [{ text: systemPrompt }] },
-    generationConfig: { temperature: 0.6, maxOutputTokens: 800 }
-  };
-  let lastError = null;
-  for (const model of GEMINI_MODELS) {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': GEMINI_API_KEY },
-      body: JSON.stringify(body)
-    });
-    if (response.ok) {
-      const data = await response.json();
-      const reply = (data.candidates?.[0]?.content?.parts || []).map(p => p.text || '').join('').trim();
-      if (reply) return reply;
-    }
-    lastError = new Error("Gemini HTTP " + response.status);
-  }
-  throw lastError || new Error('Gemini başarısız');
-}
-
-async function callAI(messages, systemPrompt, mode) {
-  const built = buildOpenAiMessages(messages, systemPrompt);
-  const errors = [];
-  try { return await tryPuter(built.messages, built.hasImages, built.lastImage, built.lastUserText, mode); } catch (e) { errors.push('Puter: ' + e.message); }
-  try { return await tryHackClub(built.messages, mode); } catch (e) { errors.push('HackClub: ' + e.message); }
-  try { return await tryHuggingFace(built.messages, built.hasImages, mode); } catch (e) { errors.push('HF: ' + e.message); }
-  try { return await tryPollinations(built.messages, built.lastUserText, systemPrompt); } catch (e) { errors.push('Pollinations: ' + e.message); }
-  try { return await tryGemini(messages, systemPrompt); } catch (e) { errors.push('Gemini: ' + e.message); }
-  throw new Error('Tüm sağlayıcılar başarısız: ' + errors.join(' | '));
-}
 
 async function regenerateResponse() {
   const activeChat = state.chats.find(c => c.id === state.currentChatId);
@@ -2384,8 +1988,8 @@ async function regenerateResponse() {
   const lastAiIndex = activeChat.messages.map(m => m.role).lastIndexOf('assistant');
   if (lastAiIndex !== -1) {
     activeChat.messages.splice(lastAiIndex, 1);
-    const aiMessages = chatContainer.querySelectorAll('.ai-wrapper');
-    if (aiMessages.length > 0) aiMessages[aiMessages.length - 1].remove();
+    const aiMsgs = chatContainer.querySelectorAll('.ai-wrapper');
+    if (aiMsgs.length > 0) aiMsgs[aiMsgs.length - 1].remove();
     typingIndicator.classList.add('active');
     chatContainer.scrollTop = chatContainer.scrollHeight;
     try {
@@ -2396,30 +2000,151 @@ async function regenerateResponse() {
       saveChats();
     } catch (error) {
       typingIndicator.classList.remove('active');
-      appendMessageUI(`Yeniden oluşturma hatası: ${error.message}`, 'ai');
+      appendMessageUI(`Hata: ${error.message}`, 'ai');
     }
   }
 }
 
-let currentUtterance = null;
-function toggleSpeech(text, btn) {
-  if (!('speechSynthesis' in window)) { showToast('Tarayıcınız sesli okumayı desteklemiyor', true); return; }
-  if (speechSynthesis.speaking) { speechSynthesis.cancel(); btn.classList.remove('active'); return; }
-  const tempDiv = document.createElement('div');
-  tempDiv.innerHTML = text;
-  const plainText = tempDiv.textContent || tempDiv.innerText || '';
-  currentUtterance = new SpeechSynthesisUtterance(plainText);
-  currentUtterance.lang = 'tr-TR';
-  currentUtterance.onend = () => btn.classList.remove('active');
-  currentUtterance.onerror = () => btn.classList.remove('active');
-  speechSynthesis.speak(currentUtterance);
-  btn.classList.add('active');
+// NIGHTPLOX KOMUT İŞLEME
+async function handleNightploxCommand(text, activeChat) {
+  if (text.startsWith('/imagine')) {
+    const prompt = text.replace(/^\/imagine\s*/, '').trim();
+    if (!prompt) { appendMessageUI("Lütfen /imagine komutundan sonra bir açıklama yazın.", 'ai'); return true; }
+    appendMessageUI(text, 'user');
+    activeChat.messages.push({ role: "user", content: text });
+    const loadingId = 'img-load-' + Date.now();
+    chatContainer.insertBefore(Object.assign(document.createElement('div'), {
+      className: 'message-wrapper ai-wrapper', id: loadingId,
+      innerHTML: `<div class="message-row"><div class="message-avatar"><i class="fas fa-star" style="color:var(--accent)"></i></div><div class="message"><div class="typing-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>Görsel oluşturuluyor...</div></div>`
+    }), typingIndicator);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+    try {
+      const seed = Math.floor(Math.random() * 999999);
+      const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt + ", masterpiece, 8k")}?width=1024&height=1024&nologo=true&seed=${seed}&model=flux`;
+      const loader = document.getElementById(loadingId);
+      if (loader) {
+        loader.innerHTML = `<div class="message-row"><div class="message-avatar"><i class="fas fa-star" style="color:var(--accent)"></i></div><div class="message"><div>İşte görseliniz:</div><img src="${imageUrl}" style="max-width:100%; border-radius:8px; margin-top:8px; cursor:pointer;" onclick="window.open(this.src, '_blank')"><div class="message-actions" style="opacity:1; margin-top:8px;"><button class="action-btn" onclick="navigator.clipboard.writeText('${imageUrl}'); showToast('Link kopyalandı')"><i class="fas fa-link"></i></button><a href="${imageUrl}" download class="action-btn" style="text-decoration:none;"><i class="fas fa-download"></i></a></div></div></div>`;
+      }
+      activeChat.messages.push({ role: "assistant", content: `![Görsel](${imageUrl})` });
+      await saveChats();
+    } catch (e) {
+      document.getElementById(loadingId).innerHTML = `<div class="message-row"><div class="message"><i class="fas fa-exclamation-triangle"></i> Görsel oluşturulamadı.</div></div>`;
+    }
+    return true;
+  }
+  return false;
 }
 
+async function sendMessage() {
+  const text = userInput.value.trim();
+  if (!text && state.attachments.length === 0) return;
+  const activeChat = state.chats.find(c => c.id === state.currentChatId);
+  if (!activeChat) return;
+
+  // NIGHTPLOX MODU KONTROLÜ
+  if (activeChat.mode === 'extra') {
+    if (!text.startsWith('/')) {
+      appendMessageUI("⚠️ **Nightplox Modu Aktif**\n\nBu mod yalnızca özel komutlarla çalışır. Lütfen bir komut girin.\n\nMevcut komutlar:\n- `/imagine [açıklama]`\n- `/code [istek]`\n- `/analyze [istek]`\n- `/story [konu]`\n- `/math [problem]`", 'ai');
+      userInput.value = '';
+      autoResizeTextarea();
+      return;
+    }
+    // Komut girildiyse işle
+    const handled = await handleNightploxCommand(text, activeChat);
+    if (handled) {
+      userInput.value = '';
+      autoResizeTextarea();
+      return;
+    }
+  }
+
+  if (activeChat.messages.length === 1 && text) {
+    activeChat.title = text.substring(0, 30) + (text.length > 30 ? "..." : "");
+    renderChatList();
+  }
+  
+  const currentAttachments = [...state.attachments];
+  userInput.value = '';
+  autoResizeTextarea();
+  userInput.disabled = true;
+  sendBtn.disabled = true;
+  state.attachments = [];
+  renderAttachments();
+  
+  appendMessageUI(text || '[Dosya yüklendi]', 'user', true, currentAttachments);
+  let messageContent = text;
+  if (currentAttachments.some(a => a.type.startsWith('image/'))) messageContent += '\n[Kullanıcı bir görsel yükledi]';
+  activeChat.messages.push({ role: "user", content: messageContent, attachments: currentAttachments });
+  await saveChats();
+  
+  typingIndicator.classList.add('active');
+  chatContainer.scrollTop = chatContainer.scrollHeight;
+  
+  try {
+    const reply = await callAI(activeChat.messages, getSystemPromptForMode(activeChat.mode), activeChat.mode);
+    typingIndicator.classList.remove('active');
+    appendMessageUI(reply, 'ai');
+    activeChat.messages.push({ role: 'assistant', content: reply });
+    await saveChats();
+  } catch (error) {
+    typingIndicator.classList.remove('active');
+    appendMessageUI(`Bağlantı hatası: ${error.message}`, 'ai');
+  } finally {
+    userInput.disabled = false;
+    sendBtn.disabled = false;
+    userInput.focus();
+  }
+}
+
+// Basit AI Çağrısı (Puter.js öncelikli)
+async function callAI(messages, systemPrompt, mode) {
+  if (typeof puter !== 'undefined' && puter.ai) {
+    const model = mode === 'extra' ? 'deepseek-r1' : (mode === 'smart' ? 'gpt-4o' : 'gpt-4o-mini');
+    const resp = await puter.ai.chat(messages, { model: model });
+    const reply = ((resp && (resp.message?.content || resp.text)) || '').toString().trim();
+    if (reply) return reply;
+  }
+  // Yedek: Pollinations
+  const lastMsg = messages.filter(m => m.role === 'user').pop()?.content || 'Merhaba';
+  const r = await fetch(`https://text.pollinations.ai/${encodeURIComponent(lastMsg)}?model=openai&system=${encodeURIComponent(systemPrompt)}`);
+  if (r.ok) return (await r.text()).trim();
+  throw new Error('AI yanıt vermedi');
+}
+
+sendBtn.addEventListener('click', sendMessage);
+userInput.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
+
+function autoResizeTextarea() {
+  userInput.style.height = 'auto';
+  userInput.style.height = Math.min(userInput.scrollHeight, 120) + 'px';
+}
+userInput.addEventListener('input', (e) => {
+  autoResizeTextarea();
+  const val = e.target.value;
+  const activeChat = state.chats.find(c => c.id === state.currentChatId);
+  if (activeChat && activeChat.mode === 'extra') {
+    const lastSlashIndex = val.lastIndexOf('/');
+    if (lastSlashIndex !== -1 && (lastSlashIndex === val.length - 1 || !val.slice(lastSlashIndex).includes(' '))) {
+      const query = val.slice(lastSlashIndex + 1).toLowerCase();
+      const items = commandMenu.querySelectorAll('.command-item');
+      let hasVisible = false;
+      items.forEach(item => {
+        const cmd = (item.dataset.cmd || '').replace('/', '').toLowerCase();
+        if (cmd && cmd.includes(query)) { item.style.display = 'flex'; hasVisible = true; }
+        else if (item.dataset.cmd) { item.style.display = 'none'; }
+      });
+      commandMenu.classList.toggle('active', hasVisible);
+    } else {
+      commandMenu.classList.remove('active');
+    }
+  }
+});
+userInput.addEventListener('blur', () => setTimeout(() => commandMenu.classList.remove('active'), 150));
+
+// Dosya ve Ses İşlemleri
 attachBtn.addEventListener('click', () => fileInput.click());
 fileInput.addEventListener('change', (e) => {
-  const files = Array.from(e.target.files);
-  files.forEach(file => {
+  Array.from(e.target.files).forEach(file => {
     if (file.size > 10 * 1024 * 1024) { showToast('Dosya 10MB\'dan küçük olmalı', true); return; }
     const reader = new FileReader();
     reader.onload = (event) => {
@@ -2438,8 +2163,7 @@ function renderAttachments() {
   state.attachments.forEach((att, index) => {
     const chip = document.createElement('div');
     chip.className = 'attachment-chip';
-    if (att.type.startsWith('image/')) chip.innerHTML = `<img src="${att.data}" alt="${att.name}"><span>${att.name.substring(0, 15)}${att.name.length > 15 ? '...' : ''}</span>`;
-    else chip.innerHTML = `<i class="fas fa-file"></i><span>${att.name.substring(0, 20)}${att.name.length > 20 ? '...' : ''}</span>`;
+    chip.innerHTML = (att.type.startsWith('image/') ? `<img src="${att.data}">` : `<i class="fas fa-file"></i>`) + `<span>${att.name.substring(0, 15)}...</span>`;
     const removeBtn = document.createElement('button');
     removeBtn.className = 'attachment-remove';
     removeBtn.innerHTML = '<i class="fas fa-times"></i>';
@@ -2449,305 +2173,59 @@ function renderAttachments() {
   });
 }
 
-let recognition = null;
-if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  recognition = new SpeechRecognition();
-  recognition.lang = 'tr-TR';
-  recognition.continuous = false;
-  recognition.interimResults = true;
-  recognition.onresult = (event) => {
-    userInput.value = Array.from(event.results).map(result => result[0].transcript).join('');
-    autoResizeTextarea();
-  };
-  recognition.onend = () => { state.isRecording = false; micBtn.classList.remove('recording'); };
-  recognition.onerror = () => { state.isRecording = false; micBtn.classList.remove('recording'); showToast('Ses tanıma hatası', true); };
-}
-
-micBtn.addEventListener('click', () => {
-  if (!recognition) { showToast('Tarayıcınız sesli girişi desteklemiyor', true); return; }
-  if (state.isRecording) recognition.stop();
-  else {
-    try {
-      recognition.start();
-      state.isRecording = true;
-      micBtn.classList.add('recording');
-      showToast('Dinleniyor...');
-    } catch (e) { showToast('Mikrofon başlatılamadı', true); }
-  }
-});
-
-userInput.addEventListener('input', (e) => {
-  const val = e.target.value;
-  const activeChat = state.chats.find(c => c.id === state.currentChatId);
-  if (!activeChat || activeChat.mode !== 'smart') {
-    commandMenu.classList.remove('active');
-    autoResizeTextarea();
-    return;
-  }
-  const lastSlashIndex = val.lastIndexOf('/');
-  if (lastSlashIndex !== -1 && (lastSlashIndex === val.length - 1 || !val.slice(lastSlashIndex).includes(' '))) {
-    const query = val.slice(lastSlashIndex + 1).toLowerCase();
-    const items = commandMenu.querySelectorAll('.command-item');
-    let hasVisible = false;
-    items.forEach(item => {
-      const cmd = (item.dataset.cmd || '').replace('/', '').toLowerCase();
-      if (cmd && cmd.includes(query)) { item.style.display = 'flex'; hasVisible = true; }
-      else if (item.dataset.cmd) { item.style.display = 'none'; }
-    });
-    if (hasVisible) commandMenu.classList.add('active');
-    else commandMenu.classList.remove('active');
-  } else {
-    commandMenu.classList.remove('active');
-  }
-  autoResizeTextarea();
-});
-
-userInput.addEventListener('blur', () => {
-  setTimeout(() => commandMenu.classList.remove('active'), 150);
-});
-
-async function generateImage(prompt) {
-  return new Promise((resolve) => {
-    const seed = Math.floor(Math.random() * 999999);
-    const enhancedPrompt = encodeURIComponent(prompt + ", masterpiece, best quality, highly detailed, 8k resolution, cinematic lighting, professional photography, stunning visuals");
-    const imageUrl = `https://image.pollinations.ai/prompt/${enhancedPrompt}?width=1024&height=1024&nologo=true&seed=${seed}&model=flux`;
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    let isResolved = false;
-    img.onload = () => { if (!isResolved) { isResolved = true; resolve(imageUrl); } };
-    img.onerror = () => { if (!isResolved) { isResolved = true; resolve(imageUrl); } };
-    img.src = imageUrl;
-    setTimeout(() => { if (!isResolved) { isResolved = true; resolve(imageUrl); } }, 60000);
-  });
-}
-
-async function handleSmartCommand(text, activeChat) {
-  if (text.startsWith('/imagine')) {
-    const prompt = text.replace(/^\/imagine\s*/, '').trim();
-    if (!prompt) {
-      appendMessageUI("Lütfen /imagine komutundan sonra bir görsel açıklaması yazın.", 'ai');
-      userInput.value = '';
-      autoResizeTextarea();
-      return true;
-    }
-    if (activeChat.messages.length === 1 && text) {
-      activeChat.title = "Görsel: " + prompt.substring(0, 20) + "...";
-      renderChatList();
-    }
-    appendMessageUI(text, 'user');
-    activeChat.messages.push({ role: "user", content: text });
-    const loadingId = 'img-loading-' + Date.now();
-    const loadingWrapper = document.createElement('div');
-    loadingWrapper.className = 'message-wrapper ai-wrapper';
-    loadingWrapper.id = loadingId;
-    loadingWrapper.innerHTML = `
-      <div class="message-row">
-        <div class="message-avatar"><i class="fas fa-bolt" style="color:var(--accent)"></i></div>
-        <div class="message">
-          <div class="typing-dots" style="margin-bottom: 8px;">
-            <div class="dot"></div><div class="dot"></div><div class="dot"></div>
-          </div>
-          Görsel oluşturuluyor...
-        </div>
-      </div>
-    `;
-    chatContainer.insertBefore(loadingWrapper, typingIndicator);
-    chatContainer.scrollTop = chatContainer.scrollHeight;
-    try {
-      const imageUrl = await generateImage(prompt);
-      const loader = document.getElementById(loadingId);
-      if (loader) {
-        loader.innerHTML = `
-          <div class="message-row">
-            <div class="message-avatar"><i class="fas fa-bolt" style="color:var(--accent)"></i></div>
-            <div class="message" style="display:flex; flex-direction:column; gap:10px;">
-              <div>İşte görseliniz: <strong>${prompt}</strong></div>
-              <img src="${imageUrl}" alt="${prompt}" style="max-width:100%; border-radius:8px; cursor:pointer; box-shadow: var(--shadow-md);" onclick="window.open(this.src, '_blank')">
-              <div class="message-actions" style="opacity:1; margin-top:4px;">
-                <button class="action-btn" onclick="navigator.clipboard.writeText('${imageUrl}'); showToast('Görsel bağlantısı kopyalandı')" title="Bağlantıyı Kopyala"><i class="fas fa-link"></i></button>
-                <a href="${imageUrl}" download="g3-image.png" class="action-btn" title="İndir" style="text-decoration:none;"><i class="fas fa-download"></i></a>
-                <a href="${imageUrl}" target="_blank" class="action-btn" title="Yeni Sekmede Aç" style="text-decoration:none;"><i class="fas fa-external-link-alt"></i></a>
-              </div>
-            </div>
-          </div>
-        `;
-      }
-      activeChat.messages.push({ role: "assistant", content: `![Görsel](${imageUrl})\n_Oluşturulan görsel: ${prompt}_` });
-      await saveChats();
-    } catch (error) {
-      console.error('Görsel oluşturma hatası:', error);
-      const loader = document.getElementById(loadingId);
-      if (loader) {
-        loader.innerHTML = `<div class="message-row"><div class="message-avatar"><i class="fas fa-bolt" style="color:var(--accent)"></i></div><div class="message">Görsel oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.</div></div>`;
-      }
-    } finally {
-      userInput.disabled = false;
-      sendBtn.disabled = false;
-      userInput.value = '';
-      autoResizeTextarea();
-      userInput.focus();
-      incrementConversationCount();
-      updateChatFooter();
-    }
-    return true;
-  }
-  return false;
-}
-
-async function sendMessage() {
-  const text = userInput.value.trim();
-  if (!text && state.attachments.length === 0) return;
-  const activeChat = state.chats.find(c => c.id === state.currentChatId);
-  if (!activeChat) return;
-  
-  const isCommand = text.startsWith('/');
-  if (isCommand && activeChat.mode !== 'smart') {
-    appendMessageUI("Komutlar sadece Zeki (Hawkweed) modunda kullanılabilir. Lütfen yeni bir sohbet başlatıp Zeki modunu seçin.", 'ai');
-    userInput.value = '';
-    autoResizeTextarea();
-    return;
-  }
-  if (activeChat.mode === 'smart' && isCommand) {
-    const handled = await handleSmartCommand(text, activeChat);
-    if (handled) return;
-  }
-  if (activeChat.messages.length === 1 && text) {
-    activeChat.title = text.substring(0, 30) + (text.length > 30 ? "..." : "");
-    renderChatList();
-  }
-  const currentAttachments = [...state.attachments];
-  userInput.value = '';
-  autoResizeTextarea();
-  userInput.disabled = true;
-  sendBtn.disabled = true;
-  state.attachments = [];
-  renderAttachments();
-  appendMessageUI(text || '[Dosya yüklendi]', 'user', true, currentAttachments);
-  let messageContent = text;
-  if (currentAttachments.some(a => a.type.startsWith('image/'))) messageContent += '\n[Kullanıcı bir görsel yükledi]';
-  else if (currentAttachments.length > 0) messageContent += `\n[Yüklenen dosyalar: ${currentAttachments.map(a => a.name).join(', ')}]`;
-  activeChat.messages.push({ role: "user", content: messageContent, attachments: currentAttachments });
-  incrementConversationCount();
-  updateChatFooter();
-  await saveChats();
-  typingIndicator.classList.add('active');
-  chatContainer.scrollTop = chatContainer.scrollHeight;
-  try {
-    const reply = await callAI(activeChat.messages, getSystemPromptForMode(activeChat.mode), activeChat.mode);
-    typingIndicator.classList.remove('active');
-    appendMessageUI(reply, 'ai');
-    activeChat.messages.push({ role: 'assistant', content: reply });
-    await saveChats();
-  } catch (error) {
-    console.error('Mesaj gönderme hatası:', error);
-    typingIndicator.classList.remove('active');
-    let userFriendlyMessage = 'Bir sorun oluştu: ';
-    if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-      userFriendlyMessage = 'Ağ bağlantısı hatası. İnternetini kontrol et.';
-    } else {
-      userFriendlyMessage = error.message;
-    }
-    appendMessageUI(userFriendlyMessage, 'ai');
-  } finally {
-    userInput.disabled = false;
-    sendBtn.disabled = false;
-    userInput.focus();
-  }
-}
-
-sendBtn.addEventListener('click', sendMessage);
-userInput.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-});
-
-function autoResizeTextarea() {
-  userInput.style.height = 'auto';
-  userInput.style.height = Math.min(userInput.scrollHeight, 120) + 'px';
-}
-userInput.addEventListener('input', autoResizeTextarea);
-
-document.querySelectorAll('.suggestion-card').forEach(card => {
-  card.addEventListener('click', () => {
-    userInput.value = card.dataset.prompt;
-    autoResizeTextarea();
-    sendMessage();
-  });
-});
-
-$('exportBtn').addEventListener('click', () => {
-  const activeChat = state.chats.find(c => c.id === state.currentChatId);
-  if (!activeChat) return;
-  let exportText = `# ${activeChat.title}\n\n`;
-  activeChat.messages.forEach(msg => {
-    if (msg.role === 'system') return;
-    const role = msg.role === 'user' ? '👤 Kullanıcı' : '🤖 G3';
-    exportText += `## ${role}\n${msg.content}\n\n---\n\n`;
-  });
-  const blob = new Blob([exportText], { type: 'text/markdown' });
-  const url = URL.createObjectURL(blob);
+// Dışa Aktarma
+$('exportJsonBtn').addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify({ app: "G3 AI", user: state.user, chats: state.chats }, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
-  a.href = url;
-  a.download = `${activeChat.title.replace(/[^a-z0-9]/gi, '_')}.md`;
+  a.href = URL.createObjectURL(blob);
+  a.download = `g3_yedek_${Date.now()}.json`;
   a.click();
-  URL.revokeObjectURL(url);
-  showToast('Sohbet dışa aktarıldı');
-  userDropdown.classList.remove('active');
+  showToast('JSON yedeklendi');
 });
 
-$('githubSaveBtn').addEventListener('click', async () => {
-  const token = $('githubToken').value.trim();
-  if (!token) { showToast('Lütfen GitHub Token girin', true); return; }
-  const gistId = $('githubGistId').value.trim();
-  const data = { version: "4.9", timestamp: new Date().toISOString(), user: state.user, chats: state.chats, settings: { theme: state.theme, accentColor: state.accentColor, fontSize: state.fontSize, bgAnimation: state.bgAnimation } };
-  const url = gistId ? `https://api.github.com/gists/${gistId}` : 'https://api.github.com/gists';
-  const method = gistId ? 'PATCH' : 'POST';
-  try {
-    showToast('GitHub\'a gönderiliyor...');
-    const response = await fetch(url, { method: method, headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json' }, body: JSON.stringify({ description: "G3 AI Chat Backup", public: false, files: { "g3_backup.json": { content: JSON.stringify(data, null, 2) } } }) });
-    if (!response.ok) { const err = await response.json(); throw new Error(err.message || 'GitHub API hatası'); }
-    const result = await response.json();
-    localStorage.setItem('g3_github_token', token);
-    localStorage.setItem('g3_github_gist_id', result.id);
-    $('githubGistId').value = result.id;
-    showToast('GitHub\'a başarıyla yedeklendi!');
-  } catch (error) {
-    console.error(error);
-    showToast('Yedekleme hatası: ' + error.message, true);
+$('importJsonBtn').addEventListener('click', () => $('importJsonInput').click());
+$('importJsonInput').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async (event) => {
+    try {
+      const data = JSON.parse(event.target.result);
+      if (data.chats && Array.isArray(data.chats)) {
+        if (confirm('Mevcut veriler silinip yedek geri yüklenecek. Emin misiniz?')) {
+          state.chats = data.chats;
+          if (data.user) { state.user = data.user; saveUserState(); updateUserUI(); }
+          await saveChats();
+          renderChatList();
+          state.chats.length > 0 ? loadChat(state.chats[0].id) : createNewChat();
+          showToast('Yedek geri yüklendi');
+        }
+      }
+    } catch (err) { showToast('Geçersiz dosya', true); }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+});
+
+$('deleteAllBtn').addEventListener('click', async () => {
+  if (confirm('TÜM VERİLER silinecek. Emin misiniz?')) {
+    state.chats = [];
+    localStorage.removeItem('g3_chats_v2');
+    createNewChat();
+    profileModal.classList.remove('active');
+    showToast('Tüm veriler silindi');
+    updateStorageUsage();
   }
 });
 
-$('githubLoadBtn').addEventListener('click', async () => {
-  const token = $('githubToken').value.trim() || localStorage.getItem('g3_github_token');
-  const gistId = $('githubGistId').value.trim() || localStorage.getItem('g3_github_gist_id');
-  if (!token || !gistId) { showToast('Token ve Gist ID gerekli', true); return; }
-  try {
-    showToast('GitHub\'dan yükleniyor...');
-    const response = await fetch(`https://api.github.com/gists/${gistId}`, { headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' } });
-    if (!response.ok) throw new Error('Gist bulunamadı veya yetki hatası');
-    const data = await response.json();
-    const backup = JSON.parse(data.files['g3_backup.json'].content);
-    if (confirm('Mevcut veriler silinip GitHub\'daki verilerle değiştirilecek. Emin misiniz?')) {
-      state.user = backup.user;
-      state.chats = backup.chats;
-      if (backup.settings) {
-        state.theme = backup.settings.theme || 'dark';
-        state.accentColor = backup.settings.accentColor || '#6366f1';
-        state.fontSize = backup.settings.fontSize || 16;
-        state.bgAnimation = backup.settings.bgAnimation !== undefined ? backup.settings.bgAnimation : true;
-      }
-      await saveChats();
-      saveUserState();
-      applyCustomization();
-      renderChatList();
-      if (state.chats.length > 0) loadChat(state.chats[0].id);
-      else createNewChat();
-      updateUserUI();
-      showToast('GitHub\'dan başarıyla yüklendi!');
-    }
-  } catch (error) {
-    console.error(error);
-    showToast('Yükleme hatası: ' + error.message, true);
+$('clearAllBtn').addEventListener('click', async () => {
+  if (confirm('Tüm sohbetler silinecek. Emin misiniz?')) {
+    state.chats = [];
+    localStorage.removeItem('g3_chats_v2');
+    createNewChat();
+    userDropdown.classList.remove('active');
+    showToast('Sohbetler silindi');
+    updateStorageUsage();
   }
 });
 
@@ -2759,8 +2237,7 @@ let toastTimeout;
 function showToast(message, isError = false) {
   toastText.textContent = message;
   toast.classList.toggle('error', isError);
-  const icon = toast.querySelector('i');
-  icon.className = isError ? 'fas fa-exclamation-circle' : 'fas fa-check-circle';
+  toast.querySelector('i').className = isError ? 'fas fa-exclamation-circle' : 'fas fa-check-circle';
   toast.classList.add('show');
   clearTimeout(toastTimeout);
   toastTimeout = setTimeout(() => toast.classList.remove('show'), 3000);
@@ -2776,49 +2253,13 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-window.addEventListener('beforeunload', () => {
-  if (state.chats && state.chats.length > 0) {
-    try { saveChats(); } catch (e) {}
-  }
+window.addEventListener('beforeunload', () => { if (state.chats.length > 0) saveChats(); });
+setInterval(() => { if (state.chats.length > 0) saveChats(); }, 15000);
+
+window.addEventListener('load', () => {
+  setTimeout(updateStorageUsage, 500);
+  initGalaxyBackground();
 });
-
-window.addEventListener('pagehide', () => {
-  if (state.chats && state.chats.length > 0) {
-    try { saveChats(); } catch (e) {}
-  }
-});
-
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'hidden') {
-    if (state.chats && state.chats.length > 0) {
-      try { saveChats(); } catch (e) {}
-    }
-  }
-});
-
-setInterval(async () => {
-  if (state.chats && state.chats.length > 0) {
-    try { await saveChats(); } catch (e) {}
-  }
-}, 15000);
-
-window.addEventListener('online', () => {
-  showToast('İnternet bağlantısı geri geldi');
-  if (state.chats && state.chats.length > 0) saveChats();
-});
-
-window.addEventListener('offline', () => {
-  showToast('İnternet bağlantısı kesildi - Veriler yerel olarak kaydedildi', true);
-  if (state.chats && state.chats.length > 0) saveChats();
-});
-
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js')
-      .then(reg => console.log('Service Worker kaydedildi:', reg.scope))
-      .catch(err => console.log('Service Worker hatası:', err));
-  });
-}
 
 console.log('%c G3 AI v4.9 ', 'background: linear-gradient(135deg, #ef4444, #6366f1); color: white; font-size: 20px; padding: 10px; border-radius: 5px;');
 console.log('Muhammed Eren Bayram tarafından geliştirilmiştir.');
