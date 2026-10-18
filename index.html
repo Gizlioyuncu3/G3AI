@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="tr" data-theme="dark">
+<html lang="tr" data-theme="dark" data-mode="fast">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -241,6 +241,41 @@
     [data-theme="light"] .mode-veil {
       mix-blend-mode: multiply;
       opacity: 0.42;
+    }
+
+    .mode-transition-flash {
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      pointer-events: none;
+      opacity: 0;
+      background:
+        radial-gradient(circle at 50% 50%, var(--accent-light), transparent 58%),
+        linear-gradient(135deg, rgba(255,255,255,0.03), transparent 45%);
+      mix-blend-mode: screen;
+    }
+
+    [data-theme="light"] .mode-transition-flash {
+      mix-blend-mode: multiply;
+      opacity: 0;
+    }
+
+    body.mode-changing .mode-transition-flash {
+      animation: modeFlash 0.78s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    @keyframes modeFlash {
+      0% {
+        opacity: 0;
+        transform: scale(0.985);
+      }
+      28% {
+        opacity: 0.95;
+      }
+      100% {
+        opacity: 0;
+        transform: scale(1.035);
+      }
     }
 
     .auth-overlay,
@@ -854,6 +889,13 @@
       scroll-behavior: smooth;
       overscroll-behavior-y: contain;
       -webkit-overflow-scrolling: touch;
+      transition: opacity 0.18s ease, filter 0.18s ease, transform 0.18s ease;
+    }
+
+    #chat-container.mode-fading {
+      opacity: 0.28;
+      filter: blur(2px);
+      transform: translateY(6px) scale(0.995);
     }
 
     .welcome-screen {
@@ -1167,6 +1209,46 @@
       margin-top: 8px;
       cursor: pointer;
       border: 1px solid var(--border);
+    }
+
+    .generated-attachment {
+      flex-direction: column;
+      align-items: stretch;
+      width: 100%;
+      max-width: 100%;
+    }
+
+    .generated-attachment img {
+      width: 100%;
+      max-width: 100%;
+      border-radius: 12px;
+      display: block;
+      background: var(--bg-tertiary);
+      min-height: 120px;
+      object-fit: cover;
+      border: 1px solid var(--border);
+    }
+
+    .attachment-actions {
+      display: flex;
+      gap: 6px;
+      justify-content: flex-end;
+      margin-top: 8px;
+    }
+
+    .image-status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text-secondary);
+    }
+
+    .image-status i {
+      color: var(--accent);
+    }
+
+    .image-error {
+      color: var(--danger);
     }
 
     .typing {
@@ -2011,6 +2093,7 @@
     @media print {
       #galaxy-canvas,
       .mode-veil,
+      .mode-transition-flash,
       #sidebar,
       .input-area,
       .auth-overlay,
@@ -2029,6 +2112,7 @@
 <body>
   <canvas id="galaxy-canvas"></canvas>
   <div class="mode-veil" aria-hidden="true"></div>
+  <div class="mode-transition-flash" id="modeTransitionFlash" aria-hidden="true"></div>
 
   <div class="auth-overlay" id="authOverlay">
     <div class="auth-modal">
@@ -2110,7 +2194,7 @@
         <h1>
           G3
           <span class="badge" id="modeBadge"><i class="fas fa-bolt"></i> Firethron</span>
-          <span class="version">v5.1</span>
+          <span class="version">v5.2</span>
         </h1>
       </div>
       <div class="header-actions">
@@ -2363,7 +2447,7 @@ KURALLAR:
     }
 
     // ============================================================
-    // 3) GALAKSİ ARKA PLANI (MOD BAZLI)
+    // 3) GALAKSİ ARKA PLANI (YAVAŞ RENK GEÇİŞLİ)
     // ============================================================
     function initGalaxyBackground() {
       const canvas = document.getElementById('galaxy-canvas');
@@ -2372,43 +2456,46 @@ KURALLAR:
       const ctx = canvas.getContext('2d');
       let width, height, cx, cy;
 
-      const palettes = {
+      const PALETTES = {
         fast: {
-          fill: 'rgba(10, 4, 2, 0.22)',
-          baseHue: 18,
+          fill: [14, 5, 2, 0.22],
+          baseHue: 22,
           spread: 34,
-          glow: [
-            [0, 'rgba(255,255,255,0.88)'],
-            [0.22, 'rgba(255,145,60,0.58)'],
-            [0.55, 'rgba(255,70,30,0.18)'],
-            [1, 'rgba(0,0,0,0)']
-          ]
+          glowA: [32, 100, 64],
+          glowB: [10, 96, 54],
+          coreHue: 42
         },
         smart: {
-          fill: 'rgba(2, 10, 16, 0.22)',
-          baseHue: 190,
-          spread: 38,
-          glow: [
-            [0, 'rgba(255,255,255,0.86)'],
-            [0.22, 'rgba(34,211,238,0.54)'],
-            [0.55, 'rgba(59,130,246,0.18)'],
-            [1, 'rgba(0,0,0,0)']
-          ]
+          fill: [2, 10, 18, 0.22],
+          baseHue: 192,
+          spread: 36,
+          glowA: [188, 94, 62],
+          glowB: [220, 88, 56],
+          coreHue: 188
         },
         extra: {
-          fill: 'rgba(8, 3, 18, 0.24)',
-          baseHue: 278,
-          spread: 42,
-          glow: [
-            [0, 'rgba(255,255,255,0.88)'],
-            [0.22, 'rgba(192,132,252,0.58)'],
-            [0.55, 'rgba(99,102,241,0.20)'],
-            [1, 'rgba(0,0,0,0)']
-          ]
+          fill: [10, 3, 22, 0.24],
+          baseHue: 284,
+          spread: 40,
+          glowA: [286, 92, 70],
+          glowB: [248, 88, 60],
+          coreHue: 282
         }
       };
 
-      let palette = palettes[document.documentElement.dataset.mode] || palettes.fast;
+      function clonePalette(p) {
+        return {
+          fill: [...p.fill],
+          baseHue: p.baseHue,
+          spread: p.spread,
+          glowA: [...p.glowA],
+          glowB: [...p.glowB],
+          coreHue: p.coreHue
+        };
+      }
+
+      let target = clonePalette(PALETTES.fast);
+      let current = clonePalette(PALETTES.fast);
 
       function resize() {
         width = canvas.width = window.innerWidth;
@@ -2419,6 +2506,29 @@ KURALLAR:
 
       window.addEventListener('resize', resize);
       resize();
+
+      function lerp(a, b, t) {
+        return a + (b - a) * t;
+      }
+
+      function lerpHue(a, b, t) {
+        const diff = ((b - a + 540) % 360) - 180;
+        return (a + diff * t + 360) % 360;
+      }
+
+      function lerpArray(a, b, t) {
+        return a.map((v, i) => lerp(v, b[i], t));
+      }
+
+      function stepPalette() {
+        const t = 0.018;
+        current.fill = lerpArray(current.fill, target.fill, t);
+        current.baseHue = lerpHue(current.baseHue, target.baseHue, t);
+        current.spread = lerp(current.spread, target.spread, t);
+        current.glowA = lerpArray(current.glowA, target.glowA, t);
+        current.glowB = lerpArray(current.glowB, target.glowB, t);
+        current.coreHue = lerpHue(current.coreHue, target.coreHue, t);
+      }
 
       const ARMS = 3;
       const PARTICLES_PER_ARM = 520;
@@ -2468,7 +2578,11 @@ KURALLAR:
           const y = cy + Math.sin(this.angle) * this.radius * 0.45;
           const dist = Math.sqrt((x - cx) ** 2 + (y - cy) ** 2);
           const fade = Math.max(0, 1 - dist / (Math.min(width, height) * 0.56));
-          const hue = palette.baseHue + this.hueFactor * palette.spread;
+
+          const hue = this.isCore
+            ? lerpHue(current.coreHue, current.baseHue, 0.35) + this.hueFactor * 14
+            : current.baseHue + this.hueFactor * current.spread;
+
           const sat = this.isCore ? 96 : 82;
 
           ctx.beginPath();
@@ -2503,14 +2617,19 @@ KURALLAR:
       let time = 0;
 
       function animate() {
-        ctx.fillStyle = palette.fill;
+        stepPalette();
+
+        ctx.fillStyle = `rgba(${Math.round(current.fill[0])}, ${Math.round(current.fill[1])}, ${Math.round(current.fill[2])}, ${current.fill[3]})`;
         ctx.fillRect(0, 0, width, height);
 
         time += 0.0045;
         const glowSize = 118 + Math.sin(time) * 10;
         const gradient = ctx.createRadialGradient(cx, cy, 10, cx, cy, glowSize);
 
-        palette.glow.forEach(([stop, color]) => gradient.addColorStop(stop, color));
+        gradient.addColorStop(0, 'rgba(255,255,255,0.88)');
+        gradient.addColorStop(0.22, `hsla(${current.glowA[0]}, ${current.glowA[1]}%, ${current.glowA[2]}%, 0.56)`);
+        gradient.addColorStop(0.55, `hsla(${current.glowB[0]}, ${current.glowB[1]}%, ${current.glowB[2]}%, 0.18)`);
+        gradient.addColorStop(1, 'rgba(0,0,0,0)');
 
         ctx.globalCompositeOperation = 'lighter';
         ctx.fillStyle = gradient;
@@ -2533,7 +2652,7 @@ KURALLAR:
       animate();
 
       window.galaxySetMode = function(mode) {
-        palette = palettes[mode] || palettes.fast;
+        target = clonePalette(PALETTES[mode] || PALETTES.fast);
       };
 
       window.toggleGalaxy = function(show) {
@@ -2553,6 +2672,11 @@ KURALLAR:
 
     function openDatabase() {
       return new Promise((resolve, reject) => {
+        if (typeof indexedDB === 'undefined') {
+          reject(new Error('IndexedDB desteklenmiyor'));
+          return;
+        }
+
         const request = indexedDB.open(DB_NAME, DB_VERSION);
 
         request.onerror = () => reject(request.error);
@@ -2616,76 +2740,207 @@ KURALLAR:
     }
 
     // ============================================================
-    // 5) DEBOUNCE KAYIT
+    // 5) MOD BAZLI SOHBET DEPOLAMA SİSTEMİ
     // ============================================================
-    let saveTimeout = null;
-    let isSaving = false;
-    let pendingSave = false;
+    function emptyChatStore() {
+      return {
+        chatsByMode: { fast: [], smart: [], extra: [] },
+        currentChatIdByMode: { fast: null, smart: null, extra: null },
+        lastMode: 'fast',
+        updatedAt: Date.now()
+      };
+    }
 
-    async function saveChats() {
-      if (isSaving) {
-        pendingSave = true;
+    function normalizeChat(chat, fallbackMode = 'fast') {
+      const mode = MODE_META[chat?.mode] ? chat.mode : fallbackMode;
+
+      const normalized = {
+        id: chat?.id || uid(),
+        title: chat?.title || 'Yeni Sohbet',
+        mode,
+        createdAt: Number(chat?.createdAt) || Date.now(),
+        messages: Array.isArray(chat?.messages) ? chat.messages : []
+      };
+
+      normalized.messages = normalized.messages
+        .filter(m => m && ['user', 'assistant', 'system'].includes(m.role))
+        .map(m => ({
+          role: m.role,
+          content: String(m.content || ''),
+          attachments: Array.isArray(m.attachments) ? m.attachments : []
+        }));
+
+      const sysIndex = normalized.messages.findIndex(m => m.role === 'system');
+      if (sysIndex === -1) {
+        normalized.messages.unshift({
+          role: 'system',
+          content: getSystemPromptForMode(mode)
+        });
+      } else {
+        normalized.messages[sysIndex].content = getSystemPromptForMode(mode);
+      }
+
+      return normalized;
+    }
+
+    function normalizeChatStore(raw) {
+      const store = emptyChatStore();
+
+      if (raw?.chatsByMode && typeof raw.chatsByMode === 'object') {
+        ['fast', 'smart', 'extra'].forEach(mode => {
+          const list = Array.isArray(raw.chatsByMode[mode]) ? raw.chatsByMode[mode] : [];
+          store.chatsByMode[mode] = list.map(chat => normalizeChat(chat, mode));
+        });
+      } else if (Array.isArray(raw?.chats)) {
+        raw.chats.forEach(chat => {
+          const mode = MODE_META[chat?.mode] ? chat.mode : 'fast';
+          store.chatsByMode[mode].push(normalizeChat(chat, mode));
+        });
+      } else if (Array.isArray(raw)) {
+        raw.forEach(chat => {
+          const mode = MODE_META[chat?.mode] ? chat.mode : 'fast';
+          store.chatsByMode[mode].push(normalizeChat(chat, mode));
+        });
+      }
+
+      ['fast', 'smart', 'extra'].forEach(mode => {
+        store.chatsByMode[mode].sort((a, b) => b.createdAt - a.createdAt);
+
+        const currentId = raw?.currentChatIdByMode?.[mode];
+        const exists = store.chatsByMode[mode].some(c => c.id === currentId);
+        store.currentChatIdByMode[mode] = exists ? currentId : (store.chatsByMode[mode][0]?.id || null);
+      });
+
+      store.lastMode = MODE_META[raw?.lastMode] ? raw.lastMode : 'fast';
+      store.updatedAt = Date.now();
+
+      return store;
+    }
+
+    let chatSaveTimer = null;
+    let chatSaving = false;
+    let chatPendingSave = false;
+
+    async function persistChatStore() {
+      if (chatSaving) {
+        chatPendingSave = true;
         return;
       }
 
-      if (saveTimeout) clearTimeout(saveTimeout);
+      chatSaving = true;
+      chatPendingSave = false;
 
-      saveTimeout = setTimeout(async () => {
-        if (isSaving) {
-          pendingSave = true;
-          return;
-        }
+      try {
+        const payload = {
+          chatsByMode: state.chatsByMode,
+          currentChatIdByMode: state.currentChatIdByMode,
+          lastMode: state.currentMode,
+          updatedAt: Date.now()
+        };
 
-        isSaving = true;
-        pendingSave = false;
+        await saveToDB('chatStore', payload);
 
         try {
-          if (!state.chats || state.chats.length === 0) {
-            await deleteFromDB('chats');
-          } else {
-            await saveToDB('chats', state.chats);
-          }
-          updateStorageIndicator('success', 'Cihaza güvenle kaydedildi');
-          updateStorageUsage();
-        } catch (e) {
-          console.error('Kaydetme hatası:', e);
-          updateStorageIndicator('error', 'Depolama hatası!');
-        } finally {
-          isSaving = false;
-          if (pendingSave) {
-            pendingSave = false;
-            saveChats();
-          }
+          await deleteFromDB('chats');
+        } catch (_) {}
+
+        updateStorageIndicator('success', 'Cihaza güvenle kaydedildi');
+        updateStorageUsage();
+      } catch (e) {
+        console.error('Sohbet kaydetme hatası:', e);
+        updateStorageIndicator('error', 'Depolama hatası!');
+      } finally {
+        chatSaving = false;
+        if (chatPendingSave) {
+          chatPendingSave = false;
+          persistChatStore();
         }
-      }, 1200);
+      }
     }
 
-    async function loadChats() {
-      try {
-        const data = await loadFromDB('chats');
-        if (data && Array.isArray(data)) return data;
+    function saveChatStore(immediate = false) {
+      if (immediate) {
+        if (chatSaveTimer) {
+          clearTimeout(chatSaveTimer);
+          chatSaveTimer = null;
+        }
+        persistChatStore();
+        return;
+      }
 
-        const oldData = localStorage.getItem('g3_chats_v2') || localStorage.getItem('g3_chats');
-        if (oldData) {
-          const parsed = JSON.parse(oldData);
-          if (Array.isArray(parsed)) {
-            await saveToDB('chats', parsed);
-            localStorage.removeItem('g3_chats_v2');
-            localStorage.removeItem('g3_chats');
-            return parsed;
-          }
+      if (chatSaving) {
+        chatPendingSave = true;
+        return;
+      }
+
+      if (chatSaveTimer) clearTimeout(chatSaveTimer);
+
+      chatSaveTimer = setTimeout(() => {
+        chatSaveTimer = null;
+        persistChatStore();
+      }, 900);
+    }
+
+    function saveChats() {
+      return saveChatStore();
+    }
+
+    async function loadChatStore() {
+      try {
+        const stored = await loadFromDB('chatStore');
+        if (stored) return normalizeChatStore(stored);
+
+        const oldIndexed = await loadFromDB('chats');
+        if (oldIndexed) {
+          const migrated = normalizeChatStore({ chats: oldIndexed });
+          await saveToDB('chatStore', {
+            chatsByMode: migrated.chatsByMode,
+            currentChatIdByMode: migrated.currentChatIdByMode,
+            lastMode: migrated.lastMode,
+            updatedAt: Date.now()
+          });
+          await deleteFromDB('chats');
+          return migrated;
+        }
+
+        const oldLocal = localStorage.getItem('g3_chats_v2') || localStorage.getItem('g3_chats');
+        if (oldLocal) {
+          const parsed = JSON.parse(oldLocal);
+          const migrated = normalizeChatStore({ chats: parsed });
+          await saveToDB('chatStore', {
+            chatsByMode: migrated.chatsByMode,
+            currentChatIdByMode: migrated.currentChatIdByMode,
+            lastMode: migrated.lastMode,
+            updatedAt: Date.now()
+          });
+          localStorage.removeItem('g3_chats_v2');
+          localStorage.removeItem('g3_chats');
+          return migrated;
         }
       } catch (e) {
-        console.error('Yükleme hatası:', e);
+        console.error('Sohbet yükleme hatası:', e);
       }
-      return null;
+
+      return emptyChatStore();
+    }
+
+    function getChats(mode = state.currentMode) {
+      if (!state.chatsByMode[mode]) state.chatsByMode[mode] = [];
+      return state.chatsByMode[mode];
+    }
+
+    function getCurrentChat(mode = state.currentMode) {
+      const id = state.currentChatIdByMode[mode];
+      return getChats(mode).find(c => c.id === id) || null;
+    }
+
+    function setCurrentChat(chatId, mode = state.currentMode) {
+      state.currentChatIdByMode[mode] = chatId;
     }
 
     // ============================================================
-    // 6) GOOGLE LOGIN
+    // 6) GOOGLE İLE GİRİŞ SİSTEMİ
     // ============================================================
-    // Not: Google Client ID public olabilir ama yine de Console > Credentials > Restrictions kısmından
-    // yalnızca kendi domainini izin vermelisin.
     const GOOGLE_CLIENT_ID = '507958128519-92226gu60md73hs5jjhnul78mfu57aoo.apps.googleusercontent.com';
 
     function decodeJwt(token) {
@@ -2805,10 +3060,19 @@ KURALLAR:
     const chatFooterText = $('chatFooterText');
     const commandMenu = $('commandMenu');
     const modeBadge = $('modeBadge');
+    const modeTransitionFlash = $('modeTransitionFlash');
 
     let state = {
-      chats: [],
-      currentChatId: null,
+      chatsByMode: {
+        fast: [],
+        smart: [],
+        extra: []
+      },
+      currentChatIdByMode: {
+        fast: null,
+        smart: null,
+        extra: null
+      },
       currentMode: 'fast',
       user: null,
       theme: 'dark',
@@ -2821,7 +3085,7 @@ KURALLAR:
     };
 
     // ============================================================
-    // 8) STORAGE INDICATOR / USAGE
+    // 8) DEPOLAMA GÖSTERGESİ
     // ============================================================
     function updateStorageIndicator(type, text) {
       if (!storageIndicator) return;
@@ -2873,12 +3137,12 @@ KURALLAR:
     }
 
     // ============================================================
-    // 9) USER STATE
+    // 9) KULLANICI DURUMU
     // ============================================================
     function saveUserState() {
       try {
-        if (state.user) saveToDB('user', state.user);
-        if (state.joinDate) saveToDB('joinDate', state.joinDate);
+        if (state.user) saveToDB('user', state.user).catch(() => {});
+        if (state.joinDate) saveToDB('joinDate', state.joinDate).catch(() => {});
         updateStorageUsage();
       } catch (e) {}
     }
@@ -2929,7 +3193,7 @@ KURALLAR:
         accentColor: state.accentColor,
         fontSize: state.fontSize,
         bgAnimation: state.bgAnimation
-      });
+      }).catch(() => {});
     }
 
     function updateUserUI() {
@@ -2949,11 +3213,15 @@ KURALLAR:
       $('profileEmail').textContent = state.user.isGuest ? 'Misafir Hesabı' : (state.user.email || '');
       renderAvatar($('profileAvatarLg'), 'user', state.user);
 
-      const totalMessages = state.chats.reduce((sum, chat) => {
-        return sum + chat.messages.filter(m => m.role !== 'system').length;
-      }, 0);
+      let totalChats = 0;
+      let totalMessages = 0;
 
-      $('statChats').textContent = state.chats.length;
+      iterateChats(chat => {
+        totalChats++;
+        totalMessages += chat.messages.filter(m => m.role !== 'system').length;
+      });
+
+      $('statChats').textContent = totalChats;
       $('statMessages').textContent = totalMessages;
 
       const joinDate = state.joinDate || Date.now();
@@ -2994,15 +3262,14 @@ KURALLAR:
     }
 
     // ============================================================
-    // 11) MOD YÖNETİMİ
+    // 11) MOD YÖNETİMİ & ANİMASYON
     // ============================================================
-    function setMode(mode) {
+    function applyModeVisuals(mode) {
       if (!MODE_META[mode]) mode = 'fast';
 
-      state.currentMode = mode;
-      document.documentElement.dataset.mode = mode;
-
       const meta = MODE_META[mode];
+
+      document.documentElement.dataset.mode = mode;
 
       document.querySelectorAll('.mode-btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.mode === mode);
@@ -3025,6 +3292,57 @@ KURALLAR:
       }
     }
 
+    function triggerModeTransition() {
+      if (!modeTransitionFlash) return;
+
+      document.body.classList.remove('mode-changing');
+      void document.body.offsetWidth;
+      document.body.classList.add('mode-changing');
+
+      chatContainer.classList.add('mode-fading');
+
+      setTimeout(() => {
+        chatContainer.classList.remove('mode-fading');
+      }, 170);
+
+      setTimeout(() => {
+        document.body.classList.remove('mode-changing');
+      }, 780);
+    }
+
+    function renderModeContent(mode) {
+      let chat = getCurrentChat(mode);
+      if (!chat) chat = createNewChat(mode, false);
+      renderChatIntoUI(chat);
+      saveChatStore();
+    }
+
+    function activateMode(mode, animate = true) {
+      if (!MODE_META[mode]) mode = 'fast';
+
+      const changing = mode !== state.currentMode;
+
+      if (animate && changing) {
+        triggerModeTransition();
+      }
+
+      state.currentMode = mode;
+      applyModeVisuals(mode);
+
+      if (animate && changing) {
+        setTimeout(() => renderModeContent(mode), 170);
+      } else {
+        renderModeContent(mode);
+      }
+    }
+
+    function setMode(mode, animate = true) {
+      return activateMode(mode, animate);
+    }
+
+    // ============================================================
+    // 12) SİSTEM PROMPT & KOMUT MENÜSÜ
+    // ============================================================
     function getSystemPromptForMode(mode) {
       return SYSTEM_PROMPT_BASE + '\n' + (MODE_META[mode]?.system || MODE_META.fast.system);
     }
@@ -3104,29 +3422,34 @@ KURALLAR:
     }
 
     // ============================================================
-    // 12) SOHBET YÖNETİMİ
+    // 13) SOHBET YÖNETİMİ
     // ============================================================
-    function createNewChat(specificMode = null) {
-      const mode = specificMode || state.currentMode;
-      setMode(mode);
+    function createNewChat(mode = state.currentMode, activate = true) {
+      mode = MODE_META[mode] ? mode : state.currentMode;
 
-      const chatId = uid();
-      state.currentChatId = chatId;
-
-      state.chats.unshift({
-        id: chatId,
+      const chat = {
+        id: uid(),
         title: 'Yeni Sohbet',
-        mode: mode,
+        mode,
         createdAt: Date.now(),
         messages: [
           { role: 'system', content: getSystemPromptForMode(mode) }
         ]
-      });
+      };
 
-      renderChatList();
-      clearChatUI();
-      welcomeScreen.style.display = 'flex';
-      saveChats();
+      getChats(mode).unshift(chat);
+      setCurrentChat(chat.id, mode);
+
+      if (activate) {
+        if (mode !== state.currentMode) {
+          state.currentMode = mode;
+          applyModeVisuals(mode);
+        }
+        renderChatIntoUI(chat);
+      }
+
+      saveChatStore();
+      return chat;
     }
 
     function clearChatUI() {
@@ -3136,6 +3459,35 @@ KURALLAR:
         }
       });
       typingIndicator.classList.remove('active');
+    }
+
+    function renderChatIntoUI(chat) {
+      clearChatUI();
+
+      if (!chat) {
+        welcomeScreen.style.display = 'flex';
+        return;
+      }
+
+      setCurrentChat(chat.id, chat.mode);
+
+      const visibleMessages = chat.messages.filter(m => m.role !== 'system');
+
+      if (visibleMessages.length === 0) {
+        welcomeScreen.style.display = 'flex';
+      } else {
+        welcomeScreen.style.display = 'none';
+        visibleMessages.forEach(msg => {
+          appendMessageUI(
+            msg.content,
+            msg.role === 'user' ? 'user' : 'ai',
+            false,
+            msg.attachments || []
+          );
+        });
+      }
+
+      renderChatList();
     }
 
     function renderChatList() {
@@ -3149,7 +3501,9 @@ KURALLAR:
         'Daha Eski': []
       };
 
-      state.chats.forEach(chat => {
+      const chats = getChats(state.currentMode);
+
+      chats.forEach(chat => {
         const age = now - chat.createdAt;
         const isSameDay = new Date(chat.createdAt).toDateString() === new Date().toDateString();
 
@@ -3159,17 +3513,17 @@ KURALLAR:
         else groups['Daha Eski'].push(chat);
       });
 
-      Object.entries(groups).forEach(([label, chats]) => {
-        if (chats.length === 0) return;
+      Object.entries(groups).forEach(([label, list]) => {
+        if (list.length === 0) return;
 
         const labelEl = document.createElement('div');
         labelEl.className = 'chat-group-label';
         labelEl.textContent = label;
         chatListEl.appendChild(labelEl);
 
-        chats.forEach(chat => {
+        list.forEach(chat => {
           const div = document.createElement('div');
-          div.className = `chat-item ${chat.id === state.currentChatId ? 'active' : ''}`;
+          div.className = `chat-item ${chat.id === state.currentChatIdByMode[state.currentMode] ? 'active' : ''}`;
 
           const icon = document.createElement('i');
           icon.className = `fas ${MODE_META[chat.mode]?.icon || 'fa-comment'}`;
@@ -3179,57 +3533,60 @@ KURALLAR:
 
           const del = document.createElement('button');
           del.className = 'chat-delete';
+          del.type = 'button';
           del.innerHTML = '<i class="fas fa-trash"></i>';
 
           del.addEventListener('click', (e) => {
             e.stopPropagation();
-            if (confirm('Sohbet silinecek. Emin misiniz?')) {
-              state.chats = state.chats.filter(c => c.id !== chat.id);
-              if (state.currentChatId === chat.id) {
-                state.chats.length > 0 ? loadChat(state.chats[0].id) : createNewChat();
-              }
-              renderChatList();
-              saveChats();
-              showToast('Sohbet silindi');
+
+            if (!confirm('Sohbet silinecek. Emin misiniz?')) return;
+
+            const modeList = getChats(chat.mode);
+            const idx = modeList.findIndex(c => c.id === chat.id);
+            if (idx !== -1) modeList.splice(idx, 1);
+
+            if (state.currentChatIdByMode[chat.mode] === chat.id) {
+              state.currentChatIdByMode[chat.mode] = modeList[0]?.id || null;
             }
+
+            if (chat.mode === state.currentMode) {
+              if (state.currentChatIdByMode[chat.mode]) {
+                loadChat(state.currentChatIdByMode[chat.mode], chat.mode, false);
+              } else {
+                createNewChat(chat.mode, true);
+              }
+            } else {
+              renderChatList();
+            }
+
+            saveChatStore();
+            showToast('Sohbet silindi');
           });
 
           div.append(icon, span, del);
-          div.addEventListener('click', () => loadChat(chat.id));
+          div.addEventListener('click', () => loadChat(chat.id, chat.mode, false));
           chatListEl.appendChild(div);
         });
       });
     }
 
-    function loadChat(chatId) {
-      state.currentChatId = chatId;
-      const activeChat = state.chats.find(c => c.id === chatId);
-      if (!activeChat) return;
+    function loadChat(chatId, mode = state.currentMode, animate = false) {
+      const chat = getChats(mode).find(c => c.id === chatId);
+      if (!chat) return;
 
-      setMode(activeChat.mode);
-      renderChatList();
-      clearChatUI();
-      welcomeScreen.style.display = 'none';
+      setCurrentChat(chatId, mode);
 
-      activeChat.messages.forEach(msg => {
-        if (msg.role !== 'system') {
-          appendMessageUI(
-            msg.content,
-            msg.role === 'user' ? 'user' : 'ai',
-            false,
-            msg.attachments || []
-          );
-        }
-      });
-
-      if (window.innerWidth <= 768) {
-        overlay.classList.remove('show');
-        sidebar.classList.remove('open');
+      if (mode !== state.currentMode) {
+        activateMode(mode, animate);
+        return;
       }
+
+      renderChatIntoUI(chat);
+      saveChatStore();
     }
 
     // ============================================================
-    // 13) MARKDOWN RENDER
+    // 14) MARKDOWN RENDER
     // ============================================================
     function renderMarkdown(text) {
       let html = '';
@@ -3284,8 +3641,59 @@ KURALLAR:
     }
 
     // ============================================================
-    // 14) MESAJ UI
+    // 15) MESAJ & EK DOSYA RENDER
     // ============================================================
+    function createAttachmentNode(att) {
+      const wrap = document.createElement('div');
+      wrap.className = 'file-attachment' + (att?.generated ? ' generated-attachment' : '');
+
+      if (att?.type?.startsWith('image/')) {
+        const img = document.createElement('img');
+        img.src = att.data;
+        img.alt = att.name || 'Görsel';
+        img.loading = 'lazy';
+        img.decoding = 'async';
+        img.addEventListener('click', () => window.open(att.data, '_blank'));
+        wrap.appendChild(img);
+
+        const actions = document.createElement('div');
+        actions.className = 'attachment-actions';
+
+        const download = document.createElement('a');
+        download.className = 'action-btn';
+        download.href = att.data;
+        download.download = att.name || 'g3-gorsel.jpg';
+        download.title = 'İndir';
+        download.innerHTML = '<i class="fas fa-download"></i>';
+
+        const copy = document.createElement('button');
+        copy.className = 'action-btn';
+        copy.type = 'button';
+        copy.title = 'Bağlantıyı kopyala';
+        copy.innerHTML = '<i class="fas fa-link"></i>';
+        copy.addEventListener('click', () => {
+          if (/^https?:\/\//i.test(att.data)) {
+            navigator.clipboard.writeText(att.data).then(() => showToast('Bağlantı kopyalandı'));
+          } else {
+            showToast('Görsel cihazda kayıtlı, doğrudan bağlantı yok');
+          }
+        });
+
+        actions.append(download, copy);
+        wrap.appendChild(actions);
+      } else {
+        const i = document.createElement('i');
+        i.className = 'fas fa-file';
+
+        const span = document.createElement('span');
+        span.textContent = att?.name || 'Dosya';
+
+        wrap.append(i, span);
+      }
+
+      return wrap;
+    }
+
     function appendMessageUI(text, sender, animate = true, attachments = []) {
       welcomeScreen.style.display = 'none';
 
@@ -3317,24 +3725,7 @@ KURALLAR:
 
       if (attachments && attachments.length > 0) {
         attachments.forEach(att => {
-          const attDiv = document.createElement('div');
-          attDiv.className = 'file-attachment';
-
-          if (att.type && att.type.startsWith('image/')) {
-            const img = document.createElement('img');
-            img.src = att.data;
-            img.alt = att.name || 'Görsel';
-            img.addEventListener('click', () => window.open(att.data, '_blank'));
-            attDiv.appendChild(img);
-          } else {
-            const i = document.createElement('i');
-            i.className = 'fas fa-file';
-            const span = document.createElement('span');
-            span.textContent = att.name || 'Dosya';
-            attDiv.append(i, span);
-          }
-
-          msgDiv.appendChild(attDiv);
+          msgDiv.appendChild(createAttachmentNode(att));
         });
       }
 
@@ -3367,7 +3758,7 @@ KURALLAR:
     }
 
     // ============================================================
-    // 15) AI ÇAĞRI
+    // 16) AI ÇAĞRI
     // ============================================================
     async function callAI(messages, systemPrompt, mode) {
       const msgs = messages
@@ -3394,7 +3785,6 @@ KURALLAR:
         }
       }
 
-      // Anahtarsız yedek: Pollinations
       try {
         const payload = {
           messages: msgs,
@@ -3428,7 +3818,194 @@ KURALLAR:
     }
 
     // ============================================================
-    // 16) NIGHTPLOX KOMUTLARI
+    // 17) GÖRSEL ÜRETİM SİSTEMİ
+    // ============================================================
+    async function fetchAsBlob(source) {
+      if (source instanceof Blob) return source;
+
+      let url = source;
+
+      if (source instanceof HTMLImageElement) {
+        url = source.src;
+      } else if (source && typeof source === 'object' && 'src' in source) {
+        url = source.src;
+      }
+
+      if (typeof url !== 'string') {
+        throw new Error('Geçersiz görsel kaynağı');
+      }
+
+      const response = await fetch(url, { cache: 'no-store', mode: 'cors' });
+      if (!response.ok) throw new Error(`Görsel indirilemedi (${response.status})`);
+
+      const blob = await response.blob();
+      if (!blob.type.startsWith('image/')) throw new Error('Dönen veri görsel değil');
+
+      return blob;
+    }
+
+    function blobToCompressedDataURL(blob, maxDimension = 1024, quality = 0.86) {
+      return new Promise((resolve, reject) => {
+        const url = URL.createObjectURL(blob);
+        const img = new Image();
+
+        img.onload = () => {
+          try {
+            const ratio = Math.min(1, maxDimension / Math.max(img.width, img.height));
+            const w = Math.max(1, Math.round(img.width * ratio));
+            const h = Math.max(1, Math.round(img.height * ratio));
+
+            const canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#0b0b10';
+            ctx.fillRect(0, 0, w, h);
+            ctx.drawImage(img, 0, 0, w, h);
+
+            canvas.toBlob((compressedBlob) => {
+              URL.revokeObjectURL(url);
+
+              if (!compressedBlob) {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = () => reject(new Error('Görsel sıkıştırılamadı'));
+                reader.readAsDataURL(blob);
+                return;
+              }
+
+              const reader = new FileReader();
+              reader.onload = () => resolve(reader.result);
+              reader.onerror = () => reject(new Error('Görsel okunamadı'));
+              reader.readAsDataURL(compressedBlob);
+            }, 'image/jpeg', quality);
+          } catch (e) {
+            URL.revokeObjectURL(url);
+            reject(e);
+          }
+        };
+
+        img.onerror = () => {
+          URL.revokeObjectURL(url);
+          reject(new Error('Görsel çözümlenemedi'));
+        };
+
+        img.src = url;
+      });
+    }
+
+    async function createImageAttachmentFromSource(source, prompt) {
+      const name = `g3-imagine-${Date.now()}.jpg`;
+
+      try {
+        const blob = await fetchAsBlob(source);
+        const data = await blobToCompressedDataURL(blob, 1024, 0.86);
+
+        return {
+          name,
+          type: 'image/jpeg',
+          data,
+          prompt,
+          generated: true
+        };
+      } catch (e) {
+        const url =
+          typeof source === 'string'
+            ? source
+            : (source?.src || source?.toString?.() || '');
+
+        if (/^https?:\/\//i.test(url)) {
+          return {
+            name,
+            type: 'image/remote',
+            data: url,
+            prompt,
+            generated: true,
+            remote: true
+          };
+        }
+
+        throw e;
+      }
+    }
+
+    async function generateWithPuter(prompt) {
+      if (typeof puter === 'undefined' || !puter.ai || typeof puter.ai.txt2img !== 'function') {
+        throw new Error('Puter görsel servisi hazır değil');
+      }
+
+      const enhanced = `${prompt}, ultra detailed, sharp focus, professional lighting, high resolution, no watermark, no text`;
+
+      const result = await puter.ai.txt2img(enhanced);
+
+      let source = result;
+      if (result instanceof HTMLImageElement) source = result.src;
+      else if (result && typeof result === 'object' && 'src' in result) source = result.src;
+      else if (typeof result === 'string') source = result;
+
+      return await createImageAttachmentFromSource(source, prompt);
+    }
+
+    async function generateWithPollinationsEmergency(prompt) {
+      const enhanced = `${prompt}, ultra detailed, sharp focus, professional lighting, high resolution, no watermark, no text`;
+      const seed = Math.floor(Math.random() * 999999);
+      const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(enhanced)}?width=1024&height=1024&nologo=true&seed=${seed}&model=flux`;
+
+      return await createImageAttachmentFromSource(url, prompt);
+    }
+
+    async function generateImage(prompt) {
+      const errors = [];
+
+      try {
+        return await generateWithPuter(prompt);
+      } catch (e) {
+        errors.push('Puter: ' + (e?.message || e));
+      }
+
+      try {
+        return await generateWithPollinationsEmergency(prompt);
+      } catch (e) {
+        errors.push('Pollinations: ' + (e?.message || e));
+      }
+
+      throw new Error(errors.join(' | '));
+    }
+
+    function createPendingMessage(text) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'message-wrapper ai-wrapper';
+
+      const row = document.createElement('div');
+      row.className = 'message-row';
+
+      const avatar = document.createElement('div');
+      avatar.className = 'message-avatar';
+      avatar.innerHTML = `<i class="fas ${MODE_META[state.currentMode]?.icon || 'fa-star'}" style="color: var(--accent);"></i>`;
+
+      const msg = document.createElement('div');
+      msg.className = 'message image-status';
+      msg.innerHTML = `
+        <i class="fas fa-wand-magic-sparkles"></i>
+        <span>${escapeHtml(text)}</span>
+        <div class="typing-dots">
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+        </div>
+      `;
+
+      row.append(avatar, msg);
+      wrapper.appendChild(row);
+      chatContainer.insertBefore(wrapper, typingIndicator);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+
+      return wrapper;
+    }
+
+    // ============================================================
+    // 18) NIGHTPLOX KOMUTLARI
     // ============================================================
     async function handleNightploxCommand(text, activeChat) {
       const trimmed = text.trim();
@@ -3441,7 +4018,10 @@ KURALLAR:
       const arg = match[2].trim();
 
       if (!KNOWN_COMMANDS.includes(cmd)) {
-        appendMessageUI(`Bilinmeyen komut: \`/${cmd}\`\n\nMevcut komutlar: ${KNOWN_COMMANDS.map(c => '`/' + c + '`').join(', ')}`, 'ai');
+        appendMessageUI(
+          `Bilinmeyen komut: \`/${cmd}\`\n\nMevcut komutlar: ${KNOWN_COMMANDS.map(c => '`/' + c + '`').join(', ')}`,
+          'ai'
+        );
         return true;
       }
 
@@ -3452,75 +4032,43 @@ KURALLAR:
 
       appendMessageUI(text, 'user');
       activeChat.messages.push({ role: 'user', content: text });
+      saveChatStore();
 
       if (cmd === 'imagine') {
-        const loader = document.createElement('div');
-        loader.className = 'message-wrapper ai-wrapper';
-
-        const row = document.createElement('div');
-        row.className = 'message-row';
-
-        const avatar = document.createElement('div');
-        avatar.className = 'message-avatar';
-        renderAvatar(avatar, 'ai', null);
-
-        const msg = document.createElement('div');
-        msg.className = 'message';
-        msg.textContent = 'Görsel oluşturuluyor…';
-
-        const dots = document.createElement('div');
-        dots.className = 'typing-dots';
-        dots.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
-        msg.appendChild(dots);
-
-        row.append(avatar, msg);
-        loader.appendChild(row);
-        chatContainer.insertBefore(loader, typingIndicator);
-        chatContainer.scrollTop = chatContainer.scrollHeight;
+        const pending = createPendingMessage('Görsel oluşturuluyor…');
 
         try {
-          const seed = Math.floor(Math.random() * 999999);
-          const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(arg + ', masterpiece, 8k, detailed')}&width=1024&height=1024&nologo=true&seed=${seed}&model=flux`;
+          const attachment = await generateImage(arg);
 
-          msg.textContent = 'İşte görselin:';
+          pending.remove();
 
-          const img = document.createElement('img');
-          img.src = imageUrl;
-          img.alt = arg;
-          img.style.cssText = 'max-width:100%; border-radius:12px; margin-top:10px; cursor:pointer; border:1px solid var(--border);';
-          img.addEventListener('click', () => window.open(imageUrl, '_blank'));
-          img.onerror = () => {
-            msg.textContent = 'Görsel yüklenemedi. Lütfen tekrar dene.';
-          };
+          appendMessageUI(
+            `✅ \`${arg}\` için görsel oluşturuldu.`,
+            'ai',
+            true,
+            [attachment]
+          );
 
-          msg.appendChild(img);
+          activeChat.messages.push({
+            role: 'assistant',
+            content: `Görsel oluşturuldu: ${arg}`,
+            attachments: [attachment]
+          });
 
-          const actions = document.createElement('div');
-          actions.className = 'message-actions';
-          actions.style.opacity = '1';
-
-          const copyBtn = document.createElement('button');
-          copyBtn.className = 'action-btn';
-          copyBtn.type = 'button';
-          copyBtn.dataset.action = 'copy-link';
-          copyBtn.dataset.url = imageUrl;
-          copyBtn.title = 'Bağlantıyı kopyala';
-          copyBtn.innerHTML = '<i class="fas fa-link"></i>';
-
-          const download = document.createElement('a');
-          download.className = 'action-btn';
-          download.href = imageUrl;
-          download.download = 'g3-imagine.png';
-          download.title = 'İndir';
-          download.innerHTML = '<i class="fas fa-download"></i>';
-
-          actions.append(copyBtn, download);
-          msg.appendChild(actions);
-
-          activeChat.messages.push({ role: 'assistant', content: `![Görsel](${imageUrl})` });
-          saveChats();
+          saveChatStore();
         } catch (e) {
-          msg.textContent = 'Görsel oluşturulamadı.';
+          const message = e?.message || 'Görsel oluşturulamadı.';
+          pending.querySelector('.message').innerHTML = `
+            <i class="fas fa-triangle-exclamation image-error"></i>
+            <span class="image-error">${escapeHtml(message)}</span>
+          `;
+
+          activeChat.messages.push({
+            role: 'assistant',
+            content: `Görsel oluşturulamadı: ${message}`
+          });
+
+          saveChatStore();
         }
 
         return true;
@@ -3535,8 +4083,9 @@ KURALLAR:
 
         typingIndicator.classList.remove('active');
         appendMessageUI(reply, 'ai');
+
         activeChat.messages.push({ role: 'assistant', content: reply });
-        saveChats();
+        saveChatStore();
       } catch (error) {
         typingIndicator.classList.remove('active');
         appendMessageUI(`Komut işlenirken hata: ${error.message}`, 'ai');
@@ -3546,16 +4095,15 @@ KURALLAR:
     }
 
     // ============================================================
-    // 17) MESAJ GÖNDERME
+    // 19) MESAJ GÖNDERME & YENİDEN OLUŞTURMA
     // ============================================================
     async function sendMessage() {
       const text = userInput.value.trim();
       if (!text && state.attachments.length === 0) return;
 
-      let activeChat = state.chats.find(c => c.id === state.currentChatId);
+      let activeChat = getCurrentChat(state.currentMode);
       if (!activeChat) {
-        createNewChat();
-        activeChat = state.chats.find(c => c.id === state.currentChatId);
+        activeChat = createNewChat(state.currentMode, true);
       }
 
       if (activeChat.mode === 'extra') {
@@ -3605,7 +4153,7 @@ KURALLAR:
         attachments: currentAttachments
       });
 
-      saveChats();
+      saveChatStore();
 
       typingIndicator.classList.add('active');
       chatContainer.scrollTop = chatContainer.scrollHeight;
@@ -3616,8 +4164,9 @@ KURALLAR:
 
         typingIndicator.classList.remove('active');
         appendMessageUI(reply, 'ai');
+
         activeChat.messages.push({ role: 'assistant', content: reply });
-        saveChats();
+        saveChatStore();
       } catch (error) {
         typingIndicator.classList.remove('active');
         appendMessageUI(`Bağlantı hatası: ${error.message}`, 'ai');
@@ -3629,7 +4178,7 @@ KURALLAR:
     }
 
     async function regenerateResponse() {
-      const activeChat = state.chats.find(c => c.id === state.currentChatId);
+      const activeChat = getCurrentChat(state.currentMode);
       if (!activeChat) return;
 
       const lastAiIndex = activeChat.messages.map(m => m.role).lastIndexOf('assistant');
@@ -3652,8 +4201,9 @@ KURALLAR:
 
         typingIndicator.classList.remove('active');
         appendMessageUI(reply, 'ai');
+
         activeChat.messages.push({ role: 'assistant', content: reply });
-        saveChats();
+        saveChatStore();
       } catch (error) {
         typingIndicator.classList.remove('active');
         appendMessageUI(`Yeniden oluşturma hatası: ${error.message}`, 'ai');
@@ -3661,7 +4211,7 @@ KURALLAR:
     }
 
     // ============================================================
-    // 18) ATAÇMANLAR
+    // 20) ATAÇMAN ARAYÜZÜ
     // ============================================================
     function renderAttachments() {
       if (state.attachments.length === 0) {
@@ -3707,7 +4257,7 @@ KURALLAR:
     }
 
     // ============================================================
-    // 19) SESLİ GİRİŞ
+    // 21) SESLİ GİRİŞ
     // ============================================================
     let speechRecognition = null;
 
@@ -3756,7 +4306,7 @@ KURALLAR:
     });
 
     // ============================================================
-    // 20) DIŞA AKTARMA
+    // 22) DIŞA AKTARMA / İÇE AKTARMA
     // ============================================================
     function downloadBlob(content, filename, type) {
       const blob = new Blob([content], { type });
@@ -3767,12 +4317,18 @@ KURALLAR:
       setTimeout(() => URL.revokeObjectURL(a.href), 1000);
     }
 
+    function iterateChats(callback) {
+      ['fast', 'smart', 'extra'].forEach(mode => {
+        getChats(mode).forEach(chat => callback(chat, mode));
+      });
+    }
+
     function chatsToMarkdown() {
       let md = '# G3 AI Yedeği\n\n';
 
-      state.chats.forEach(chat => {
+      iterateChats((chat, mode) => {
         md += `## ${chat.title || 'Yeni Sohbet'}\n\n`;
-        md += `- Mod: ${MODE_META[chat.mode]?.label || chat.mode}\n`;
+        md += `- Mod: ${MODE_META[mode]?.label || mode}\n`;
         md += `- Tarih: ${new Date(chat.createdAt).toLocaleString('tr-TR')}\n\n`;
 
         chat.messages.forEach(m => {
@@ -3790,6 +4346,7 @@ KURALLAR:
     $('exportJsonBtn').addEventListener('click', () => {
       const data = {
         app: 'G3 AI',
+        version: '5.2',
         user: state.user,
         joinDate: state.joinDate,
         settings: {
@@ -3798,7 +4355,9 @@ KURALLAR:
           bgAnimation: state.bgAnimation,
           theme: state.theme
         },
-        chats: state.chats,
+        chatsByMode: state.chatsByMode,
+        currentChatIdByMode: state.currentChatIdByMode,
+        lastMode: state.currentMode,
         timestamp: Date.now()
       };
 
@@ -3829,9 +4388,9 @@ KURALLAR:
 
       let html = `<h1 style="font-size:24px;margin-bottom:16px;">G3 AI Sohbetleri</h1>`;
 
-      state.chats.forEach(chat => {
+      iterateChats((chat, mode) => {
         html += `<h2 style="font-size:18px;margin-top:22px;">${escapeHtml(chat.title || 'Yeni Sohbet')}</h2>`;
-        html += `<p style="font-size:12px;color:#666;">Mod: ${escapeHtml(MODE_META[chat.mode]?.label || chat.mode)} • ${new Date(chat.createdAt).toLocaleString('tr-TR')}</p>`;
+        html += `<p style="font-size:12px;color:#666;">Mod: ${escapeHtml(MODE_META[mode]?.label || mode)} • ${new Date(chat.createdAt).toLocaleString('tr-TR')}</p>`;
 
         chat.messages.forEach(m => {
           if (m.role === 'system') return;
@@ -3875,42 +4434,49 @@ KURALLAR:
         try {
           const data = JSON.parse(event.target.result);
 
-          if (!data.chats || !Array.isArray(data.chats)) {
+          const hasNewFormat = data?.chatsByMode && typeof data.chatsByMode === 'object';
+          const hasOldFormat = Array.isArray(data?.chats);
+
+          if (!hasNewFormat && !hasOldFormat) {
             showToast('Geçersiz yedek dosyası', true);
             return;
           }
 
-          if (confirm('Mevcut veriler silinip yedek geri yüklenecek. Emin misiniz?')) {
-            state.chats = data.chats;
+          if (!confirm('Mevcut veriler silinip yedek geri yüklenecek. Emin misiniz?')) return;
 
-            if (data.user) {
-              state.user = data.user;
-              saveUserState();
-              updateUserUI();
-              authOverlay.classList.remove('active');
-            }
+          const store = normalizeChatStore(data);
 
-            if (data.joinDate) {
-              state.joinDate = data.joinDate;
-              saveToDB('joinDate', state.joinDate);
-            }
+          state.chatsByMode = store.chatsByMode;
+          state.currentChatIdByMode = store.currentChatIdByMode;
+          state.currentMode = MODE_META[store.lastMode] ? store.lastMode : 'fast';
 
-            if (data.settings) {
-              state.accentColor = data.settings.accentColor || state.accentColor;
-              state.fontSize = data.settings.fontSize || state.fontSize;
-              state.bgAnimation = data.settings.bgAnimation ?? state.bgAnimation;
-              state.theme = data.settings.theme || state.theme;
-              document.documentElement.setAttribute('data-theme', state.theme);
-              updateThemeIcon();
-              applyCustomization();
-            }
-
-            await saveToDB('chats', state.chats);
-            renderChatList();
-            state.chats.length > 0 ? loadChat(state.chats[0].id) : createNewChat();
-            showToast('Yedek geri yüklendi');
+          if (data.user) {
+            state.user = data.user;
+            saveUserState();
+            updateUserUI();
+            authOverlay.classList.remove('active');
           }
+
+          if (data.joinDate) {
+            state.joinDate = data.joinDate;
+            saveToDB('joinDate', state.joinDate).catch(() => {});
+          }
+
+          if (data.settings) {
+            state.accentColor = data.settings.accentColor || state.accentColor;
+            state.fontSize = data.settings.fontSize || state.fontSize;
+            state.bgAnimation = data.settings.bgAnimation ?? state.bgAnimation;
+            state.theme = data.settings.theme || state.theme;
+            document.documentElement.setAttribute('data-theme', state.theme);
+            updateThemeIcon();
+            applyCustomization();
+          }
+
+          await persistChatStore();
+          activateMode(state.currentMode, false);
+          showToast('Yedek geri yüklendi');
         } catch (err) {
+          console.error(err);
           showToast('Geçersiz dosya', true);
         }
       };
@@ -3920,25 +4486,33 @@ KURALLAR:
     });
 
     $('deleteAllBtn').addEventListener('click', async () => {
-      if (confirm('TÜM VERİLER silinecek. Emin misiniz?')) {
-        state.chats = [];
-        await deleteFromDB('chats');
-        createNewChat();
-        profileModal.classList.remove('active');
-        showToast('Tüm veriler silindi');
-        updateStorageUsage();
-      }
+      if (!confirm('TÜM VERİLER silinecek. Emin misiniz?')) return;
+
+      const empty = emptyChatStore();
+      state.chatsByMode = empty.chatsByMode;
+      state.currentChatIdByMode = empty.currentChatIdByMode;
+
+      await persistChatStore();
+      activateMode(state.currentMode, false);
+
+      profileModal.classList.remove('active');
+      showToast('Tüm veriler silindi');
+      updateStorageUsage();
     });
 
     $('clearAllBtn').addEventListener('click', async () => {
-      if (confirm('Tüm sohbetler silinecek. Emin misiniz?')) {
-        state.chats = [];
-        await deleteFromDB('chats');
-        createNewChat();
-        userDropdown.classList.remove('active');
-        showToast('Sohbetler silindi');
-        updateStorageUsage();
-      }
+      if (!confirm('Tüm sohbetler silinecek. Emin misiniz?')) return;
+
+      const empty = emptyChatStore();
+      state.chatsByMode = empty.chatsByMode;
+      state.currentChatIdByMode = empty.currentChatIdByMode;
+
+      await persistChatStore();
+      activateMode(state.currentMode, false);
+
+      userDropdown.classList.remove('active');
+      showToast('Sohbetler silindi');
+      updateStorageUsage();
     });
 
     $('exportBtn').addEventListener('click', () => {
@@ -3947,7 +4521,7 @@ KURALLAR:
     });
 
     // ============================================================
-    // 21) EVENT LISTENERS
+    // 23) EVENT LISTENERS
     // ============================================================
     $('googleSignInBtn').addEventListener('click', () => {
       if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
@@ -4038,17 +4612,25 @@ KURALLAR:
 
     document.querySelectorAll('.mode-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        const newMode = btn.dataset.mode;
-        setMode(newMode);
+        const mode = btn.dataset.mode;
+        if (!MODE_META[mode]) return;
 
-        const modeChat = state.chats.find(c => c.mode === newMode);
-        if (modeChat) loadChat(modeChat.id);
-        else createNewChat(newMode);
+        if (mode === state.currentMode) {
+          activateMode(mode, false);
+        } else {
+          activateMode(mode, true);
+        }
+
+        if (window.innerWidth <= 768) {
+          sidebar.classList.remove('open');
+          overlay.classList.remove('show');
+        }
       });
     });
 
     newChatBtn.addEventListener('click', () => {
-      createNewChat();
+      createNewChat(state.currentMode, true);
+
       if (window.innerWidth <= 768) {
         sidebar.classList.remove('open');
         overlay.classList.remove('show');
@@ -4073,7 +4655,7 @@ KURALLAR:
       autoResizeTextarea();
 
       const val = userInput.value;
-      const activeChat = state.chats.find(c => c.id === state.currentChatId);
+      const activeChat = getCurrentChat(state.currentMode);
 
       if (activeChat && activeChat.mode === 'extra') {
         const lastSlashIndex = val.lastIndexOf('/');
@@ -4203,17 +4785,31 @@ KURALLAR:
       }
     });
 
-    window.addEventListener('beforeunload', async () => {
-      if (state.chats.length > 0 && !isSaving) {
-        try {
-          await saveToDB('chats', state.chats);
-        } catch (e) {}
+    window.addEventListener('pagehide', () => {
+      saveChatStore(true);
+    });
+
+    window.addEventListener('beforeunload', () => {
+      saveChatStore(true);
+    });
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        saveChatStore(true);
       }
     });
 
     // ============================================================
-    // 22) INIT
+    // 24) INIT
     // ============================================================
+    let galaxyInitialized = false;
+
+    function ensureGalaxy() {
+      if (galaxyInitialized) return;
+      initGalaxyBackground();
+      galaxyInitialized = true;
+    }
+
     async function initApp() {
       try {
         await openDatabase();
@@ -4232,6 +4828,9 @@ KURALLAR:
 
       await loadTheme();
 
+      ensureGalaxy();
+      applyCustomization();
+
       const userLoaded = await loadUserState();
       if (userLoaded) {
         updateUserUI();
@@ -4244,19 +4843,12 @@ KURALLAR:
         }
       }
 
-      applyCustomization();
+      const store = await loadChatStore();
+      state.chatsByMode = store.chatsByMode;
+      state.currentChatIdByMode = store.currentChatIdByMode;
+      state.currentMode = MODE_META[store.lastMode] ? store.lastMode : 'fast';
 
-      const savedChats = await loadChats();
-      if (savedChats && savedChats.length > 0) {
-        state.chats = savedChats;
-        state.currentChatId = state.chats[0].id;
-        state.currentMode = state.chats[0].mode || 'fast';
-        setMode(state.currentMode);
-        renderChatList();
-        loadChat(state.currentChatId);
-      } else {
-        createNewChat('fast');
-      }
+      activateMode(state.currentMode, false);
 
       updateChatFooter();
       setInterval(updateChatFooter, 60000);
@@ -4264,21 +4856,18 @@ KURALLAR:
     }
 
     window.addEventListener('load', () => {
-      initGalaxyBackground();
-      if (typeof window.galaxySetMode === 'function') {
-        window.galaxySetMode(state.currentMode || 'fast');
-      }
       setTimeout(updateStorageUsage, 400);
     });
 
     initApp();
 
-    console.log('%c G3 AI v5.1 ', 'background: linear-gradient(135deg, #ff6b35, #ffd166); color: #111; font-size: 18px; padding: 8px 12px; border-radius: 8px;');
+    console.log('%c G3 AI v5.2 ', 'background: linear-gradient(135deg, #ff6b35, #ffd166); color: #111; font-size: 18px; padding: 8px 12px; border-radius: 8px;');
     console.log('Muhammed Eren Bayram tarafından geliştirilmiştir.');
-    console.log('✓ Mod bazlı arayüz ve arka plan aktif');
-    console.log('✓ Öneri kartları kaldırıldı');
-    console.log('✓ Hardcoded AI API keyleri çıkarıldı');
-    console.log('✓ IndexedDB debounce kayıt sistemi aktif');
+    console.log('✓ Mod bazlı ayrı sohbet sistemi aktif');
+    console.log('✓ Puter tabanlı görsel üretimi aktif');
+    console.log('✓ Galaksi yavaş renk geçişi aktif');
+    console.log('✓ Mod geçiş animasyonu aktif');
+    console.log('✓ IndexedDB güçlü kaydetme sistemi aktif');
   </script>
 </body>
 </html>
