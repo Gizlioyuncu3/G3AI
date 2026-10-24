@@ -1262,6 +1262,176 @@ z-index: 550;
 .dot-indicator { width: 8px; height: 8px; border-radius: 50%; background: var(--success); }
 .storage-indicator.warn .dot-indicator { background: var(--warning); }
 .storage-indicator.error .dot-indicator { background: var(--danger); }
+.intro-overlay {
+position: fixed;
+inset: 0;
+z-index: 1000;
+display: none;
+align-items: center;
+justify-content: center;
+background:
+radial-gradient(circle at center, rgba(99, 102, 241, 0.20), transparent 34%),
+radial-gradient(circle at 20% 20%, rgba(255, 107, 53, 0.12), transparent 28%),
+radial-gradient(circle at 80% 80%, rgba(34, 211, 238, 0.12), transparent 28%),
+rgba(3, 3, 8, 0.96);
+backdrop-filter: blur(22px);
+overflow: hidden;
+}
+.intro-overlay.active { display: flex; animation: introFadeIn 0.45s ease; }
+.intro-overlay.hide { animation: introFadeOut 0.55s ease forwards; }
+.intro-particles {
+position: absolute;
+inset: 0;
+pointer-events: none;
+}
+.intro-particle {
+position: absolute;
+width: 3px;
+height: 3px;
+border-radius: 50%;
+background: rgba(255, 255, 255, 0.62);
+box-shadow: 0 0 12px rgba(255, 255, 255, 0.45);
+animation: particleFloat linear infinite;
+}
+.intro-content {
+position: relative;
+z-index: 2;
+text-align: center;
+padding: 24px;
+}
+.intro-orbit {
+width: 170px;
+height: 170px;
+margin: 0 auto 22px;
+position: relative;
+display: grid;
+place-items: center;
+}
+.intro-core {
+width: 86px;
+height: 86px;
+border-radius: 28px;
+background: linear-gradient(135deg, #6366f1, #22d3ee);
+display: grid;
+place-items: center;
+color: white;
+font-weight: 900;
+font-size: 26px;
+box-shadow:
+0 0 42px rgba(99, 102, 241, 0.55),
+inset 0 0 20px rgba(255, 255, 255, 0.18);
+overflow: hidden;
+animation: corePulse 1.8s ease-in-out infinite;
+}
+.intro-core img {
+width: 100%;
+height: 100%;
+object-fit: cover;
+}
+.intro-ring {
+position: absolute;
+border-radius: 50%;
+border: 1px solid rgba(255, 255, 255, 0.16);
+animation: spinRing linear infinite;
+}
+.ring-1 {
+width: 118px;
+height: 118px;
+border-top-color: #ff6b35;
+border-right-color: rgba(255, 107, 53, 0.35);
+animation-duration: 2.4s;
+}
+.ring-2 {
+width: 144px;
+height: 144px;
+border-bottom-color: #22d3ee;
+border-left-color: rgba(34, 211, 238, 0.35);
+animation-duration: 3.2s;
+animation-direction: reverse;
+}
+.ring-3 {
+width: 168px;
+height: 168px;
+border-top-color: #c084fc;
+border-left-color: rgba(192, 132, 252, 0.30);
+animation-duration: 4s;
+}
+.intro-title {
+font-size: clamp(1.8rem, 5vw, 3rem);
+font-weight: 900;
+letter-spacing: -0.04em;
+background: linear-gradient(135deg, #ffffff, #b4b4be);
+-webkit-background-clip: text;
+background-clip: text;
+color: transparent;
+animation: titleRise 0.8s ease both;
+}
+.intro-subtitle {
+color: var(--text-secondary);
+margin-top: 8px;
+font-size: 0.98rem;
+animation: titleRise 0.8s 0.12s ease both;
+}
+.intro-loader {
+width: 190px;
+height: 4px;
+border-radius: 999px;
+background: rgba(255, 255, 255, 0.10);
+margin: 22px auto 0;
+overflow: hidden;
+}
+.intro-loader span {
+display: block;
+width: 40%;
+height: 100%;
+border-radius: inherit;
+background: linear-gradient(90deg, #ff6b35, #22d3ee, #c084fc);
+animation: loaderSlide 1.25s ease-in-out infinite;
+}
+.intro-skip {
+margin-top: 14px;
+background: transparent;
+border: 1px solid rgba(255, 255, 255, 0.14);
+color: var(--text-secondary);
+border-radius: 999px;
+padding: 8px 14px;
+cursor: pointer;
+font-family: inherit;
+transition: var(--transition);
+}
+.intro-skip:hover {
+background: rgba(255, 255, 255, 0.06);
+color: var(--text-primary);
+}
+@keyframes introFadeIn {
+from { opacity: 0; }
+to { opacity: 1; }
+}
+@keyframes introFadeOut {
+from { opacity: 1; }
+to { opacity: 0; visibility: hidden; }
+}
+@keyframes corePulse {
+0%, 100% { transform: scale(1); box-shadow: 0 0 34px rgba(99, 102, 241, 0.45), inset 0 0 18px rgba(255,255,255,0.16); }
+50% { transform: scale(1.05); box-shadow: 0 0 56px rgba(99, 102, 241, 0.68), inset 0 0 24px rgba(255,255,255,0.22); }
+}
+@keyframes spinRing {
+from { transform: rotate(0deg); }
+to { transform: rotate(360deg); }
+}
+@keyframes titleRise {
+from { opacity: 0; transform: translateY(14px); }
+to { opacity: 1; transform: translateY(0); }
+}
+@keyframes loaderSlide {
+0% { transform: translateX(-120%); }
+100% { transform: translateX(320%); }
+}
+@keyframes particleFloat {
+0% { transform: translateY(20px) scale(0.7); opacity: 0; }
+20% { opacity: 1; }
+100% { transform: translateY(-120px) scale(1.2); opacity: 0; }
+}
 @media (max-width: 900px) {
 #sidebar {
 position: fixed;
@@ -1289,6 +1459,25 @@ header { padding-left: 14px; padding-right: 14px; }
 <canvas id="galaxy-canvas"></canvas>
 <div class="mode-veil"></div>
 <div class="mode-flash" id="modeTransitionFlash"></div>
+
+<div class="intro-overlay" id="introOverlay">
+<div class="intro-particles" id="introParticles"></div>
+<div class="intro-content">
+<div class="intro-orbit">
+<div class="intro-core">
+<img src="./g3.png" alt="G3" onerror="this.style.display='none'; this.parentElement.innerHTML='G3';" />
+</div>
+<span class="intro-ring ring-1"></span>
+<span class="intro-ring ring-2"></span>
+<span class="intro-ring ring-3"></span>
+</div>
+<h1 class="intro-title">G3 AI</h1>
+<p class="intro-subtitle">Puter destekli kalıcı asistan deneyimi</p>
+<div class="intro-loader"><span></span></div>
+<button class="intro-skip" id="introSkipBtn" type="button">Geç</button>
+</div>
+</div>
+
 <div class="auth-overlay" id="authOverlay">
 <div class="auth-modal">
 <div class="auth-logo">
@@ -1310,6 +1499,7 @@ Puter ile Devam Et
 </div>
 </div>
 </div>
+
 <div class="app-shell">
 <aside id="sidebar">
 <div class="sidebar-header">
@@ -1353,7 +1543,7 @@ Puter ile Devam Et
 <h1>
 G3 AI
 <span class="badge" id="modeBadge"><i class="fas fa-bolt"></i> Firethron</span>
-<span class="version">v5.2.2</span>
+<span class="version">v5.3.0</span>
 </h1>
 </div>
 <div class="header-actions">
@@ -1399,6 +1589,7 @@ G3 AI
 </div>
 </main>
 </div>
+
 <div class="profile-modal" id="profileModal">
 <div class="profile-card">
 <div class="profile-top">
@@ -1447,17 +1638,20 @@ G3 AI
 </div>
 </div>
 </div>
+
 <div class="toast" id="toast">
 <i class="fas fa-check-circle"></i>
 <span id="toastText">Kopyalandı</span>
 </div>
+
 <div class="storage-indicator" id="storageIndicator">
 <div class="dot-indicator"></div>
 <span id="storageText">Cihaza güvenle kaydedildi</span>
 </div>
+
 <script>
 // ============================================================
-// G3 AI - Puter Entegre Kalıcı Sohbet Yaması v5.2.2
+// G3 AI - Puter Only Auth + First Launch Animation v5.3.0
 // ============================================================
 const MODE_META = {
 fast: {
@@ -1488,16 +1682,25 @@ typing: 'Nightplox işliyor',
 system: 'MOD: Nightplox. KURALLAR: SADECE girilen komuta odaklan. Normal sohbet açma. Komutun gerektirdiği görevi en yüksek kalitede yerine getir.'
 }
 };
+
 const COMMAND_INSTRUCTIONS = {
 code: 'Görev: /code. Üretim kalitesinde, açıklaması minimum, çalıştırılabilir kod üret. Dil belirtilmemişse en uygun dili seç. Kod bloğunu markdown ile ver.',
 analyze: 'Görev: /analyze. Verilen konuyu veya metni teknik olarak parçalara ayır; riskler, fırsatlar, özet ve önerileri madde madde ver.',
 story: 'Görev: /story. Etkileşimli, atmosferik ve karakter odaklı bir hikaye parçası yaz. Sonunda kullanıcıya yön veren bir soru bırak.',
 math: 'Görev: /math. Problemi adım adım çöz, formülleri açıkla, sonucu kalın biçimde vurgula.'
 };
+
 const KNOWN_COMMANDS = ['imagine', 'code', 'analyze', 'story', 'math'];
 const AI_AVATAR_URL = './g3.png';
+const ALLOWED_AUTH_PROVIDERS = ['puter', 'guest'];
+const AUTH_RESET_KEY = 'g3_auth_reset_puter_guest_v1';
+const INTRO_SEEN_IPS_KEY = 'g3_intro_seen_ips_v1';
+const INTRO_SEEN_LOCAL_KEY = 'g3_intro_seen_local_v1';
+
 const SYSTEM_PROMPT_BASE = "Adın G3. Net, yardımcı ve direkt yanıtlar ver. Yanıtlarında Markdown kullanabilirsin.\nKURALLAR:\n1- \"Seni kim yaptı?\", \"Yapımcın kim?\", \"Yaratıcın kim?\" gibi sorulara KESİNLİKLE SADECE \"Muhammed Eren Bayram\" diye cevap ver.\n2- Kullanıcının dilini OTOMATİK ALGILA ve aynı dilde cevap ver.\n3- Kod bloklarını ```dil_kodu şeklinde formatla.";
+
 const $ = (id) => document.getElementById(id);
+
 function escapeHtml(value) {
 return String(value ?? '')
 .replace(/&/g, '&amp;')
@@ -1506,12 +1709,15 @@ return String(value ?? '')
 .replace(/"/g, '&quot;')
 .replace(/'/g, '&#39;');
 }
+
 function uid() {
 return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 }
+
 function renderAvatar(element, kind, user = null) {
 if (!element) return;
 element.innerHTML = '';
+
 if (kind === 'ai') {
 const img = document.createElement('img');
 img.src = AI_AVATAR_URL;
@@ -1526,11 +1732,13 @@ element.appendChild(icon);
 element.appendChild(img);
 return;
 }
+
 const avatarValue = user?.avatar;
 const isImageAvatar = typeof avatarValue === 'string' && (avatarValue.startsWith('http') || avatarValue.startsWith('data:image'));
 const fallbackText = (typeof avatarValue === 'string' && !isImageAvatar && avatarValue.trim())
 ? avatarValue
 : (user?.name?.charAt(0)?.toUpperCase() || 'K');
+
 if (isImageAvatar) {
 const img = document.createElement('img');
 img.src = avatarValue;
@@ -1544,32 +1752,40 @@ element.appendChild(img);
 element.textContent = fallbackText;
 }
 }
+
 function initGalaxyBackground() {
 const canvas = document.getElementById('galaxy-canvas');
 if (!canvas) return;
 const ctx = canvas.getContext('2d');
 let width, height, cx, cy;
+
 const PALETTES = {
 fast: { fill: [14, 5, 2, 0.22], baseHue: 22, spread: 34, glowA: [32, 100, 64], glowB: [10, 96, 54], coreHue: 42 },
 smart: { fill: [2, 10, 18, 0.22], baseHue: 192, spread: 36, glowA: [188, 94, 62], glowB: [220, 88, 56], coreHue: 188 },
 extra: { fill: [10, 3, 22, 0.24], baseHue: 284, spread: 40, glowA: [286, 92, 70], glowB: [248, 88, 60], coreHue: 282 }
 };
+
 function clonePalette(p) {
 return { fill: [...p.fill], baseHue: p.baseHue, spread: p.spread, glowA: [...p.glowA], glowB: [...p.glowB], coreHue: p.coreHue };
 }
+
 let target = clonePalette(PALETTES.fast);
 let current = clonePalette(PALETTES.fast);
+
 function resize() {
 width = canvas.width = window.innerWidth;
 height = canvas.height = window.innerHeight;
 cx = width / 2;
 cy = height / 2;
 }
+
 window.addEventListener('resize', resize);
 resize();
+
 function lerp(a, b, t) { return a + (b - a) * t; }
 function lerpHue(a, b, t) { const diff = ((b - a + 540) % 360) - 180; return (a + diff * t + 360) % 360; }
 function lerpArray(a, b, t) { return a.map((v, i) => lerp(v, b[i], t)); }
+
 function stepPalette() {
 const t = 0.018;
 current.fill = lerpArray(current.fill, target.fill, t);
@@ -1579,15 +1795,18 @@ current.glowA = lerpArray(current.glowA, target.glowA, t);
 current.glowB = lerpArray(current.glowB, target.glowB, t);
 current.coreHue = lerpHue(current.coreHue, target.coreHue, t);
 }
+
 const ARMS = 3;
 const PARTICLES_PER_ARM = 420;
 const CORE_PARTICLES = 240;
 const particles = [];
+
 class Star {
 constructor(isCore = false) {
 this.isCore = isCore;
 this.reset();
 }
+
 reset() {
 const maxRadius = Math.min(width, height) * 0.45;
 if (this.isCore) {
@@ -1611,11 +1830,13 @@ this.twinkleSpeed = Math.random() * 0.045 + 0.01;
 this.twinklePhase = Math.random() * Math.PI * 2;
 this.currentOpacity = this.opacity;
 }
+
 update() {
 this.angle += this.speed;
 this.twinklePhase += this.twinkleSpeed;
 this.currentOpacity = this.opacity * (0.72 + 0.28 * Math.sin(this.twinklePhase));
 }
+
 draw() {
 const x = cx + Math.cos(this.angle) * this.radius;
 const y = cy + Math.sin(this.angle) * this.radius * 0.45;
@@ -1623,11 +1844,13 @@ const dist = Math.sqrt((x - cx) ** 2 + (y - cy) ** 2);
 const fade = Math.max(0, 1 - dist / (Math.min(width, height) * 0.56));
 const hue = this.isCore ? lerpHue(current.coreHue, current.baseHue, 0.35) + this.hueFactor * 14 : current.baseHue + this.hueFactor * current.spread;
 const sat = this.isCore ? 96 : 82;
+
 ctx.beginPath();
 ctx.arc(x, y, this.size, 0, Math.PI * 2);
 ctx.fillStyle = `hsl(${hue}, ${sat}%, ${this.lightness}%)`;
 ctx.globalAlpha = this.currentOpacity * fade;
 ctx.fill();
+
 if (this.isCore && this.size > 1.1) {
 ctx.beginPath();
 ctx.arc(x, y, this.size * 3, 0, Math.PI * 2);
@@ -1635,19 +1858,24 @@ ctx.fillStyle = `hsl(${hue}, ${sat}%, ${this.lightness}%)`;
 ctx.globalAlpha = 0.10 * fade;
 ctx.fill();
 }
+
 ctx.globalAlpha = 1.0;
 }
 }
+
 for (let i = 0; i < CORE_PARTICLES; i++) particles.push(new Star(true));
 for (let i = 0; i < ARMS * PARTICLES_PER_ARM; i++) particles.push(new Star(false));
+
 let mouseX = cx;
 let mouseY = cy;
 window.addEventListener('mousemove', (e) => { mouseX = e.clientX; mouseY = e.clientY; });
+
 let time = 0;
 function animate() {
 stepPalette();
 ctx.fillStyle = `rgba(${Math.round(current.fill[0])}, ${Math.round(current.fill[1])}, ${Math.round(current.fill[2])}, ${current.fill[3]})`;
 ctx.fillRect(0, 0, width, height);
+
 time += 0.0045;
 const glowSize = 118 + Math.sin(time) * 10;
 const gradient = ctx.createRadialGradient(cx, cy, 10, cx, cy, glowSize);
@@ -1655,53 +1883,66 @@ gradient.addColorStop(0, 'rgba(255,255,255,0.88)');
 gradient.addColorStop(0.22, `hsla(${current.glowA[0]}, ${current.glowA[1]}%, ${current.glowA[2]}%, 0.56)`);
 gradient.addColorStop(0.55, `hsla(${current.glowB[0]}, ${current.glowB[1]}%, ${current.glowB[2]}%, 0.18)`);
 gradient.addColorStop(1, 'rgba(0,0,0,0)');
+
 ctx.globalCompositeOperation = 'lighter';
 ctx.fillStyle = gradient;
 ctx.beginPath();
 ctx.arc(cx, cy, glowSize, 0, Math.PI * 2);
 ctx.fill();
+
 ctx.save();
 ctx.translate((mouseX - cx) * 0.018, (mouseY - cy) * 0.018);
 particles.forEach(p => { p.update(); p.draw(); });
 ctx.restore();
+
 ctx.globalCompositeOperation = 'source-over';
 requestAnimationFrame(animate);
 }
+
 animate();
+
 window.galaxySetMode = function (mode) {
 target = clonePalette(PALETTES[mode] || PALETTES.fast);
 };
+
 window.toggleGalaxy = function (show) {
 canvas.style.display = show ? 'block' : 'none';
 const veil = document.querySelector('.mode-veil');
 if (veil) veil.style.display = show ? 'block' : 'none';
 };
 }
+
 const DB_NAME = 'G3AI_Database';
 const DB_VERSION = 2;
 const STORE_NAME = 'appData';
 const ATTACHMENT_STORE = 'attachments';
 const LOCAL_BACKUP_KEY = 'g3_chat_backup_v3';
 let db = null;
+
 function openDatabase() {
 return new Promise((resolve, reject) => {
 if (db) { resolve(db); return; }
 if (typeof indexedDB === 'undefined') { reject(new Error('IndexedDB desteklenmiyor')); return; }
+
 const request = indexedDB.open(DB_NAME, DB_VERSION);
+
 request.onupgradeneeded = (event) => {
 const database = event.target.result;
 if (!database.objectStoreNames.contains(STORE_NAME)) database.createObjectStore(STORE_NAME, { keyPath: 'id' });
 if (!database.objectStoreNames.contains(ATTACHMENT_STORE)) database.createObjectStore(ATTACHMENT_STORE, { keyPath: 'id' });
 };
+
 request.onsuccess = () => {
 db = request.result;
 db.onversionchange = () => { try { db.close(); } catch (_) {} db = null; };
 resolve(db);
 };
+
 request.onerror = () => reject(request.error);
 request.onblocked = () => reject(new Error('IndexedDB başka bir sekme tarafından engellendi.'));
 });
 }
+
 async function saveToDB(key, value) {
 if (!db) await openDatabase();
 return new Promise((resolve, reject) => {
@@ -1715,6 +1956,7 @@ tx.onabort = () => reject(tx.error || new Error('Transaction abort'));
 } catch (e) { reject(e); }
 });
 }
+
 async function loadFromDB(key) {
 if (!db) await openDatabase();
 return new Promise((resolve, reject) => {
@@ -1726,6 +1968,7 @@ request.onerror = () => reject(request.error);
 } catch (e) { reject(e); }
 });
 }
+
 async function deleteFromDB(key) {
 if (!db) await openDatabase();
 return new Promise((resolve, reject) => {
@@ -1737,6 +1980,7 @@ request.onerror = () => reject(request.error);
 } catch (e) { reject(e); }
 });
 }
+
 async function putAttachmentToDB(att) {
 if (!db) await openDatabase();
 return new Promise((resolve, reject) => {
@@ -1750,6 +1994,7 @@ tx.onabort = () => reject(tx.error || new Error('Attachment transaction abort'))
 } catch (e) { reject(e); }
 });
 }
+
 async function getAttachmentFromDB(id) {
 if (!db) await openDatabase();
 return new Promise((resolve, reject) => {
@@ -1761,6 +2006,7 @@ request.onerror = () => reject(request.error);
 } catch (e) { reject(e); }
 });
 }
+
 async function deleteAttachmentRecord(id) {
 if (!id) return;
 if (!db) await openDatabase();
@@ -1773,6 +2019,7 @@ request.onerror = () => reject(request.error);
 } catch (e) { reject(e); }
 });
 }
+
 async function clearAttachmentStore() {
 if (!db) await openDatabase();
 if (!db.objectStoreNames.contains(ATTACHMENT_STORE)) return;
@@ -1785,6 +2032,7 @@ tx.onerror = () => reject(tx.error);
 } catch (e) { reject(e); }
 });
 }
+
 let state = {
 chatsByMode: { fast: [], smart: [], extra: [] },
 currentChatIdByMode: { fast: null, smart: null, extra: null },
@@ -1798,6 +2046,7 @@ accentColor: '#6366f1',
 fontSize: 16,
 bgAnimation: true
 };
+
 function emptyChatStore() {
 return {
 chatsByMode: { fast: [], smart: [], extra: [] },
@@ -1806,6 +2055,7 @@ lastMode: 'fast',
 updatedAt: Date.now()
 };
 }
+
 function normalizeMessage(m) {
 if (!m || typeof m !== 'object') return null;
 let role = m.role;
@@ -1817,6 +2067,7 @@ content: String(m.content ?? ''),
 attachments: Array.isArray(m.attachments) ? m.attachments.filter(Boolean).map(a => ({ ...a })) : []
 };
 }
+
 function normalizeChat(chat, fallbackMode = 'fast') {
 const mode = MODE_META[chat?.mode] ? chat.mode : fallbackMode;
 const normalized = {
@@ -1826,6 +2077,7 @@ mode,
 createdAt: Number(chat?.createdAt) || Date.now(),
 messages: []
 };
+
 const rawMessages = Array.isArray(chat?.messages) ? chat.messages : [];
 for (const raw of rawMessages) {
 const m = normalizeMessage(raw);
@@ -1836,14 +2088,18 @@ const hasAttachments = Array.isArray(m.attachments) && m.attachments.length > 0;
 if (!hasText && !hasAttachments) continue;
 normalized.messages.push(m);
 }
+
 const sysIndex = normalized.messages.findIndex(m => m.role === 'system');
 const systemMessage = { role: 'system', content: getSystemPromptForMode(mode) };
 if (sysIndex === -1) normalized.messages.unshift(systemMessage);
 else normalized.messages[sysIndex] = systemMessage;
+
 return normalized;
 }
+
 function normalizeChatStore(raw) {
 const store = emptyChatStore();
+
 if (raw?.chatsByMode && typeof raw.chatsByMode === 'object') {
 ['fast', 'smart', 'extra'].forEach(mode => {
 const list = Array.isArray(raw.chatsByMode[mode]) ? raw.chatsByMode[mode] : [];
@@ -1860,16 +2116,19 @@ const mode = MODE_META[chat?.mode] ? chat.mode : 'fast';
 store.chatsByMode[mode].push(normalizeChat(chat, mode));
 });
 }
+
 ['fast', 'smart', 'extra'].forEach(mode => {
 store.chatsByMode[mode].sort((a, b) => b.createdAt - a.createdAt);
 const currentId = raw?.currentChatIdByMode?.[mode];
 const exists = store.chatsByMode[mode].some(c => c.id === currentId);
 store.currentChatIdByMode[mode] = exists ? currentId : (store.chatsByMode[mode][0]?.id || null);
 });
+
 store.lastMode = MODE_META[raw?.lastMode] ? raw.lastMode : 'fast';
 store.updatedAt = Date.now();
 return store;
 }
+
 function countVisibleMessages(chat) {
 return (chat?.messages || []).filter(m => {
 if (m.role === 'system') return false;
@@ -1878,6 +2137,7 @@ const hasAttachments = Array.isArray(m.attachments) && m.attachments.length > 0;
 return hasText || hasAttachments;
 }).length;
 }
+
 function countAllMessages(store) {
 let total = 0;
 ['fast', 'smart', 'extra'].forEach(mode => {
@@ -1885,10 +2145,12 @@ let total = 0;
 });
 return total;
 }
+
 function mergeChatStores(primary, secondary) {
 const p = normalizeChatStore(primary || {});
 const s = normalizeChatStore(secondary || {});
 const map = new Map();
+
 const addChat = (chat, mode) => {
 const normalized = normalizeChat({ ...chat, mode: chat.mode || mode }, mode);
 const existing = map.get(normalized.id);
@@ -1896,13 +2158,16 @@ if (!existing || countVisibleMessages(normalized) > countVisibleMessages(existin
 map.set(normalized.id, { chat: normalized, mode: normalized.mode });
 }
 };
+
 ['fast', 'smart', 'extra'].forEach(mode => (p.chatsByMode[mode] || []).forEach(chat => addChat(chat, mode)));
 ['fast', 'smart', 'extra'].forEach(mode => (s.chatsByMode[mode] || []).forEach(chat => addChat(chat, mode)));
+
 const result = emptyChatStore();
 map.forEach(({ chat, mode }) => {
 const safeMode = MODE_META[mode] ? mode : chat.mode;
 result.chatsByMode[safeMode].push(chat);
 });
+
 ['fast', 'smart', 'extra'].forEach(mode => {
 result.chatsByMode[mode].sort((a, b) => b.createdAt - a.createdAt);
 const pId = p.currentChatIdByMode[mode];
@@ -1910,15 +2175,18 @@ const sId = s.currentChatIdByMode[mode];
 const exists = (id) => result.chatsByMode[mode].some(c => c.id === id);
 result.currentChatIdByMode[mode] = exists(pId) ? pId : exists(sId) ? sId : (result.chatsByMode[mode][0]?.id || null);
 });
+
 result.lastMode = MODE_META[p.lastMode] ? p.lastMode : (MODE_META[s.lastMode] ? s.lastMode : 'fast');
 return result;
 }
+
 function serializeAttachment(att) {
 if (!att) return null;
 const out = { ...att };
 if (out.stored && typeof out.data === 'string' && out.data.startsWith('data:')) delete out.data;
 return out;
 }
+
 function serializeChat(chat) {
 return {
 id: chat.id,
@@ -1932,6 +2200,7 @@ attachments: Array.isArray(m.attachments) ? m.attachments.map(serializeAttachmen
 }))
 };
 }
+
 function serializeChatStore() {
 const chatsByMode = {};
 ['fast', 'smart', 'extra'].forEach(mode => { chatsByMode[mode] = getChats(mode).map(serializeChat); });
@@ -1943,6 +2212,7 @@ lastMode: state.currentMode,
 updatedAt: Date.now()
 };
 }
+
 function writeLocalBackup(payload) {
 try {
 const data = payload || serializeChatStore();
@@ -1952,6 +2222,7 @@ console.warn('Local backup yazılamadı:', e);
 try { localStorage.removeItem(LOCAL_BACKUP_KEY); } catch (_) {}
 }
 }
+
 function readLocalBackup() {
 try {
 const raw = localStorage.getItem(LOCAL_BACKUP_KEY);
@@ -1961,9 +2232,11 @@ console.warn('Local backup okunamadı:', e);
 return null;
 }
 }
+
 function clearLocalBackup() {
 try { localStorage.removeItem(LOCAL_BACKUP_KEY); } catch (_) {}
 }
+
 async function hydrateAttachment(att) {
 if (!att) return att;
 if (att.stored && !att.data && att.id) {
@@ -1977,6 +2250,7 @@ att.data = '';
 }
 return att;
 }
+
 async function hydrateChatStore(store) {
 for (const mode of ['fast', 'smart', 'extra']) {
 for (const chat of store.chatsByMode[mode] || []) {
@@ -1987,6 +2261,7 @@ for (const att of msg.attachments || []) await hydrateAttachment(att);
 }
 return store;
 }
+
 async function migrateInlineAttachments(store) {
 for (const mode of ['fast', 'smart', 'extra']) {
 for (const chat of store.chatsByMode[mode] || []) {
@@ -2001,18 +2276,23 @@ await registerAttachment(att);
 }
 return store;
 }
+
 async function loadChatStore() {
 let dbStore = null;
 let backupStore = null;
+
 try {
 const stored = await loadFromDB('chatStore');
 if (stored) dbStore = normalizeChatStore(stored);
 } catch (e) { console.error('IndexedDB sohbet yükleme hatası:', e); }
+
 try {
 const raw = readLocalBackup();
 if (raw) backupStore = normalizeChatStore(raw);
 } catch (e) { console.error('Local backup sohbet yükleme hatası:', e); }
+
 let store = (dbStore && backupStore) ? mergeChatStores(dbStore, backupStore) : (dbStore || backupStore || emptyChatStore());
+
 if (countAllMessages(store) === 0) {
 try {
 const oldIndexed = await loadFromDB('chats');
@@ -2022,6 +2302,7 @@ store = mergeChatStores(store, migrated);
 await deleteFromDB('chats');
 }
 } catch (e) {}
+
 try {
 const oldLocal = localStorage.getItem('g3_chats_v2') || localStorage.getItem('g3_chats');
 if (oldLocal) {
@@ -2033,17 +2314,21 @@ localStorage.removeItem('g3_chats');
 }
 } catch (e) {}
 }
+
 await hydrateChatStore(store);
 await migrateInlineAttachments(store);
 return store;
 }
+
 let persistTimer = null;
 let persisting = false;
 let persistPending = false;
+
 async function runPersist() {
 if (persisting) { persistPending = true; return; }
 persisting = true;
 persistPending = false;
+
 try {
 const payload = serializeChatStore();
 await saveToDB('chatStore', payload);
@@ -2060,62 +2345,77 @@ persisting = false;
 if (persistPending) { persistPending = false; runPersist(); }
 }
 }
+
 function saveChatStore(immediate = false) {
 try { writeLocalBackup(serializeChatStore()); } catch (e) { console.warn('Anlık local backup hatası:', e); }
+
 if (immediate) {
 if (persistTimer) { clearTimeout(persistTimer); persistTimer = null; }
 runPersist();
 return;
 }
+
 if (persisting) { persistPending = true; return; }
 if (persistTimer) clearTimeout(persistTimer);
 persistTimer = setTimeout(() => { persistTimer = null; runPersist(); }, 200);
 }
+
 function getChats(mode = state.currentMode) {
 if (!MODE_META[mode]) mode = state.currentMode;
 if (!state.chatsByMode[mode]) state.chatsByMode[mode] = [];
 return state.chatsByMode[mode];
 }
+
 function getCurrentChat(mode = state.currentMode) {
 const id = state.currentChatIdByMode[mode];
 return getChats(mode).find(c => c.id === id) || null;
 }
+
 function getChatById(chatId, mode = state.currentMode) {
 if (!chatId) return null;
 return getChats(mode).find(c => c.id === chatId) || null;
 }
+
 function setCurrentChat(chatId, mode = state.currentMode) {
 state.currentChatIdByMode[mode] = chatId;
 }
+
 function isChatActive(chat) {
 return !!chat && chat.mode === state.currentMode && state.currentChatIdByMode[chat.mode] === chat.id;
 }
+
 function getAllChats() {
 const all = [];
 ['fast', 'smart', 'extra'].forEach(mode => getChats(mode).forEach(chat => all.push(chat)));
 return all.sort((a, b) => b.createdAt - a.createdAt);
 }
+
 function addMessageToChat(chat, role, content, attachments = [], render = true, uiContent = null) {
 if (!chat) return null;
+
 const storedContent = String(content || '');
 const displayContent = uiContent === null ? storedContent : String(uiContent || '');
 const msg = { role, content: storedContent, attachments: Array.isArray(attachments) ? attachments : [] };
 chat.messages.push(msg);
+
 let titleChanged = false;
 if (role === 'user' && (!chat.title || chat.title === 'Yeni Sohbet')) {
 const base = displayContent.trim() || storedContent.trim() || (msg.attachments[0]?.name) || 'Dosya';
 chat.title = base.substring(0, 34) + (base.length > 34 ? '…' : '');
 titleChanged = true;
 }
+
 if (render && isChatActive(chat)) {
 appendMessageUI(displayContent, role === 'user' ? 'user' : 'ai', true, msg.attachments);
 }
+
 if (titleChanged) renderChatList();
 saveChatStore();
 return msg;
 }
+
 // ============================================================
-// Puter Auth Entegrasyonu
+// Puter Auth + Guest Only
 // ============================================================
 async function puterResolve(value) {
 if (value && typeof value.then === 'function') {
@@ -2123,45 +2423,57 @@ return await value;
 }
 return value;
 }
+
 async function isPuterSignedIn() {
 try {
 if (typeof puter === 'undefined' || !puter.auth) return false;
+
 if (typeof puter.auth.isSignedIn === 'function') {
 return Boolean(await puterResolve(puter.auth.isSignedIn()));
 }
+
 if (typeof puter.auth.getUser === 'function') {
 const user = await puterResolve(puter.auth.getUser());
 return Boolean(user);
 }
+
 return false;
 } catch (e) {
 console.warn('Puter oturum kontrolü başarısız:', e);
 return false;
 }
 }
+
 async function loadPuterUser() {
 try {
 if (typeof puter === 'undefined' || !puter.auth) return false;
+
 let user = null;
+
 if (typeof puter.auth.getUser === 'function') {
 user = await puterResolve(puter.auth.getUser());
 }
+
 if (!user && typeof puter.auth.me === 'function') {
 user = await puterResolve(puter.auth.me());
 }
+
 if (!user) return false;
+
 const email = user.email || user.mail || '';
 const name =
 user.username ||
 user.display_name ||
 user.name ||
 (email ? email.split('@')[0] : 'Puter Kullanıcı');
+
 const avatar =
 user.profile_image ||
 user.avatar ||
 user.photo ||
 user.picture ||
 (name ? name.charAt(0).toUpperCase() : 'P');
+
 state.user = {
 name,
 email,
@@ -2174,27 +2486,34 @@ username: user.username || null,
 emailVerified: user.email_verified ?? null
 }
 };
+
 if (!state.joinDate) state.joinDate = Date.now();
+
 saveUserState();
 updateUserUI();
 updateChatFooter();
+
 return true;
 } catch (e) {
 console.error('Puter kullanıcı bilgisi alınamadı:', e);
 return false;
 }
 }
+
 async function signInWithPuter() {
 if (typeof puter === 'undefined' || !puter.auth || typeof puter.auth.signIn !== 'function') {
 showToast('Puter SDK yüklenmedi. Lütfen sayfayı yenileyip tekrar deneyin.', true);
 return;
 }
+
 try {
 await puterResolve(puter.auth.signIn());
 const loaded = await loadPuterUser();
+
 if (!loaded) {
 throw new Error('Puter kullanıcı bilgisi alınamadı.');
 }
+
 authOverlay.classList.remove('active');
 showToast('Puter ile giriş başarılı. Hoş geldin, ' + state.user.name);
 } catch (e) {
@@ -2202,6 +2521,7 @@ console.error('Puter giriş hatası:', e);
 showToast('Puter girişi tamamlanamadı. Misafir olarak devam edebilirsin.', true);
 }
 }
+
 function signInAsGuest() {
 state.user = {
 name: 'Misafir Kullanıcı',
@@ -2210,13 +2530,61 @@ avatar: 'M',
 isGuest: true,
 provider: 'guest'
 };
+
 if (!state.joinDate) state.joinDate = Date.now();
+
 saveUserState();
 updateUserUI();
 updateChatFooter();
+
 authOverlay.classList.remove('active');
 showToast('Misafir olarak devam ediliyor');
 }
+
+async function purgeLegacyAccountsOnce() {
+try {
+if (!db) await openDatabase();
+
+let shouldPurge = false;
+try {
+shouldPurge = !localStorage.getItem(AUTH_RESET_KEY);
+} catch (_) {
+shouldPurge = true;
+}
+
+if (shouldPurge) {
+try { await deleteFromDB('user'); } catch (_) {}
+try { await deleteFromDB('joinDate'); } catch (_) {}
+
+['g3_user', 'g3_joinDate', 'g3_google_user', 'g3_google_joinDate'].forEach(key => {
+try { localStorage.removeItem(key); } catch (_) {}
+});
+
+state.user = null;
+state.joinDate = null;
+
+try { localStorage.setItem(AUTH_RESET_KEY, '1'); } catch (_) {}
+
+console.log('Eski kayıtlı hesaplar temizlendi. Artık yalnızca Puter ve misafir girişleri kabul edilecek.');
+}
+} catch (e) {
+console.warn('Hesap sıfırlama uyarısı:', e);
+}
+}
+
+async function enforcePuterGuestAccount() {
+if (!state.user) return false;
+if (ALLOWED_AUTH_PROVIDERS.includes(state.user.provider)) return true;
+
+state.user = null;
+state.joinDate = null;
+
+try { await deleteFromDB('user'); } catch (_) {}
+try { await deleteFromDB('joinDate'); } catch (_) {}
+
+return false;
+}
+
 const chatContainer = $('chat-container');
 const userInput = $('userInput');
 const sendBtn = $('send-btn');
@@ -2249,6 +2617,7 @@ const chatFooterText = $('chatFooterText');
 const commandMenu = $('commandMenu');
 const modeBadge = $('modeBadge');
 const modeTransitionFlash = $('modeTransitionFlash');
+
 function updateStorageIndicator(type, text) {
 if (!storageIndicator) return;
 storageIndicator.className = 'storage-indicator show';
@@ -2257,42 +2626,53 @@ if (type === 'error') storageIndicator.classList.add('error');
 storageText.textContent = text;
 setTimeout(() => storageIndicator.classList.remove('show'), 2400);
 }
+
 function displayStorageSize(totalSize) {
 const sizeMB = (totalSize / (1024 * 1024)).toFixed(2);
 const storageFill = $('storageFill');
 const percent = Math.min((totalSize / (500 * 1024 * 1024)) * 100, 100).toFixed(1);
+
 if (storageFill) {
 storageFill.style.width = percent + '%';
 storageFill.className = 'storage-fill';
 if (percent > 80) storageFill.classList.add('danger');
 else if (percent > 60) storageFill.classList.add('warning');
 }
+
 if ($('storagePercent')) $('storagePercent').textContent = percent + '%';
 if ($('storageTextDetail')) $('storageTextDetail').textContent = `${sizeMB} MB kullanılıyor`;
 }
+
 async function updateStorageUsage() {
 try {
 if (!db) { displayStorageSize(0); return; }
+
 const names = [STORE_NAME];
 const hasAttachments = db.objectStoreNames.contains(ATTACHMENT_STORE);
 if (hasAttachments) names.push(ATTACHMENT_STORE);
+
 const tx = db.transaction(names, 'readonly');
 const appReq = tx.objectStore(STORE_NAME).getAll();
 const attReq = hasAttachments ? tx.objectStore(ATTACHMENT_STORE).getAll() : null;
+
 tx.oncomplete = () => {
 let total = 0;
 (appReq.result || []).forEach(item => { total += JSON.stringify(item).length * 2; });
+
 if (attReq) {
 (attReq.result || []).forEach(rec => {
 total += ((rec.data || '').length * 2);
 total += JSON.stringify({ id: rec.id, type: rec.type, name: rec.name }).length * 2;
 });
 }
+
 displayStorageSize(total);
 };
+
 tx.onerror = () => displayStorageSize(0);
 } catch (e) { displayStorageSize(0); }
 }
+
 function saveUserState() {
 try {
 if (state.user) saveToDB('user', state.user).catch(() => {});
@@ -2300,14 +2680,27 @@ if (state.joinDate) saveToDB('joinDate', state.joinDate).catch(() => {});
 updateStorageUsage();
 } catch (e) {}
 }
+
 async function loadUserState() {
 try {
 const user = await loadFromDB('user');
 const joinDate = await loadFromDB('joinDate');
-if (user) { state.user = user; state.joinDate = joinDate || Date.now(); return true; }
+
+if (user && ALLOWED_AUTH_PROVIDERS.includes(user.provider)) {
+state.user = user;
+state.joinDate = joinDate || Date.now();
+return true;
+}
+
+if (user) {
+try { await deleteFromDB('user'); } catch (_) {}
+try { await deleteFromDB('joinDate'); } catch (_) {}
+}
 } catch (e) {}
+
 return false;
 }
+
 function updateChatFooter() {
 if (!chatFooterText) return;
 const launchDate = new Date('2026-06-01T00:00:00');
@@ -2317,27 +2710,35 @@ const days = Math.max(0, Math.floor(diff / (1000 * 60 * 60 * 24)));
 const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
 chatFooterText.innerHTML = `<i class="fas fa-clock"></i> G3 AI <strong>${days} gün, ${hours} saat</strong> süredir aktif`;
 }
+
 function hexToRgba(hex, alpha) {
 const clean = String(hex || '').replace('#', '');
 const full = clean.length === 3
 ? clean.split('').map(c => c + c).join('')
 : clean;
+
 const num = parseInt(full, 16);
+
 if (Number.isNaN(num)) {
 return `rgba(99, 102, 241, ${alpha})`;
 }
+
 const r = (num >> 16) & 255;
 const g = (num >> 8) & 255;
 const b = num & 255;
+
 return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
+
 function applyCustomization() {
 const root = document.documentElement;
 const defaultAccent = '#6366f1';
+
 const customAccent =
 state.accentColor && String(state.accentColor).toLowerCase() !== defaultAccent
 ? state.accentColor
 : null;
+
 if (customAccent) {
 root.style.setProperty('--accent', customAccent);
 root.style.setProperty('--accent-hover', customAccent);
@@ -2355,32 +2756,40 @@ root.style.setProperty('--brand-shadow', hexToRgba(customAccent, 0.24));
 '--brand-shadow'
 ].forEach(prop => root.style.removeProperty(prop));
 }
+
 const fontSize = Number(state.fontSize) || 16;
+
 if (fontSize !== 16) {
 root.style.fontSize = fontSize + 'px';
 } else {
 root.style.removeProperty('font-size');
 }
+
 if (typeof window.toggleGalaxy === 'function') {
 window.toggleGalaxy(state.bgAnimation !== false);
 }
+
 const picker = $('accentColorPicker');
 if (picker) {
 const computedAccent = getComputedStyle(root).getPropertyValue('--accent').trim();
 picker.value = customAccent || computedAccent || defaultAccent;
 }
+
 if ($('fontSizeSlider')) {
 $('fontSizeSlider').value = fontSize;
 }
+
 if ($('bgAnimToggle')) {
 $('bgAnimToggle').checked = state.bgAnimation !== false;
 }
+
 saveToDB('settings', {
 accentColor: state.accentColor,
 fontSize: fontSize,
 bgAnimation: state.bgAnimation
 }).catch(() => {});
 }
+
 function updateUserUI() {
 if (!state.user) return;
 $('userName').textContent = state.user.name || 'Kullanıcı';
@@ -2388,22 +2797,29 @@ $('userEmail').textContent = state.user.isGuest ? 'Misafir Hesabı' : (state.use
 renderAvatar($('userAvatar'), 'user', state.user);
 renderAvatar(headerProfileBtn, 'user', state.user);
 }
+
 function openProfileModal() {
 if (!state.user) return;
+
 $('profileName').textContent = state.user.name || 'Kullanıcı';
 $('profileEmail').textContent = state.user.isGuest ? 'Misafir Hesabı' : (state.user.email || state.user.name || 'Puter Kullanıcısı');
 renderAvatar($('profileAvatarLg'), 'user', state.user);
+
 let totalChats = 0;
 let totalMessages = 0;
 iterateChats(chat => { totalChats++; totalMessages += countVisibleMessages(chat); });
+
 $('statChats').textContent = totalChats;
 $('statMessages').textContent = totalMessages;
+
 const joinDate = state.joinDate || Date.now();
 $('statDays').textContent = Math.max(1, Math.ceil((Date.now() - joinDate) / (1000 * 60 * 60 * 24)));
 $('profileJoinDate').textContent = `Katılım: ${new Date(joinDate).toLocaleDateString('tr-TR')}`;
+
 profileModal.classList.add('active');
 userDropdown.classList.remove('active');
 }
+
 async function loadTheme() {
 try {
 const savedTheme = await loadFromDB('theme');
@@ -2417,30 +2833,38 @@ state.theme = 'dark';
 updateThemeIcon();
 }
 }
+
 function updateThemeIcon() {
 const icon = themeToggle.querySelector('i');
 icon.className = state.theme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
 }
+
 async function toggleTheme() {
 state.theme = state.theme === 'dark' ? 'light' : 'dark';
 document.documentElement.setAttribute('data-theme', state.theme);
 await saveToDB('theme', state.theme);
 updateThemeIcon();
 }
+
 function applyModeVisuals(mode) {
 if (!MODE_META[mode]) mode = 'fast';
 const meta = MODE_META[mode];
+
 document.documentElement.dataset.mode = mode;
 document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.mode === mode));
+
 if (modeBadge) modeBadge.innerHTML = `<i class="fas ${meta.icon}"></i> ${meta.label}`;
 if (userInput) userInput.placeholder = meta.placeholder;
 if (welcomeTitle) welcomeTitle.textContent = meta.welcomeTitle;
 if (welcomeSubtitle) welcomeSubtitle.textContent = meta.welcomeSubtitle;
 if (typingText) typingText.textContent = meta.typing;
+
 renderAvatar(typingAvatar, 'ai', null);
 updateCommandMenu(mode);
+
 if (typeof window.galaxySetMode === 'function') window.galaxySetMode(mode);
 }
+
 function triggerModeTransition() {
 if (!modeTransitionFlash) return;
 document.body.classList.remove('mode-changing');
@@ -2450,26 +2874,34 @@ chatContainer.classList.add('mode-fading');
 setTimeout(() => chatContainer.classList.remove('mode-fading'), 170);
 setTimeout(() => document.body.classList.remove('mode-changing'), 780);
 }
+
 function renderModeContent(mode) {
 let chat = getCurrentChat(mode);
 if (!chat) chat = createNewChat(mode, false);
 renderChatIntoUI(chat);
 saveChatStore();
 }
+
 function activateMode(mode, animate = true) {
 if (!MODE_META[mode]) mode = 'fast';
 const changing = mode !== state.currentMode;
+
 if (animate && changing) triggerModeTransition();
+
 state.currentMode = mode;
 applyModeVisuals(mode);
+
 if (animate && changing) setTimeout(() => renderModeContent(mode), 170);
 else renderModeContent(mode);
 }
+
 function getSystemPromptForMode(mode) {
 return SYSTEM_PROMPT_BASE + '\n' + (MODE_META[mode]?.system || MODE_META.fast.system);
 }
+
 function getSystemPromptForContext(mode, lastUserContent = '') {
 let prompt = getSystemPromptForMode(mode);
+
 if (mode === 'extra' && typeof lastUserContent === 'string' && lastUserContent.trim().startsWith('/')) {
 const match = lastUserContent.trim().match(/^\/([a-zA-Z]+)\s*([\s\S]*)$/);
 if (match) {
@@ -2478,10 +2910,13 @@ const arg = match[2].trim();
 if (COMMAND_INSTRUCTIONS[cmd]) prompt += '\n' + COMMAND_INSTRUCTIONS[cmd] + '\nKullanıcı isteği: ' + arg;
 }
 }
+
 return prompt;
 }
+
 function updateCommandMenu(mode) {
 commandMenu.innerHTML = '';
+
 if (mode === 'extra') {
 const cmds = [
 { cmd: '/imagine ', desc: 'Görsel oluştur', icon: 'fa-image' },
@@ -2490,25 +2925,32 @@ const cmds = [
 { cmd: '/story ', desc: 'Etkileşimli hikaye', icon: 'fa-book-open' },
 { cmd: '/math ', desc: 'Karmaşık problem çözme', icon: 'fa-calculator' }
 ];
+
 cmds.forEach(c => {
 const div = document.createElement('div');
 div.className = 'command-item';
 div.dataset.cmd = c.cmd;
+
 const i = document.createElement('i');
 i.className = `fas ${c.icon}`;
+
 const name = document.createElement('span');
 name.className = 'cmd-name';
 name.textContent = c.cmd.trim();
+
 const desc = document.createElement('span');
 desc.className = 'cmd-desc';
 desc.textContent = c.desc;
+
 div.append(i, name, desc);
+
 div.addEventListener('click', () => {
 userInput.value = c.cmd;
 commandMenu.classList.remove('active');
 userInput.focus();
 autoResizeTextarea();
 });
+
 commandMenu.appendChild(div);
 });
 } else {
@@ -2516,17 +2958,22 @@ const div = document.createElement('div');
 div.className = 'command-item';
 div.style.color = 'var(--text-muted)';
 div.style.justifyContent = 'center';
+
 const i = document.createElement('i');
 i.className = 'fas fa-lock';
+
 const desc = document.createElement('span');
 desc.className = 'cmd-desc';
 desc.textContent = 'Komutlar sadece Nightplox modunda kullanılabilir';
+
 div.append(i, desc);
 commandMenu.appendChild(div);
 }
 }
+
 function createNewChat(mode = state.currentMode, activate = true) {
 mode = MODE_META[mode] ? mode : state.currentMode;
+
 const chat = {
 id: uid(),
 title: 'Yeni Sohbet',
@@ -2534,8 +2981,10 @@ mode,
 createdAt: Date.now(),
 messages: [{ role: 'system', content: getSystemPromptForMode(mode) }]
 };
+
 getChats(mode).unshift(chat);
 setCurrentChat(chat.id, mode);
+
 if (activate) {
 if (mode !== state.currentMode) {
 state.currentMode = mode;
@@ -2543,28 +2992,35 @@ applyModeVisuals(mode);
 }
 renderChatIntoUI(chat);
 }
+
 saveChatStore();
 renderChatList();
 return chat;
 }
+
 function clearChatUI() {
 chatContainer.querySelectorAll('.message-wrapper').forEach(el => el.remove());
 typingIndicator.classList.remove('active');
 }
+
 function renderChatIntoUI(chat) {
 clearChatUI();
+
 if (!chat) {
 welcomeScreen.style.display = 'flex';
 renderChatList();
 return;
 }
+
 setCurrentChat(chat.id, chat.mode);
+
 const visibleMessages = chat.messages.filter(m => {
 if (m.role === 'system') return false;
 const hasText = String(m.content || '').trim().length > 0;
 const hasAttachments = Array.isArray(m.attachments) && m.attachments.length > 0;
 return hasText || hasAttachments;
 });
+
 if (visibleMessages.length === 0) {
 welcomeScreen.style.display = 'flex';
 } else {
@@ -2573,18 +3029,26 @@ visibleMessages.forEach(msg => {
 appendMessageUI(msg.content, msg.role === 'user' ? 'user' : 'ai', false, msg.attachments || []);
 });
 }
+
 renderChatList();
 }
+
 function renderChatList() {
 chatListEl.innerHTML = '';
+
 const groups = { 'Bugün': [], 'Dün': [], 'Son 7 Gün': [], 'Daha Eski': [] };
+
 const startOfToday = new Date();
 startOfToday.setHours(0, 0, 0, 0);
+
 const startOfYesterday = new Date(startOfToday);
 startOfYesterday.setDate(startOfYesterday.getDate() - 1);
+
 const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+
 getAllChats().forEach(chat => {
 const createdAt = Number(chat.createdAt) || 0;
+
 if (createdAt >= startOfToday.getTime()) {
 groups['Bugün'].push(chat);
 } else if (createdAt >= startOfYesterday.getTime()) {
@@ -2595,46 +3059,60 @@ groups['Son 7 Gün'].push(chat);
 groups['Daha Eski'].push(chat);
 }
 });
+
 Object.entries(groups).forEach(([label, list]) => {
 if (list.length === 0) return;
+
 const labelEl = document.createElement('div');
 labelEl.className = 'chat-group-label';
 labelEl.textContent = label;
 chatListEl.appendChild(labelEl);
+
 list.forEach(chat => {
 const div = document.createElement('div');
 const isActive = chat.mode === state.currentMode && state.currentChatIdByMode[chat.mode] === chat.id;
 div.className = `chat-item ${isActive ? 'active' : ''}`;
 div.title = `${chat.title || 'Yeni Sohbet'} • ${MODE_META[chat.mode]?.label || chat.mode}`;
+
 const icon = document.createElement('i');
 icon.className = `fas ${MODE_META[chat.mode]?.icon || 'fa-comment'}`;
+
 const span = document.createElement('span');
 span.textContent = chat.title || 'Yeni Sohbet';
+
 const del = document.createElement('button');
 del.className = 'chat-delete';
 del.type = 'button';
 del.innerHTML = '<i class="fas fa-trash"></i>';
 del.setAttribute('aria-label', 'Sohbeti sil');
+
 del.addEventListener('click', async (e) => {
 e.stopPropagation();
 if (!confirm('Sohbet silinecek. Emin misiniz?')) return;
+
 try { await deleteChatAttachments(chat); } catch (_) {}
+
 const modeList = getChats(chat.mode);
 const idx = modeList.findIndex(c => c.id === chat.id);
 if (idx !== -1) modeList.splice(idx, 1);
+
 if (state.currentChatIdByMode[chat.mode] === chat.id) {
 state.currentChatIdByMode[chat.mode] = modeList[0]?.id || null;
 }
+
 if (chat.mode === state.currentMode) {
 if (state.currentChatIdByMode[chat.mode]) loadChat(state.currentChatIdByMode[chat.mode], chat.mode, false);
 else createNewChat(chat.mode, true);
 } else {
 renderChatList();
 }
+
 saveChatStore(true);
 showToast('Sohbet silindi');
 });
+
 div.append(icon, span, del);
+
 div.addEventListener('click', () => {
 loadChat(chat.id, chat.mode, true);
 if (window.innerWidth <= 768) {
@@ -2642,10 +3120,12 @@ sidebar.classList.remove('open');
 overlay.classList.remove('show');
 }
 });
+
 chatListEl.appendChild(div);
 });
 });
 }
+
 async function deleteChatAttachments(chat) {
 for (const msg of chat?.messages || []) {
 for (const att of msg?.attachments || []) {
@@ -2655,55 +3135,74 @@ try { await deleteAttachmentRecord(att.id); } catch (_) {}
 }
 }
 }
+
 function loadChat(chatId, mode = state.currentMode, animate = false) {
 const chat = getChatById(chatId, mode);
 if (!chat) return;
+
 setCurrentChat(chatId, mode);
+
 if (mode !== state.currentMode) {
 activateMode(mode, animate);
 return;
 }
+
 renderChatIntoUI(chat);
 saveChatStore();
 }
+
 function renderMarkdown(text) {
 let html = '';
+
 try {
 html = marked.parse(String(text || ''), { breaks: true, gfm: true });
 } catch (e) {
 html = escapeHtml(text).replace(/\n/g, '<br>');
 }
+
 if (window.DOMPurify) {
 html = DOMPurify.sanitize(html, { ADD_ATTR: ['class', 'data-action', 'title', 'download', 'href', 'src', 'alt'] });
 }
+
 const tempDiv = document.createElement('div');
 tempDiv.innerHTML = html;
+
 tempDiv.querySelectorAll('pre code').forEach(block => {
 try { hljs.highlightElement(block); } catch (e) {}
 });
+
 tempDiv.querySelectorAll('pre').forEach(pre => {
 const code = pre.querySelector('code');
 const lang = code?.className?.match(/language-(\w+)/)?.[1] || 'code';
+
 const wrapper = document.createElement('div');
 wrapper.className = 'code-block';
+
 const header = document.createElement('div');
 header.className = 'code-header';
+
 const langSpan = document.createElement('span');
 langSpan.textContent = lang;
+
 const copyBtn = document.createElement('button');
 copyBtn.className = 'copy-code-btn';
 copyBtn.type = 'button';
 copyBtn.innerHTML = '<i class="fas fa-copy"></i> Kopyala';
+
 header.append(langSpan, copyBtn);
 wrapper.appendChild(header);
+
 pre.parentNode.insertBefore(wrapper, pre);
 wrapper.appendChild(pre);
 });
+
 return tempDiv.innerHTML;
 }
+
 function createAttachmentNode(att) {
 const wrap = document.createElement('div');
 wrap.className = 'file-attachment' + (att?.generated ? ' generated-attachment' : '');
+
 if (att?.type?.startsWith('image/')) {
 if (att.data) {
 const img = document.createElement('img');
@@ -2713,14 +3212,17 @@ img.loading = 'lazy';
 img.decoding = 'async';
 img.addEventListener('click', () => window.open(att.data, '_blank'));
 wrap.appendChild(img);
+
 const actions = document.createElement('div');
 actions.className = 'attachment-actions';
+
 const download = document.createElement('a');
 download.className = 'action-btn';
 download.href = att.data;
 download.download = att.name || 'g3-gorsel.jpg';
 download.title = 'İndir';
 download.innerHTML = '<i class="fas fa-download"></i>';
+
 const copy = document.createElement('button');
 copy.className = 'action-btn';
 copy.type = 'button';
@@ -2730,39 +3232,52 @@ copy.addEventListener('click', () => {
 if (/^https?:\/\//i.test(att.data)) navigator.clipboard.writeText(att.data).then(() => showToast('Bağlantı kopyalandı'));
 else showToast('Görsel cihazda kayıtlı, doğrudan bağlantı yok');
 });
+
 actions.append(download, copy);
 wrap.appendChild(actions);
 } else {
 const i = document.createElement('i');
 i.className = 'fas fa-image';
+
 const span = document.createElement('span');
 span.textContent = att.name || 'Görsel yüklenemedi';
+
 wrap.append(i, span);
 }
 } else {
 const i = document.createElement('i');
 i.className = 'fas fa-file';
+
 const span = document.createElement('span');
 span.textContent = att?.name || 'Dosya';
+
 wrap.append(i, span);
 }
+
 return wrap;
 }
+
 function appendMessageUI(text, sender, animate = true, attachments = []) {
 welcomeScreen.style.display = 'none';
+
 const wrapper = document.createElement('div');
 wrapper.className = `message-wrapper ${sender}-wrapper`;
 if (!animate) wrapper.style.animation = 'none';
+
 const row = document.createElement('div');
 row.className = 'message-row';
+
 const avatar = document.createElement('div');
 avatar.className = 'message-avatar';
 renderAvatar(avatar, sender === 'user' ? 'user' : 'ai', state.user);
+
 const content = document.createElement('div');
 content.style.cssText = `flex:1; min-width:0; display:flex; flex-direction:column; align-items:${sender === 'user' ? 'flex-end' : 'flex-start'};`;
+
 const msgDiv = document.createElement('div');
 msgDiv.className = 'message';
 msgDiv.dataset.raw = text || '';
+
 const displayText = String(text || '');
 if (sender === 'ai') msgDiv.innerHTML = renderMarkdown(displayText);
 else {
@@ -2770,37 +3285,46 @@ if (displayText.trim()) msgDiv.textContent = displayText;
 else if (attachments.length > 0) msgDiv.textContent = '[Dosya eklendi]';
 else msgDiv.textContent = '';
 }
+
 content.appendChild(msgDiv);
+
 if (attachments && attachments.length > 0) {
 attachments.forEach(att => msgDiv.appendChild(createAttachmentNode(att)));
 }
+
 if (sender === 'ai') {
 const actions = document.createElement('div');
 actions.className = 'message-actions';
+
 const copyBtn = document.createElement('button');
 copyBtn.className = 'action-btn';
 copyBtn.type = 'button';
 copyBtn.dataset.action = 'copy';
 copyBtn.title = 'Kopyala';
 copyBtn.innerHTML = '<i class="fas fa-copy"></i>';
+
 const regenBtn = document.createElement('button');
 regenBtn.className = 'action-btn';
 regenBtn.type = 'button';
 regenBtn.dataset.action = 'regenerate';
 regenBtn.title = 'Yeniden Oluştur';
 regenBtn.innerHTML = '<i class="fas fa-rotate"></i>';
+
 actions.append(copyBtn, regenBtn);
 content.appendChild(actions);
 }
+
 row.append(avatar, content);
 wrapper.appendChild(row);
 chatContainer.insertBefore(wrapper, typingIndicator);
 chatContainer.scrollTop = chatContainer.scrollHeight;
 }
+
 function getPuterText(resp) {
 if (!resp) return '';
 if (typeof resp === 'string') return resp;
 if (resp.text) return String(resp.text);
+
 if (resp.message) {
 if (typeof resp.message === 'string') return resp.message;
 if (resp.message.content) {
@@ -2808,15 +3332,19 @@ if (typeof resp.message.content === 'string') return resp.message.content;
 if (Array.isArray(resp.message.content)) return resp.message.content.map(p => p.text || '').join('');
 }
 }
+
 if (resp.choices?.[0]?.message?.content) return String(resp.choices[0].message.content);
 return '';
 }
+
 async function callAI(messages, systemPrompt, mode) {
 const msgs = messages
 .map(m => ({ role: m.role, content: m.content }))
 .filter(m => m.role && typeof m.content !== 'undefined');
+
 if (msgs[0]?.role === 'system') msgs[0].content = systemPrompt;
 else msgs.unshift({ role: 'system', content: systemPrompt });
+
 if (typeof puter !== 'undefined' && puter.ai && typeof puter.ai.chat === 'function') {
 try {
 const model = mode === 'extra' ? 'deepseek-r1' : (mode === 'smart' ? 'gpt-4o' : 'gpt-4o-mini');
@@ -2827,6 +3355,7 @@ if (reply) return reply;
 console.warn('Puter AI hatası, yedeğe geçiliyor:', e);
 }
 }
+
 try {
 const payload = { messages: msgs, model: 'openai', seed: Math.floor(Math.random() * 1000000) };
 const r = await fetch('https://text.pollinations.ai/', {
@@ -2834,6 +3363,7 @@ method: 'POST',
 headers: { 'Content-Type': 'application/json' },
 body: JSON.stringify(payload)
 });
+
 if (r.ok) {
 const txt = (await r.text()).trim();
 if (txt) return txt;
@@ -2841,19 +3371,24 @@ if (txt) return txt;
 } catch (e) {
 console.warn('Pollinations POST yedeği başarısız:', e);
 }
+
 const lastUser = msgs.filter(m => m.role === 'user').pop()?.content || 'Merhaba';
 const url = `https://text.pollinations.ai/${encodeURIComponent(lastUser)}?model=openai&system=${encodeURIComponent(systemPrompt)}`;
 const r = await fetch(url);
+
 if (r.ok) return (await r.text()).trim();
 throw new Error('AI yanıt vermedi');
 }
+
 async function registerAttachment(att) {
 if (!att) return att;
 if (!att.id) att.id = 'att_' + uid();
+
 if (att.remote || (typeof att.data === 'string' && /^https?:\/\//i.test(att.data))) {
 att.stored = false;
 return att;
 }
+
 if (typeof att.data === 'string' && att.data.startsWith('data:') && att.data.length > 20000) {
 try {
 await putAttachmentToDB(att);
@@ -2865,8 +3400,10 @@ att.stored = false;
 } else {
 att.stored = false;
 }
+
 return att;
 }
+
 function readFileAsDataURL(file) {
 return new Promise((resolve, reject) => {
 const reader = new FileReader();
@@ -2875,10 +3412,12 @@ reader.onerror = () => reject(reader.error || new Error('Dosya okunamadı'));
 reader.readAsDataURL(file);
 });
 }
+
 async function createUserAttachmentFromFile(file) {
 let data;
 if (file.type && file.type.startsWith('image/')) data = await blobToCompressedDataURL(file, 1024, 0.82);
 else data = await readFileAsDataURL(file);
+
 const att = {
 id: 'att_' + uid(),
 name: file.name,
@@ -2886,38 +3425,51 @@ type: file.type || 'application/octet-stream',
 data,
 generated: false
 };
+
 return await registerAttachment(att);
 }
+
 async function fetchAsBlob(source) {
 if (source instanceof Blob) return source;
+
 let url = source;
 if (source instanceof HTMLImageElement) url = source.src;
 else if (source && typeof source === 'object' && 'src' in source) url = source.src;
+
 if (typeof url !== 'string') throw new Error('Geçersiz görsel kaynağı');
+
 const response = await fetch(url, { cache: 'no-store', mode: 'cors' });
 if (!response.ok) throw new Error(`Görsel indirilemedi (${response.status})`);
+
 const blob = await response.blob();
 if (!blob.type.startsWith('image/')) throw new Error('Dönen veri görsel değil');
+
 return blob;
 }
+
 function blobToCompressedDataURL(blob, maxDimension = 1024, quality = 0.86) {
 return new Promise((resolve, reject) => {
 const url = URL.createObjectURL(blob);
 const img = new Image();
+
 img.onload = () => {
 try {
 const ratio = Math.min(1, maxDimension / Math.max(img.width, img.height));
 const w = Math.max(1, Math.round(img.width * ratio));
 const h = Math.max(1, Math.round(img.height * ratio));
+
 const canvas = document.createElement('canvas');
 canvas.width = w;
 canvas.height = h;
+
 const ctx = canvas.getContext('2d');
 ctx.fillStyle = '#0b0b10';
 ctx.fillRect(0, 0, w, h);
 ctx.drawImage(img, 0, 0, w, h);
+
 canvas.toBlob((compressedBlob) => {
 URL.revokeObjectURL(url);
+
 if (!compressedBlob) {
 const reader = new FileReader();
 reader.onload = () => resolve(reader.result);
@@ -2925,6 +3477,7 @@ reader.onerror = () => reject(new Error('Görsel sıkıştırılamadı'));
 reader.readAsDataURL(blob);
 return;
 }
+
 const reader = new FileReader();
 reader.onload = () => resolve(reader.result);
 reader.onerror = () => reject(new Error('Görsel okunamadı'));
@@ -2935,12 +3488,15 @@ URL.revokeObjectURL(url);
 reject(e);
 }
 };
+
 img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Görsel çözümlenemedi')); };
 img.src = url;
 });
 }
+
 async function createImageAttachmentFromSource(source, prompt) {
 const name = `g3-imagine-${Date.now()}.jpg`;
+
 try {
 const blob = await fetchAsBlob(source);
 const data = await blobToCompressedDataURL(blob, 1024, 0.86);
@@ -2954,26 +3510,33 @@ return { id: 'att_' + uid(), name, type: 'image/remote', data: url, prompt, gene
 throw e;
 }
 }
+
 async function generateImage(prompt) {
 if (typeof puter === 'undefined' || !puter.ai || typeof puter.ai.txt2img !== 'function') {
 throw new Error('Puter görsel servisi yüklenmedi.');
 }
+
 if (!(await isPuterSignedIn())) {
 throw new Error('PUTER_LOGIN_REQUIRED');
 }
+
 const enhanced = `${prompt}, ultra detailed, sharp focus, professional lighting, high resolution, no watermark, no text`;
+
 let result;
 try {
 result = await puterResolve(puter.ai.txt2img(enhanced));
 } catch (e) {
 throw new Error(e?.message || 'Puter görsel oluşturamadı.');
 }
+
 let source = result;
+
 if (result instanceof HTMLImageElement) {
 source = result.src;
 } else if (result && typeof result === 'object') {
 source = result.src || result.url || result.data || result.base64 || '';
 }
+
 if (
 typeof source === 'string' &&
 source &&
@@ -2983,19 +3546,25 @@ source.length > 100
 ) {
 source = 'data:image/jpeg;base64,' + source;
 }
+
 if (!source) {
 throw new Error('Puter geçerli bir görsel döndürmedi.');
 }
+
 return await createImageAttachmentFromSource(source, prompt);
 }
+
 function createPendingMessage(text) {
 const wrapper = document.createElement('div');
 wrapper.className = 'message-wrapper ai-wrapper';
+
 const row = document.createElement('div');
 row.className = 'message-row';
+
 const avatar = document.createElement('div');
 avatar.className = 'message-avatar';
 avatar.innerHTML = `<i class="fas ${MODE_META[state.currentMode]?.icon || 'fa-star'}" style="color: var(--accent);"></i>`;
+
 const msg = document.createElement('div');
 msg.className = 'message image-status';
 msg.innerHTML = `
@@ -3003,31 +3572,41 @@ msg.innerHTML = `
 <span>${escapeHtml(text)}</span>
 <div class="typing-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
 `;
+
 row.append(avatar, msg);
 wrapper.appendChild(row);
 chatContainer.insertBefore(wrapper, typingIndicator);
 chatContainer.scrollTop = chatContainer.scrollHeight;
+
 return wrapper;
 }
+
 async function handleNightploxCommand(text, activeChat, alreadyAddedUser = false) {
 const trimmed = text.trim();
 if (!trimmed.startsWith('/')) return false;
+
 const match = trimmed.match(/^\/([a-zA-Z]+)\s*([\s\S]*)$/);
 if (!match) return false;
+
 const cmd = match[1].toLowerCase();
 const arg = match[2].trim();
+
 if (!alreadyAddedUser) addMessageToChat(activeChat, 'user', text, [], true);
+
 if (!KNOWN_COMMANDS.includes(cmd)) {
 const list = KNOWN_COMMANDS.map(c => '/' + c).join(', ');
 addMessageToChat(activeChat, 'assistant', `Bilinmeyen komut: /${cmd}\nMevcut komutlar: ${list}`, [], true);
 return true;
 }
+
 if (!arg) {
 addMessageToChat(activeChat, 'assistant', `Kullanım: /${cmd} [istek]`, [], true);
 return true;
 }
+
 if (cmd === 'imagine') {
 const pending = createPendingMessage('Görsel oluşturuluyor…');
+
 try {
 const attachment = await generateImage(arg);
 pending.remove();
@@ -3035,6 +3614,7 @@ addMessageToChat(activeChat, 'assistant', `✅ ${arg} için görsel oluşturuldu
 } catch (e) {
 const message = e?.message || 'Görsel oluşturulamadı.';
 pending.remove();
+
 if (message === 'PUTER_LOGIN_REQUIRED' || /puter.*giri|login.*puter/i.test(message)) {
 addMessageToChat(
 activeChat,
@@ -3049,10 +3629,13 @@ showToast('Görsel oluşturmak için Puter girişi gerekli', true);
 addMessageToChat(activeChat, 'assistant', `Görsel oluşturulamadı: ${message}`, [], true);
 }
 }
+
 return true;
 }
+
 typingIndicator.classList.add('active');
 chatContainer.scrollTop = chatContainer.scrollHeight;
+
 try {
 const sys = getSystemPromptForContext('extra', text);
 const reply = await callAI(activeChat.messages, sys, 'extra');
@@ -3062,35 +3645,45 @@ addMessageToChat(activeChat, 'assistant', reply, [], true);
 typingIndicator.classList.remove('active');
 addMessageToChat(activeChat, 'assistant', `Komut işlenirken hata: ${error.message}`, [], true);
 }
+
 return true;
 }
+
 async function sendMessage() {
 const text = userInput.value.trim();
 if (!text && state.attachments.length === 0) return;
+
 let activeChat = getCurrentChat(state.currentMode);
 if (!activeChat) activeChat = createNewChat(state.currentMode, true);
+
 const requestMode = activeChat.mode;
 const requestChatId = activeChat.id;
+
 if (activeChat.mode === 'extra') {
 const currentAttachments = [...state.attachments];
 state.attachments = [];
 renderAttachments();
 userInput.value = '';
 autoResizeTextarea();
+
 if (!text.startsWith('/')) {
 const uiContent = text || (currentAttachments.length ? '[Dosya yüklendi]' : '');
 addMessageToChat(activeChat, 'user', text, currentAttachments, true, uiContent);
+
 const warning = `⚠️ Nightplox Modu Aktif\nBu mod yalnızca özel komutlarla çalışır.\nMevcut komutlar:\n- /imagine [açıklama]\n- /code [istek]\n- /analyze [istek]\n- /story [konu]\n- /math [problem]`;
 addMessageToChat(activeChat, 'assistant', warning, [], true);
 return;
 }
+
 if (currentAttachments.length > 0) {
 const uiContent = text || '[Dosya yüklendi]';
 addMessageToChat(activeChat, 'user', text, currentAttachments, true, uiContent);
 }
+
 await handleNightploxCommand(text, activeChat, currentAttachments.length > 0);
 return;
 }
+
 const currentAttachments = [...state.attachments];
 userInput.value = '';
 autoResizeTextarea();
@@ -3098,24 +3691,32 @@ userInput.disabled = true;
 sendBtn.disabled = true;
 state.attachments = [];
 renderAttachments();
+
 let aiContent = text;
 if (currentAttachments.some(a => a.type && a.type.startsWith('image/'))) aiContent += '\n[Kullanıcı bir görsel yükledi]';
+
 const uiContent = text || (currentAttachments.length ? '[Dosya yüklendi]' : '');
 addMessageToChat(activeChat, 'user', aiContent, currentAttachments, true, uiContent);
+
 typingIndicator.classList.add('active');
 chatContainer.scrollTop = chatContainer.scrollHeight;
+
 try {
 const chat = getChatById(requestChatId, requestMode) || activeChat;
 const sys = getSystemPromptForContext(chat.mode, aiContent);
 const reply = await callAI(chat.messages, sys, chat.mode);
+
 typingIndicator.classList.remove('active');
+
 const target = getChatById(requestChatId, requestMode);
 if (target) addMessageToChat(target, 'assistant', reply, [], isChatActive(target));
 else appendMessageUI(reply, 'ai');
 } catch (error) {
 typingIndicator.classList.remove('active');
+
 const target = getChatById(requestChatId, requestMode);
 const message = `Bağlantı hatası: ${error.message}`;
+
 if (target) addMessageToChat(target, 'assistant', message, [], isChatActive(target));
 else appendMessageUI(message, 'ai');
 } finally {
@@ -3124,51 +3725,67 @@ sendBtn.disabled = false;
 userInput.focus();
 }
 }
+
 async function regenerateResponse() {
 const activeChat = getCurrentChat(state.currentMode);
 if (!activeChat) return;
+
 const requestMode = activeChat.mode;
 const requestChatId = activeChat.id;
 const lastAiIndex = activeChat.messages.map(m => m.role).lastIndexOf('assistant');
 if (lastAiIndex === -1) return;
+
 activeChat.messages.splice(lastAiIndex, 1);
+
 if (isChatActive(activeChat)) {
 const aiWrappers = chatContainer.querySelectorAll('.ai-wrapper');
 if (aiWrappers.length > 0) aiWrappers[aiWrappers.length - 1].remove();
 }
+
 saveChatStore(true);
 typingIndicator.classList.add('active');
 chatContainer.scrollTop = chatContainer.scrollHeight;
+
 try {
 const chat = getChatById(requestChatId, requestMode);
 if (!chat) throw new Error('Sohbet bulunamadı');
+
 const lastUser = [...chat.messages].reverse().find(m => m.role === 'user');
 const sys = getSystemPromptForContext(chat.mode, lastUser?.content || '');
 const reply = await callAI(chat.messages, sys, chat.mode);
+
 typingIndicator.classList.remove('active');
+
 const target = getChatById(requestChatId, requestMode);
 if (target) addMessageToChat(target, 'assistant', reply, [], isChatActive(target));
 } catch (error) {
 typingIndicator.classList.remove('active');
+
 const target = getChatById(requestChatId, requestMode);
 const message = `Yeniden oluşturma hatası: ${error.message}`;
+
 if (target) addMessageToChat(target, 'assistant', message, [], isChatActive(target));
 }
 }
+
 function renderAttachments() {
 if (state.attachments.length === 0) {
 attachmentPreview.classList.remove('active');
 attachmentPreview.innerHTML = '';
 return;
 }
+
 attachmentPreview.classList.add('active');
 attachmentPreview.innerHTML = '';
+
 state.attachments.forEach((att, index) => {
 if (!att.data && att.stored) {
 hydrateAttachment(att).then(() => { if (att.data) renderAttachments(); }).catch(() => {});
 }
+
 const chip = document.createElement('div');
 chip.className = 'attachment-chip';
+
 if (att.type && att.type.startsWith('image/') && att.data) {
 const img = document.createElement('img');
 img.src = att.data;
@@ -3179,9 +3796,11 @@ const i = document.createElement('i');
 i.className = att.type && att.type.startsWith('image/') ? 'fas fa-image' : 'fas fa-file';
 chip.appendChild(i);
 }
+
 const span = document.createElement('span');
 span.textContent = att.name && att.name.length > 18 ? att.name.substring(0, 18) + '…' : (att.name || 'Dosya');
 chip.appendChild(span);
+
 const removeBtn = document.createElement('button');
 removeBtn.className = 'attachment-remove';
 removeBtn.type = 'button';
@@ -3191,39 +3810,48 @@ removeBtn.addEventListener('click', () => {
 state.attachments.splice(index, 1);
 renderAttachments();
 });
+
 chip.appendChild(removeBtn);
 attachmentPreview.appendChild(chip);
 });
 }
+
 let speechRecognition = null;
 micBtn.addEventListener('click', () => {
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 if (!SR) { showToast('Tarayıcı sesli girişi desteklemiyor', true); return; }
 if (state.isRecording) { speechRecognition?.stop(); return; }
+
 speechRecognition = new SR();
 speechRecognition.lang = 'tr-TR';
 speechRecognition.interimResults = true;
 speechRecognition.continuous = false;
+
 const baseText = userInput.value;
+
 speechRecognition.onresult = (event) => {
 let transcript = '';
 for (let i = event.resultIndex; i < event.results.length; i++) transcript += event.results[i][0].transcript;
 userInput.value = (baseText ? baseText + ' ' : '') + transcript;
 autoResizeTextarea();
 };
+
 speechRecognition.onend = () => {
 state.isRecording = false;
 micBtn.classList.remove('recording');
 };
+
 speechRecognition.onerror = () => {
 state.isRecording = false;
 micBtn.classList.remove('recording');
 showToast('Ses algılanamadı', true);
 };
+
 state.isRecording = true;
 micBtn.classList.add('recording');
 speechRecognition.start();
 });
+
 function downloadBlob(content, filename, type) {
 const blob = new Blob([content], { type });
 const a = document.createElement('a');
@@ -3232,28 +3860,35 @@ a.download = filename;
 a.click();
 setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
+
 function iterateChats(callback) {
 ['fast', 'smart', 'extra'].forEach(mode => getChats(mode).forEach(chat => callback(chat, mode)));
 }
+
 function chatsToMarkdown() {
 let md = '# G3 AI Yedeği\n\n';
+
 iterateChats((chat, mode) => {
 md += `## ${chat.title || 'Yeni Sohbet'}\n`;
 md += `- Mod: ${MODE_META[mode]?.label || mode}\n`;
 md += `- Tarih: ${new Date(chat.createdAt).toLocaleString('tr-TR')}\n\n`;
+
 chat.messages.forEach(m => {
 if (m.role === 'system') return;
 const who = m.role === 'user' ? 'Kullanıcı' : 'G3';
 md += `**${who}:** ${m.content}\n\n`;
 });
+
 md += '---\n\n';
 });
+
 return md;
 }
+
 function buildExportPayload(includeAttachments = true) {
 const base = {
 app: 'G3 AI',
-version: '5.2.2',
+version: '5.3.0',
 user: state.user,
 joinDate: state.joinDate,
 settings: { accentColor: state.accentColor, fontSize: state.fontSize, bgAnimation: state.bgAnimation, theme: state.theme },
@@ -3261,9 +3896,11 @@ currentChatIdByMode: state.currentChatIdByMode,
 lastMode: state.currentMode,
 timestamp: Date.now()
 };
+
 base.chatsByMode = includeAttachments ? state.chatsByMode : serializeChatStore().chatsByMode;
 return base;
 }
+
 async function prepareImportedAttachments(store) {
 for (const mode of ['fast', 'smart', 'extra']) {
 for (const chat of store.chatsByMode[mode] || []) {
@@ -3276,6 +3913,7 @@ else if (att && att.stored && !att.data) await hydrateAttachment(att);
 }
 }
 }
+
 $('exportJsonBtn').addEventListener('click', () => {
 try {
 const full = JSON.stringify(buildExportPayload(true), null, 2);
@@ -3290,12 +3928,15 @@ showToast('Hafif JSON yedeklendi (görseller hariç)');
 } catch (_) { showToast('JSON dışa aktarılamadı', true); }
 }
 });
+
 $('exportAllBtn').addEventListener('click', () => {
 downloadBlob(chatsToMarkdown(), `g3_sohbetler_${Date.now()}.md`, 'text/markdown;charset=utf-8');
 showToast('Markdown dosyası indirildi');
 });
+
 $('exportPdfBtn').addEventListener('click', async () => {
 if (typeof html2pdf === 'undefined') { showToast('PDF kütüphanesi yüklenemedi', true); return; }
+
 const printRoot = document.createElement('div');
 printRoot.style.position = 'fixed';
 printRoot.style.left = '-10000px';
@@ -3305,18 +3946,23 @@ printRoot.style.background = '#ffffff';
 printRoot.style.color = '#111111';
 printRoot.style.padding = '28px';
 printRoot.style.fontFamily = 'Arial, sans-serif';
+
 let html = `<h1 style="font-size:24px;margin-bottom:16px;">G3 AI Sohbetleri</h1>`;
+
 iterateChats((chat, mode) => {
 html += `<h2 style="font-size:18px;margin-top:22px;">${escapeHtml(chat.title || 'Yeni Sohbet')}</h2>`;
 html += `<p style="font-size:12px;color:#666;">Mod: ${escapeHtml(MODE_META[mode]?.label || mode)} • ${new Date(chat.createdAt).toLocaleString('tr-TR')}</p>`;
+
 chat.messages.forEach(m => {
 if (m.role === 'system') return;
 const who = m.role === 'user' ? 'Kullanıcı' : 'G3';
 html += `<p style="margin:10px 0;"><strong>${who}:</strong><br>${escapeHtml(m.content).replace(/\n/g, '<br>')}</p>`;
 });
 });
+
 printRoot.innerHTML = html;
 document.body.appendChild(printRoot);
+
 try {
 await html2pdf()
 .set({
@@ -3328,6 +3974,7 @@ jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
 })
 .from(printRoot)
 .save();
+
 showToast('PDF oluşturuldu');
 } catch (e) {
 console.error(e);
@@ -3336,25 +3983,46 @@ showToast('PDF oluşturulamadı', true);
 printRoot.remove();
 }
 });
+
 $('importJsonBtn').addEventListener('click', () => $('importJsonInput').click());
+
 $('importJsonInput').addEventListener('change', (e) => {
 const file = e.target.files[0];
 if (!file) return;
+
 const reader = new FileReader();
 reader.onload = async (event) => {
 try {
 const data = JSON.parse(event.target.result);
 const hasNewFormat = data?.chatsByMode && typeof data.chatsByMode === 'object';
 const hasOldFormat = Array.isArray(data?.chats);
+
 if (!hasNewFormat && !hasOldFormat) { showToast('Geçersiz yedek dosyası', true); return; }
 if (!confirm('Mevcut veriler silinip yedek geri yüklenecek. Emin misiniz?')) return;
+
 const store = normalizeChatStore(data);
 await prepareImportedAttachments(store);
+
 state.chatsByMode = store.chatsByMode;
 state.currentChatIdByMode = store.currentChatIdByMode;
 state.currentMode = MODE_META[store.lastMode] ? store.lastMode : 'fast';
-if (data.user) { state.user = data.user; saveUserState(); updateUserUI(); authOverlay.classList.remove('active'); }
-if (data.joinDate) { state.joinDate = data.joinDate; saveToDB('joinDate', data.joinDate).catch(() => {}); }
+
+if (data.user && ALLOWED_AUTH_PROVIDERS.includes(data.user.provider)) {
+state.user = data.user;
+saveUserState();
+updateUserUI();
+authOverlay.classList.remove('active');
+} else if (data.user) {
+state.user = null;
+try { await deleteFromDB('user'); } catch (_) {}
+try { await deleteFromDB('joinDate'); } catch (_) {}
+}
+
+if (data.joinDate) {
+state.joinDate = data.joinDate;
+saveToDB('joinDate', data.joinDate).catch(() => {});
+}
+
 if (data.settings) {
 state.accentColor = data.settings.accentColor || state.accentColor;
 state.fontSize = Number(data.settings.fontSize) || state.fontSize;
@@ -3364,6 +4032,7 @@ document.documentElement.setAttribute('data-theme', state.theme);
 updateThemeIcon();
 applyCustomization();
 }
+
 await persistChatStoreImmediate();
 activateMode(state.currentMode, false);
 showToast('Yedek geri yüklendi');
@@ -3372,20 +4041,26 @@ console.error(err);
 showToast('Geçersiz dosya', true);
 }
 };
+
 reader.readAsText(file);
 e.target.value = '';
 });
+
 async function persistChatStoreImmediate() {
 writeLocalBackup(serializeChatStore());
 await runPersist();
 }
+
 $('deleteAllBtn').addEventListener('click', async () => {
 if (!confirm('TÜM VERİLER silinecek. Emin misiniz?')) return;
+
 const empty = emptyChatStore();
 state.chatsByMode = empty.chatsByMode;
 state.currentChatIdByMode = empty.currentChatIdByMode;
+
 try { await deleteFromDB('chatStore'); } catch (_) {}
 try { await clearAttachmentStore(); } catch (_) {}
+
 clearLocalBackup();
 await persistChatStoreImmediate();
 activateMode(state.currentMode, false);
@@ -3393,13 +4068,17 @@ profileModal.classList.remove('active');
 showToast('Tüm veriler silindi');
 updateStorageUsage();
 });
+
 $('clearAllBtn').addEventListener('click', async () => {
 if (!confirm('Tüm sohbetler silinecek. Emin misiniz?')) return;
+
 const empty = emptyChatStore();
 state.chatsByMode = empty.chatsByMode;
 state.currentChatIdByMode = empty.currentChatIdByMode;
+
 try { await deleteFromDB('chatStore'); } catch (_) {}
 try { await clearAttachmentStore(); } catch (_) {}
+
 clearLocalBackup();
 await persistChatStoreImmediate();
 activateMode(state.currentMode, false);
@@ -3407,18 +4086,29 @@ userDropdown.classList.remove('active');
 showToast('Sohbetler silindi');
 updateStorageUsage();
 });
+
 $('exportBtn').addEventListener('click', () => {
 $('exportJsonBtn').click();
 userDropdown.classList.remove('active');
 });
+
 $('puterSignInBtn').addEventListener('click', signInWithPuter);
-$('guestFallback').addEventListener('click', (e) => { e.preventDefault(); signInAsGuest(); });
+
+$('guestFallback').addEventListener('click', (e) => {
+e.preventDefault();
+signInAsGuest();
+});
+
 $('logoutBtn').addEventListener('click', async () => {
 const wasPuterUser = state.user && !state.user.isGuest && state.user.provider === 'puter';
+
 state.user = null;
+
 try { await deleteFromDB('user'); } catch (_) {}
 try { await deleteFromDB('joinDate'); } catch (_) {}
+
 userDropdown.classList.remove('active');
+
 if (wasPuterUser && typeof puter !== 'undefined' && puter.auth && typeof puter.auth.signOut === 'function') {
 try {
 await puterResolve(puter.auth.signOut());
@@ -3426,87 +4116,112 @@ await puterResolve(puter.auth.signOut());
 console.warn('Puter çıkış işlemi başarısız:', e);
 }
 }
+
 authOverlay.classList.add('active');
 updateStorageUsage();
 showToast('Çıkış yapıldı');
 });
+
 $('profileClose').addEventListener('click', () => profileModal.classList.remove('active'));
 profileModal.addEventListener('click', (e) => { if (e.target === profileModal) profileModal.classList.remove('active'); });
+
 $('openProfileBtn').addEventListener('click', openProfileModal);
 headerProfileBtn.addEventListener('click', openProfileModal);
+
 $('editNameBtn').addEventListener('click', () => {
 const newName = prompt('Yeni adınız:', state.user?.name || '');
 if (newName && newName.trim()) {
 state.user.name = newName.trim();
+
 if (!state.user.avatar || (typeof state.user.avatar === 'string' && state.user.avatar.length <= 2)) {
 state.user.avatar = newName.trim().charAt(0).toUpperCase();
 }
+
 saveUserState();
 updateUserUI();
 $('profileName').textContent = state.user.name;
 showToast('İsim güncellendi');
 }
 });
+
 themeToggle.addEventListener('click', toggleTheme);
+
 $('themeToggleDropdown').addEventListener('click', async () => {
 await toggleTheme();
 userDropdown.classList.remove('active');
 });
+
 menuToggle.addEventListener('click', () => {
 sidebar.classList.add('open');
 overlay.classList.add('show');
 });
+
 overlay.addEventListener('click', () => {
 sidebar.classList.remove('open');
 overlay.classList.remove('show');
 userDropdown.classList.remove('active');
 });
+
 userProfileBtn.addEventListener('click', (e) => {
 e.stopPropagation();
 userDropdown.classList.toggle('active');
 });
+
 document.addEventListener('click', (e) => {
 if (!userDropdown.contains(e.target) && !userProfileBtn.contains(e.target)) userDropdown.classList.remove('active');
 });
+
 document.querySelectorAll('.mode-btn').forEach(btn => {
 btn.addEventListener('click', () => {
 const mode = btn.dataset.mode;
 if (!MODE_META[mode]) return;
+
 activateMode(mode, mode !== state.currentMode);
+
 if (window.innerWidth <= 768) {
 sidebar.classList.remove('open');
 overlay.classList.remove('show');
 }
 });
 });
+
 newChatBtn.addEventListener('click', () => {
 createNewChat(state.currentMode, true);
+
 if (window.innerWidth <= 768) {
 sidebar.classList.remove('open');
 overlay.classList.remove('show');
 }
 });
+
 sendBtn.addEventListener('click', sendMessage);
+
 userInput.addEventListener('keydown', (e) => {
 if (e.key === 'Enter' && !e.shiftKey) {
 e.preventDefault();
 sendMessage();
 }
 });
+
 function autoResizeTextarea() {
 userInput.style.height = 'auto';
 userInput.style.height = Math.min(userInput.scrollHeight, 120) + 'px';
 }
+
 userInput.addEventListener('input', () => {
 autoResizeTextarea();
+
 const val = userInput.value;
 const activeChat = getCurrentChat(state.currentMode);
+
 if (activeChat && activeChat.mode === 'extra') {
 const lastSlashIndex = val.lastIndexOf('/');
+
 if (lastSlashIndex !== -1 && (lastSlashIndex === val.length - 1 || !val.slice(lastSlashIndex).includes(' '))) {
 const query = val.slice(lastSlashIndex + 1).toLowerCase();
 const items = commandMenu.querySelectorAll('.command-item');
 let hasVisible = false;
+
 items.forEach(item => {
 const cmd = (item.dataset.cmd || '').replace('/', '').toLowerCase();
 if (cmd && cmd.includes(query)) {
@@ -3516,22 +4231,28 @@ hasVisible = true;
 item.style.display = 'none';
 }
 });
+
 commandMenu.classList.toggle('active', hasVisible);
 } else {
 commandMenu.classList.remove('active');
 }
 }
 });
+
 userInput.addEventListener('blur', () => setTimeout(() => commandMenu.classList.remove('active'), 150));
+
 attachBtn.addEventListener('click', () => fileInput.click());
+
 fileInput.addEventListener('change', async (e) => {
 const files = Array.from(e.target.files || []);
 fileInput.value = '';
+
 for (const file of files) {
 if (file.size > 10 * 1024 * 1024) {
 showToast('Dosya 10MB\'dan küçük olmalı', true);
 continue;
 }
+
 try {
 const att = await createUserAttachmentFromFile(file);
 state.attachments.push(att);
@@ -3542,6 +4263,7 @@ showToast('Dosya eklenemedi', true);
 }
 }
 });
+
 chatContainer.addEventListener('click', (e) => {
 const copyCodeBtn = e.target.closest('.copy-code-btn');
 if (copyCodeBtn) {
@@ -3556,10 +4278,13 @@ setTimeout(() => { copyCodeBtn.innerHTML = original; }, 1800);
 }
 return;
 }
+
 const actionBtn = e.target.closest('.action-btn');
 if (!actionBtn) return;
+
 const action = actionBtn.dataset.action;
 const msgDiv = actionBtn.closest('.message');
+
 if (action === 'copy') {
 const raw = msgDiv?.dataset.raw || msgDiv?.textContent || '';
 navigator.clipboard.writeText(raw).then(() => showToast('Mesaj kopyalandı'));
@@ -3570,9 +4295,11 @@ const url = actionBtn.dataset.url || '';
 if (url) navigator.clipboard.writeText(url).then(() => showToast('Bağlantı kopyalandı'));
 }
 });
+
 $('accentColorPicker').addEventListener('input', (e) => { state.accentColor = e.target.value; applyCustomization(); });
 $('fontSizeSlider').addEventListener('input', (e) => { state.fontSize = Number(e.target.value) || 16; applyCustomization(); });
 $('bgAnimToggle').addEventListener('change', (e) => { state.bgAnimation = e.target.checked; applyCustomization(); });
+
 let toastTimeout;
 function showToast(message, isError = false) {
 toastText.textContent = message;
@@ -3582,35 +4309,159 @@ toast.classList.add('show');
 clearTimeout(toastTimeout);
 toastTimeout = setTimeout(() => toast.classList.remove('show'), 2800);
 }
+
 document.addEventListener('keydown', (e) => {
 if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'n') {
 e.preventDefault();
 createNewChat();
 }
+
 if (e.key === 'Escape') {
 userDropdown.classList.remove('active');
 profileModal.classList.remove('active');
 commandMenu.classList.remove('active');
+
 if (window.innerWidth <= 768) {
 sidebar.classList.remove('open');
 overlay.classList.remove('show');
 }
 }
 });
+
 window.addEventListener('pagehide', () => saveChatStore(true));
 window.addEventListener('beforeunload', () => saveChatStore(true));
 document.addEventListener('visibilitychange', () => { if (document.hidden) saveChatStore(true); });
+
 let galaxyInitialized = false;
 function ensureGalaxy() {
 if (galaxyInitialized) return;
 initGalaxyBackground();
 galaxyInitialized = true;
 }
+
+// ============================================================
+// First Launch IP Animation
+// ============================================================
+function readSeenIps() {
+try {
+return JSON.parse(localStorage.getItem(INTRO_SEEN_IPS_KEY) || '[]');
+} catch (_) {
+return [];
+}
+}
+
+function writeSeenIps(arr) {
+try {
+localStorage.setItem(INTRO_SEEN_IPS_KEY, JSON.stringify(arr.slice(-25)));
+} catch (_) {}
+}
+
+async function fetchWithTimeout(url, timeout = 2500) {
+const controller = new AbortController();
+const id = setTimeout(() => controller.abort(), timeout);
+
+try {
+return await fetch(url, { signal: controller.signal, cache: 'no-store' });
+} finally {
+clearTimeout(id);
+}
+}
+
+async function getClientPublicIp() {
+const services = [
+{ url: 'https://api.ipify.org?format=json', parse: (d) => d.ip },
+{ url: 'https://api.my-ip.io/v2/ip.json', parse: (d) => d.ip },
+{ url: 'https://ipapi.co/json/', parse: (d) => d.ip }
+];
+
+for (const service of services) {
+try {
+const res = await fetchWithTimeout(service.url, 2500);
+if (!res.ok) continue;
+const data = await res.json();
+const ip = service.parse(data);
+if (ip) return String(ip);
+} catch (_) {}
+}
+
+return null;
+}
+
+async function shouldShowIntroAnimation() {
+try {
+const ip = await getClientPublicIp();
+
+if (ip) {
+const seen = readSeenIps();
+if (seen.includes(ip)) return false;
+
+seen.push(ip);
+writeSeenIps(seen);
+
+try { localStorage.setItem(INTRO_SEEN_LOCAL_KEY, '1'); } catch (_) {}
+return true;
+}
+} catch (_) {}
+
+try {
+if (localStorage.getItem(INTRO_SEEN_LOCAL_KEY) === '1') return false;
+localStorage.setItem(INTRO_SEEN_LOCAL_KEY, '1');
+} catch (_) {}
+
+return true;
+}
+
+function createIntroParticles() {
+const container = $('introParticles');
+if (!container || container.childElementCount > 0) return;
+
+for (let i = 0; i < 28; i++) {
+const p = document.createElement('span');
+p.className = 'intro-particle';
+p.style.left = Math.random() * 100 + '%';
+p.style.top = (60 + Math.random() * 45) + '%';
+p.style.animationDuration = (2.2 + Math.random() * 2.8) + 's';
+p.style.animationDelay = (Math.random() * 2.2) + 's';
+p.style.opacity = String(0.25 + Math.random() * 0.55);
+container.appendChild(p);
+}
+}
+
+function hideIntroAnimation() {
+const intro = $('introOverlay');
+if (!intro || !intro.classList.contains('active')) return;
+
+intro.classList.add('hide');
+setTimeout(() => {
+intro.classList.remove('active', 'hide');
+}, 560);
+}
+
+async function maybeShowIntroAnimation() {
+try {
+const shouldShow = await shouldShowIntroAnimation();
+if (!shouldShow) return;
+
+createIntroParticles();
+const intro = $('introOverlay');
+intro.classList.add('active');
+
+$('introSkipBtn')?.addEventListener('click', hideIntroAnimation, { once: true });
+setTimeout(hideIntroAnimation, 3200);
+} catch (e) {
+console.warn('İlk açılış animasyonu gösterilemedi:', e);
+}
+}
+
 async function initApp() {
 try { await openDatabase(); } catch (e) { console.error('DB açılamadı:', e); }
+
+await purgeLegacyAccountsOnce();
+
 if (navigator.storage?.persist) {
 try { await navigator.storage.persist(); } catch (_) {}
 }
+
 try {
 const savedSettings = await loadFromDB('settings');
 if (savedSettings) {
@@ -3619,52 +4470,64 @@ state.fontSize = Number(savedSettings.fontSize) || 16;
 state.bgAnimation = savedSettings.bgAnimation !== undefined ? savedSettings.bgAnimation : true;
 }
 } catch (e) {}
+
 await loadTheme();
 ensureGalaxy();
 applyCustomization();
+
+// Animasyonu beklemeden başlat, giriş ekranını kilitlemesin
+void maybeShowIntroAnimation();
+
 let isAuthenticated = false;
+
 if (await isPuterSignedIn()) {
 isAuthenticated = await loadPuterUser();
 }
+
 if (!isAuthenticated) {
 const savedUser = await loadUserState();
-if (savedUser && state.user?.isGuest) {
-isAuthenticated = true;
-updateUserUI();
-updateChatFooter();
-} else if (savedUser && state.user) {
+if (savedUser) {
+isAuthenticated = await enforcePuterGuestAccount();
+if (isAuthenticated) {
 updateUserUI();
 updateChatFooter();
 }
 }
+}
+
 if (!isAuthenticated) {
 setTimeout(() => authOverlay.classList.add('active'), 280);
 } else {
 authOverlay.classList.remove('active');
 }
+
 const store = await loadChatStore();
 state.chatsByMode = store.chatsByMode;
 state.currentChatIdByMode = store.currentChatIdByMode;
 state.currentMode = MODE_META[store.lastMode] ? store.lastMode : 'fast';
+
 activateMode(state.currentMode, false);
 updateChatFooter();
 setInterval(updateChatFooter, 60000);
 updateStorageUsage();
+
 window.g3ForceSave = () => saveChatStore(true);
 window.g3GetStore = () => serializeChatStore();
 }
+
 window.addEventListener('load', () => setTimeout(updateStorageUsage, 400));
 initApp();
-console.log('%c G3 AI v5.2.2 ', 'background: linear-gradient(135deg, #ff6b35, #ffd166); color: #111; font-size: 18px; padding: 8px 12px; border-radius: 8px;');
+
+console.log('%c G3 AI v5.3.0 ', 'background: linear-gradient(135deg, #ff6b35, #ffd166); color: #111; font-size: 18px; padding: 8px 12px; border-radius: 8px;');
 console.log('Muhammed Eren Bayram tarafından geliştirilmiştir.');
-console.log('✓ Puter giriş sistemi aktif');
-console.log('✓ Misafir girişi aktif');
+console.log('✓ Eski kayıtlı hesaplar temizlendi');
+console.log('✓ Yalnızca Puter ve misafir girişi aktif');
+console.log('✓ Puter kullanıcı adı, e-posta ve avatar entegrasyonu aktif');
 console.log('✓ Görsel oluşturma Puter txt2img entegre');
+console.log('✓ İlk açılış IP animasyonu aktif');
 console.log('✓ Kalıcı sohbet sistemi aktif');
 console.log('✓ LocalStorage anlık yedek aktif');
 console.log('✓ Ayrı attachment store aktif');
-console.log('✓ Tüm mod sohbetleri listede görünür');
-console.log('✓ Mesaj kalıcılığı güçlendirildi');
 </script>
 </body>
 </html>
